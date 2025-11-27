@@ -23,8 +23,8 @@
 
                 <button type="submit">ACCESO</button>
                 <div class="links">
-                    <a href="#">¿No tienes una cuenta?</a>
-                    <a href="#">¿Se te olvidó tu contraseña?</a>
+                    <a href="/registrar">¿No tienes una cuenta?</a>
+                    <a href="/resetpass">¿Se te olvidó tu contraseña?</a>
                 </div>
             </form>
         </div>

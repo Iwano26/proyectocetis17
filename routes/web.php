@@ -3,7 +3,15 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/login', function () {
-    return view('inicio');
+    return view('LoginViews/inicio');
+});
+
+Route::get('/registrar', function () {
+    return view('RegisterViews/registrarusuario');
+});
+
+Route::get('/resetpass', function () {
+    return view('ResetPasswordViews/olvidosucontrasennia');
 });
 
 Route::get('/gestionusuario', function () {
