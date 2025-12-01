@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
+use App\Http\Controllers\GestionUsuarioController;
 
 Route::get('/login', function () {
     return view('LoginViews/inicio');
@@ -22,9 +23,12 @@ Route::get('/resetpass', function () {
     return view('ResetPasswordViews/olvidosucontrasennia');
 });
 
-Route::get('/gestionusuario', function () {
-    return view('GestionUsuarioViews/usuarios');
-});
+Route::resource('gestionusuario', GestionUsuarioController::class)->only([
+    'index',   // GET /gestionusuario (Listar)
+    'store',   // POST /gestionusuario (Crear)
+    'update',  // PUT/PATCH /gestionusuario/{gestionusuario} (Editar/Actualizar)
+    'destroy'  // DELETE /gestionusuario/{gestionusuario} (Eliminar)
+]);
 
 Route::get('/gestionbiblioteca', function () {
     return view('GestionBibliotecaViews/biblioteca');
