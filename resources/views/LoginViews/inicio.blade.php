@@ -14,16 +14,24 @@
                 <img src="{{ asset('img/cetis.png') }}" alt="Logo Escuela" />
             </div>
             <h2>Asesorias CETIS 17</h2>
-            <form id="loginForm" method="POST" action="servidor/iniciosession.php">
+            <div>
+                @if ($errors->has('login'))
+                    <p style="color:red;">{{ $errors->first('login') }}</p>
+                @endif
+            </div>
+            <form id="loginForm" method="POST" action="{{ route('login.post') }}">
+                 @csrf
                 <label for="usuario">Usuario </label>
                 <input type="text" id="correo" name="correo" placeholder="Ingresa tu usuario">
+                @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
 
                 <label for="password">Contraseña </label>
-                <input type="text" id="contraseña" name="contraseña" placeholder="Ingresa tu contraseña">
+                <input type="text" id="pass" name="pass" placeholder="Ingresa tu contraseña">
+                @error('pass') <small style="color:red;">{{ $message }}</small> @enderror
 
                 <button type="submit">ACCESO</button>
                 <div class="links">
-                    <a href="/registrar">¿No tienes una cuenta?</a>
+                    <a href="/register">¿No tienes una cuenta?</a>
                     <a href="/resetpass">¿Se te olvidó tu contraseña?</a>
                 </div>
             </form>

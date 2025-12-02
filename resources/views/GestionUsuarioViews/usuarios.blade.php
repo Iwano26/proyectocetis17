@@ -91,7 +91,7 @@
                 <select name="rol" id="rol" class="form-select" required>
                   <option value="" disabled selected>Seleccione un rol</option>
                   <option value="Administrador" {{ old('rol') == 'Administrador' ? 'selected' : '' }}>Administrador</option>
-                  <option value="Maestro" {{ old('rol') == 'Maestro' ? 'selected' : '' }}>Maestro</option>
+                  <option value="Asesor" {{ old('rol') == 'Asesor' ? 'selected' : '' }}>Asesor</option>
                   <option value="Estudiante" {{ old('rol') == 'Estudiante' ? 'selected' : '' }}>Estudiante</option>
                 </select>
                 <div class="invalid-feedback">

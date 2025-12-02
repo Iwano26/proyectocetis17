@@ -3,10 +3,11 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GestionUsuarioController;
+use App\Http\Controllers\LoginController;
 
-Route::get('/login', function () {
-    return view('LoginViews/inicio');
-});
+Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
 Route::prefix('/register')->group(function () {
     // Rutas para el CRUD de Usuarios
@@ -21,7 +22,7 @@ Route::prefix('/register')->group(function () {
 
 Route::get('/resetpass', function () {
     return view('ResetPasswordViews/olvidosucontrasennia');
-});
+})->middleware('auth'); // asta aqui llegaste mi rey
 
 Route::resource('gestionusuario', GestionUsuarioController::class)->only([
     'index',   // GET /gestionusuario (Listar)
