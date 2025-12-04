@@ -24,7 +24,7 @@ Route::prefix('/register')->group(function () {
 
 Route::get('/resetpass', function () {
     return view('ResetPasswordViews/olvidosucontrasennia');
-})->middleware('auth'); // asta aqui llegaste mi rey
+}); // asta aqui llegaste mi rey
 
 // ... otras rutas que ya tienes
 
