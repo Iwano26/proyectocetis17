@@ -44,7 +44,7 @@ class GestionUsuarioController extends Controller
             'correo' => 'required|email|unique:persona,correo|regex:/@cetis17\.edu\.mx$/',
             'nombre' => 'required|string|max:255',
             'contrasennia' => 'required|min:8',
-            'rol' => 'required|in:Administrador,Maestro,Estudiante',
+            'rol' => 'required|in:Administrador,Asesor,Estudiante',
             'telefono' => 'required|digits:10',
         ]);
         
@@ -98,7 +98,7 @@ class GestionUsuarioController extends Controller
             'nombre' => 'required|string|max:255',
             'apellidoPa' => 'required|string|max:255',
             'apellidoMa' => 'required|string|max:255',
-            'rol' => 'required|in:Administrador,Maestro,Estudiante',
+            'rol' => 'required|in:Administrador,Asesor,Estudiante',
             'telefono' => 'required|digits:10',
             // La contraseña es opcional al actualizar, solo se valida si se proporciona
             'contrasennia' => 'nullable|min:8',

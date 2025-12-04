@@ -20,13 +20,13 @@
                 @endif
             </div>
             <form id="loginForm" method="POST" action="{{ route('login.post') }}">
-                 @csrf
+                @csrf
                 <label for="usuario">Usuario </label>
                 <input type="text" id="correo" name="correo" placeholder="Ingresa tu usuario">
                 @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
 
                 <label for="password">Contraseña </label>
-                <input type="text" id="pass" name="pass" placeholder="Ingresa tu contraseña">
+                <input type="password" id="pass" name="pass" placeholder="Ingresa tu contraseña">
                 @error('pass') <small style="color:red;">{{ $message }}</small> @enderror
 
                 <button type="submit">ACCESO</button>
@@ -41,7 +41,8 @@
     <script>
         document.getElementById("loginForm").addEventListener("submit", function(e) {
             const correo = document.getElementById("correo").value.trim();
-            const contraseña = document.getElementById("contraseña").value;
+            // CORRECCIÓN: Cambiado 'contraseña' por 'pass' para que coincida con el id del input
+            const contraseña = document.getElementById("pass").value;
 
             const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
             const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;

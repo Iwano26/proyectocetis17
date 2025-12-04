@@ -18,7 +18,8 @@
             <h2>Asesorias Cetis 17</h2>
             <p class="box-msg">¿Olvidaste tu contraseña? <br>Aquí puedes recuperarla fácilmente.</p>
 
-            <form action="recover-password.html" method="post">
+           <form action="{{ route('password.email') }}" method="post">
+            @csrf
                 
                 <label for="email">Correo Electrónico</label>
                 <input type="email" name="email" placeholder="Ingresa tu Correo Electrónico">

@@ -40,11 +40,9 @@
                 <label for="telefono">Teléfono</label>
                 <input type="text" name="telefono" placeholder="Número de Teléfono" maxlength="10">
 
-                <label for="rol">Rol (Estudiante/Asesor)</label>
-                <select name="rol">
-                    <option value="">Selecciona un rol</option>
-                    <option value="Estudiante">Estudiante</option>
-                    <option value="Asesor">Asesor</option>
+                <label for="rol">Rol</label>
+                <select name="rol">                    
+                    <option value="Estudiante">Estudiante</option>                    
                 </select>
 
                 <label for="contrasennia">Contraseña</label>
