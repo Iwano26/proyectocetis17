@@ -14,7 +14,7 @@
 </head>
 <body>
     
-    {{-- Lógica para el Pop-up de SweetAlert de Registro Exitoso (Punto 1) --}}
+
     @if (session('success'))
         <script>
             // El script se ejecuta porque el Controller redirige aquí con la sesión 'success'
@@ -63,8 +63,8 @@
                 @error('telefono') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="rol">Rol</label>
-                <select name="rol">                    
-                    <option value="Estudiante">Estudiante</option>                    
+                <select name="rol">
+                    <option value="Estudiante">Estudiante</option> 
                 </select>
                 @error('rol') <div class="error-message">{{ $message }}</div> @enderror
 
@@ -91,20 +91,18 @@
             // Requisitos de Contraseña: al menos 8 caracteres, una minúscula, una mayúscula y un número.
             const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
             
-            // --- MÉTODO DE VALIDACIÓN: Correo Institucional (Punto 2) ---
+            // --- MÉTODO DE VALIDACIÓN: Correo Institucional ---
             $.validator.addMethod(
                 "correoInstitucional",
                 function(value, element) {
-                    // Expresión regular para el dominio @cetis17.edu.mx
                     const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
                     if (this.optional(element)) {
                         return true;
                     }
                     return regexCorreo.test(value);
                 },
-                "Correo inválido" // Este es el mensaje de error que se muestra en rojo
+                "Correo inválido"
             );
-            // --- FIN NUEVO MÉTODO ---
 
             // Método de validación para el formato de la contraseña 
             $.validator.addMethod(
@@ -143,12 +141,13 @@
                     correo: { 
                         required: true, 
                         email: true,
-                        correoInstitucional: true // <-- Aplica la regla del dominio
+                        correoInstitucional: true 
                     },
                     telefono: { required: true, telefonoValido: true },
                     rol: { required: true },
                     contrasennia: {
-                        required: true,
+                        required: true,                        
+                        minlength: 6, 
                         regexContrasennia: true
                     },
                     recontrasennia: {
@@ -163,12 +162,13 @@
                     correo: { 
                         required: "Favor de ingresar un correo institucional", 
                         email: "Correo electrónico no válido",
-                        correoInstitucional: "Correo inválido" // <-- Mensaje de error en rojo
+                        correoInstitucional: "Correo inválido"
                     },
                     telefono: { required: "Favor de ingresar tu número de teléfono" },
                     rol: { required: "Favor de seleccionar un rol" },
                     contrasennia: {
-                        required: "Favor de ingresar una contraseña",
+                        required: "Favor de ingresar una contraseña",                      
+                        minlength: "Contraseña débil", 
                         regexContrasennia: "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número."
                     },
                     recontrasennia: {
@@ -177,8 +177,7 @@
                     },
                 },
                 errorElement: 'div', 
-                errorPlacement: function (error, element) {
-                    // Asegura que el mensaje se muestre en rojo usando la clase 'error-message'
+                errorPlacement: function (error, element) {                
                     error.addClass('error-message'); 
                     if (element.attr("name") == "rol" || element.attr("name") == "terminos") {
                         error.insertAfter(element.parent());
