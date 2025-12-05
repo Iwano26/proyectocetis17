@@ -207,7 +207,7 @@
                             <i class="feature-icon bi bi-book-half"></i>
                         </div>
                         <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Cursos y Talleres</h5>
+                            <h5 class="card-title fw-bold text-cetis">Cursos</h5>
                             <p class="card-text text-muted">
                                 Material didáctico y asesorias enfocados en las áreas clave de tu bachillerato tecnológico.
                             </p>
@@ -224,7 +224,7 @@
                         <div class="card-body text-center">
                             <h5 class="card-title fw-bold text-cetis">Biblioteca Digital</h5>
                             <p class="card-text text-muted">
-                                Acceso rápido a libros, tesis y documentos relevantes para todas las especialidades.
+                                Acceso rápido a libros, tesis y documentos relevantes.
                             </p>
                         </div>
                     </div>
@@ -237,7 +237,7 @@
                             <i class="feature-icon bi bi-chat-dots"></i>
                         </div>
                         <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Asesorías Directas</h5>
+                            <h5 class="card-title fw-bold text-cetis">Asesorías</h5>
                             <p class="card-text text-muted">
                                 Reserva un espacio con un profesor o estudiante avanzado para resolver dudas específicas.
                             </p>
@@ -252,7 +252,7 @@
                             <i class="feature-icon bi bi-people"></i>
                         </div>
                         <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Foros Colaborativos</h5>
+                            <h5 class="card-title fw-bold text-cetis">Foros</h5>
                             <p class="card-text text-muted">
                                 Participa en discusiones, comparte conocimiento y ayuda a tus compañeros de clase.
                             </p>
@@ -262,21 +262,10 @@
             </div>
         </div>
     </section>
-
-    <!-- 5. Llamada a la Acción (Registro / Acceso) -->
-    <section id="cta" class="py-5 bg-light">
-        <div class="container text-center">
-            <h3 class="fw-bold mb-3 text-dark">¿Dudas o problemas?</h3>
-            <p class="lead mb-4 text-muted">
-                Contactanos a los numeros: 2271009203 o 2482408784
-            </p> 
-        </div>
-    </section>
-
-    <!-- 6. Footer -->
+    
     <footer class="bg-dark text-white py-4 mt-auto">
         <div class="container text-center">
-            <p class="mb-0">&copy; 2024 CETIS 17 | Sistema de Asesorías Académicas. | DGETI.</p>
+            <p class="mb-0">&copy; 2025 CETIS 17 | Sistema de Asesorías Académicas. | DGETI.</p>
         </div>
     </footer>
 

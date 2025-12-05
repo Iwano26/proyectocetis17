@@ -21,8 +21,8 @@
             </div>
             <form id="loginForm" method="POST" action="{{ route('login.post') }}">
                 @csrf
-                <label for="usuario">Usuario </label>
-                <input type="text" id="correo" name="correo" placeholder="Ingresa tu usuario">
+                <label for="usuario">Correo </label>
+                <input type="text" id="correo" name="correo" placeholder="Ingresa tu correo institucional">
                 @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
 
                 <label for="password">Contraseña </label>

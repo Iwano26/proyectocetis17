@@ -36,7 +36,7 @@ class LoginController extends Controller
 
         // Error personalizado
         return back()->withErrors([
-            'login' => 'Usuario o contraseña incorrectos.'
+            'login' => 'Correo o contraseña incorrectos.'
         ])->withInput();
 
     }
