@@ -11,10 +11,27 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../plugins/jquery-validation/jquery.validate.min.js"></script>
     <script src="../plugins/jquery-validation/additional-methods.min.js"></script>
-
-    {{-- Se eliminan todos los CSS de AdminLTE --}}
 </head>
 <body>
+    
+    {{-- Lógica para el Pop-up de SweetAlert de Registro Exitoso (Punto 1) --}}
+    @if (session('success'))
+        <script>
+            // El script se ejecuta porque el Controller redirige aquí con la sesión 'success'
+            Swal.fire({
+                icon: 'success',
+                title: '¡Registro Exitoso!',
+                text: '{{ session('success') }}',
+                confirmButtonText: 'Iniciar Sesión'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Redirige a la vista de Login después de que el usuario hace clic
+                    window.location.href = "{{ url('/login') }}"; 
+                }
+            });
+        </script>
+    @endif
+    
     <div class="fondo">
         <div class="register-box">
             <div class="logo">
@@ -27,29 +44,37 @@
                 
                 <label for="nombre">Nombre</label>
                 <input type="text" name="nombre" placeholder="Nombre">
+                @error('nombre') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="apellidoPa">Apellido Paterno</label>
                 <input type="text" name="apellidoPa" placeholder="Apellido Paterno">
+                @error('apellidoPa') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="apellidoMa">Apellido Materno</label>
                 <input type="text" name="apellidoMa" placeholder="Apellido Materno">
+                @error('apellidoMa') <div class="error-message">{{ $message }}</div> @enderror
                 
                 <label for="correo">Correo Institucional</label>
                 <input type="email" name="correo" placeholder="Correo Institucional">
+                @error('correo') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="telefono">Teléfono</label>
                 <input type="text" name="telefono" placeholder="Número de Teléfono" maxlength="10">
+                @error('telefono') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="rol">Rol</label>
-                <select name="rol">                    
-                    <option value="Estudiante">Estudiante</option>                    
+                <select name="rol">                    
+                    <option value="Estudiante">Estudiante</option>                    
                 </select>
+                @error('rol') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="contrasennia">Contraseña</label>
                 <input type="password" name="contrasennia" id="contrasennia" placeholder="Contraseña, min 8, Mayús/Minús/Número">
+                @error('contrasennia') <div class="error-message">{{ $message }}</div> @enderror
                 
                 <label for="recontrasennia">Confirmar Contraseña</label>
                 <input type="password" name="recontrasennia" placeholder="Confirma tu Contraseña">
+                @error('recontrasennia') <div class="error-message">{{ $message }}</div> @enderror
                 
                 
                 <button type="submit" id="enviarFormulario">REGISTRAR</button>
@@ -66,18 +91,22 @@
             // Requisitos de Contraseña: al menos 8 caracteres, una minúscula, una mayúscula y un número.
             const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
             
-            function mostrarError(title, text) {
-                Swal.fire({
-                    icon: 'error',
-                    title: title,
-                    text: text,
-                    customClass: {
-                        popup: 'swal-wide',
-                    },
-                });
-            }
+            // --- MÉTODO DE VALIDACIÓN: Correo Institucional (Punto 2) ---
+            $.validator.addMethod(
+                "correoInstitucional",
+                function(value, element) {
+                    // Expresión regular para el dominio @cetis17.edu.mx
+                    const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
+                    if (this.optional(element)) {
+                        return true;
+                    }
+                    return regexCorreo.test(value);
+                },
+                "Correo inválido" // Este es el mensaje de error que se muestra en rojo
+            );
+            // --- FIN NUEVO MÉTODO ---
 
-            // Método de validación para el formato de la contraseña
+            // Método de validación para el formato de la contraseña 
             $.validator.addMethod(
                 "regexContrasennia",
                 function(value, element) {
@@ -86,7 +115,7 @@
                     }
                     return regex.test(value);
                 },
-                "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número."
+                "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número."
             );
 
             // Método de validación para confirmar la contraseña
@@ -111,7 +140,11 @@
                     nombre: { required: true },
                     apellidoPa: { required: true },
                     apellidoMa: { required: true },
-                    correo: { required: true, email: true }, // Mantenido para consistencia con la DB
+                    correo: { 
+                        required: true, 
+                        email: true,
+                        correoInstitucional: true // <-- Aplica la regla del dominio
+                    },
                     telefono: { required: true, telefonoValido: true },
                     rol: { required: true },
                     contrasennia: {
@@ -122,13 +155,16 @@
                         required: true,
                         compararContrasennias: true,
                     },
-                    terminos: { required: true },
                 },
                 messages: {
                     nombre: { required: "Favor de ingresar tu nombre" },
                     apellidoPa: { required: "Favor de ingresar tu apellido paterno" },
                     apellidoMa: { required: "Favor de ingresar tu apellido materno" },
-                    correo: { required: "Favor de ingresar un correo institucional", email: "Correo electrónico no válido" },
+                    correo: { 
+                        required: "Favor de ingresar un correo institucional", 
+                        email: "Correo electrónico no válido",
+                        correoInstitucional: "Correo inválido" // <-- Mensaje de error en rojo
+                    },
                     telefono: { required: "Favor de ingresar tu número de teléfono" },
                     rol: { required: "Favor de seleccionar un rol" },
                     contrasennia: {
@@ -139,15 +175,12 @@
                         required: "Favor de confirmar la contraseña",
                         compararContrasennias: "Las contraseñas no coinciden."
                     },
-                    terminos: "Debes aceptar los términos"
                 },
                 errorElement: 'div', 
                 errorPlacement: function (error, element) {
-                    error.addClass('error-message');
-                    // Colocar el error después del elemento, con manejo especial para el select
-                    if (element.attr("name") == "rol") {
-                        error.insertAfter(element.parent());
-                    } else if (element.attr("name") == "terminos") {
+                    // Asegura que el mensaje se muestre en rojo usando la clase 'error-message'
+                    error.addClass('error-message'); 
+                    if (element.attr("name") == "rol" || element.attr("name") == "terminos") {
                         error.insertAfter(element.parent());
                     } else {
                         error.insertAfter(element);

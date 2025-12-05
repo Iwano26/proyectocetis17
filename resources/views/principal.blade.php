@@ -76,7 +76,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <!-- Enlaces del Menú solicitados, listos para rutas de Laravel -->                    
+                    <li class="nav-item">
+                        <a class="nav-link">ADMINISTACIÓN:</a> 
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/gestioncurso">Cursos</a> 
                     </li>
@@ -85,10 +87,7 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="">Asesorías</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Foros</a>
-                    </li>
+                    </li>                    
                     <li class="nav-item">
                         <a class="nav-link" href="/gestionusuario">Usuarios</a>
                     </li>

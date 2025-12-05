@@ -39,38 +39,52 @@
     </div>
 
     <script>
-        document.getElementById("loginForm").addEventListener("submit", function(e) {
-            const correo = document.getElementById("correo").value.trim();
-            // CORRECCIÓN: Cambiado 'contraseña' por 'pass' para que coincida con el id del input
-            const contraseña = document.getElementById("pass").value;
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+        const correo = document.getElementById("correo").value.trim();
+        const pass = document.getElementById("pass").value;
 
-            const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
-            const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
+        const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
+        
+        // Función para mostrar la alerta con el estilo solicitado
+        function mostrarAlerta(titulo, texto) {
+            Swal.fire({
+                icon: 'error', 
+                title: titulo,
+                text: texto,
+                confirmButtonText: 'OK',
+            });
+        }
 
-            if (!regexCorreo.test(correo)) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Correo inválido',
-                    text: 'Debes ingresar un correo institucional con dominio @cetis17.edu.mx',
-                });
-                return;
-            }
+        // --- 1. Alerta de Campos Vacíos ---
+        if (correo === "" || pass === "") {
+            e.preventDefault();
+            mostrarAlerta('Campos Vacíos', 'Debes ingresar tu correo y contraseña.');
+            return;
+        }
 
-            if (!regexPassword.test(contraseña)) {
-                e.preventDefault();
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Contraseña inválida',
-                    html: 'Tu contraseña debe tener como mínimo:<br>' +
-                          '- 8 caracteres<br>' +
-                          '- Una letra mayúscula<br>' +
-                          '- Una letra minúscula<br>' +
-                          '- Un número',
-                });
-                return;
-            }
-        });
-    </script>
+        // --- 2. Alerta de Correo Inválido (Dominio @cetis17.edu.mx) ---
+        if (!regexCorreo.test(correo)) {
+            e.preventDefault();
+            mostrarAlerta('Correo inválido', 'Debes ingresar un correo institucional con dominio @cetis17.edu.mx');
+            return;
+        }
+        
+        // --- 3. Alerta de Contraseña Inválida (Simula 'Contraseña incorrecta') ---
+        if (!regexPassword.test(pass)) {
+            e.preventDefault();
+            mostrarAlerta('Error de Acceso', 'Correo o contraseña incorrecto.');
+            return;
+        }
+
+        // Si el código llega a este punto, significa que todas las validaciones de JavaScript pasaron.
+        // El formulario se enviará automáticamente (comportamiento por defecto) al servidor,
+        // a la ruta definida en action="{{ route('login.post') }}" y
+        // si el servidor valida las credenciales, te redirigirá a la pantalla principal.
+
+        // Por lo tanto, NO NECESITAS AÑADIR código aquí, ya que el 'submit' sigue su curso normal.
+
+    });
+</script>
 </body>
 </html>

@@ -6,13 +6,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
-// Eliminamos: use Illuminate\Support\Facades\Mail;
-// Eliminamos: use App\Mail\ConfirmarCorreoMailable;
 
 class RegisterController extends Controller
 {
     public function create(){
-        // Muestra la vista del formulario de registro
         return view('RegisterViews.registrarusuario'); 
     }
     
@@ -26,14 +23,11 @@ class RegisterController extends Controller
         $telefono = $request->telefono;
         $contrasennia = $request->contrasennia;
         
-        // Cifrar la contraseña para la columna 'pass' (se necesita VARCHAR(255) en la DB)
         $contraseniaCifrada = Hash::make($contrasennia);
         
         $MensajeError = "";
 
         try{
-            // Ajuste en la inserción: Si la columna 'activo' existe, la insertamos con valor 1.
-            // Si la columna 'activo' NO existe, simplemente la omitimos y el registro es directo.
             DB::connection('mysql')
                 ->table('persona')
                 ->insert([
@@ -44,20 +38,18 @@ class RegisterController extends Controller
                     'rol' => $rol,
                     'telefono' => $telefono,
                     'pass' => $contraseniaCifrada, 
-                    'activo' => 1, // El usuario se activa inmediatamente al registrarse
+                    'activo' => 1, 
                 ]);
 
-            $MensajeError = "Registro exitoso. Puedes iniciar sesión.";
+            $MensajeExito = "Tu cuenta ha sido creada con éxito. Ahora puedes iniciar sesión.";
 
-            // ELIMINADA la lógica de envío de correo
-
-            return redirect('/login')
-                ->with('sessionInsertado', 'true')
-                ->with('mensaje', $MensajeError);
+            // *** CAMBIO CRUCIAL: Redirige a /register con el mensaje 'success' ***
+            // Esto permite que el SweetAlert se ejecute en la vista de registro.
+            return redirect('/register')->with('success', $MensajeExito);
 
         }
         catch (\Exception $e){
-            Log::error('Error al registrar usuario: ' . $e->getMessage()); // Registrar el error
+            Log::error('Error al registrar usuario: ' . $e->getMessage()); 
             $MensajeError = "Hubo un error en el servidor al intentar registrar el usuario. Por favor, intenta más tarde.";
             
             return redirect('/register')
@@ -65,8 +57,4 @@ class RegisterController extends Controller
                 ->with('mensaje', $MensajeError);
         }
     }
-
-    // ELIMINADA la función public function ConfirmMail($correo)
-
-    
 }
