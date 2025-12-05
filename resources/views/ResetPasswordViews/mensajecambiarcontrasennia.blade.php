@@ -20,16 +20,6 @@
             max-width: 600px;
             margin: 0 auto;
         }
-        .button {
-            background-color: #007bff;
-            color: #ffffff;
-            padding: 14px 25px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            border-radius: 5px;
-            margin-top: 20px;
-        }
         .button:hover {
             background-color: #0056b3;
         }
@@ -42,10 +32,10 @@
     <p>Estimado/a {{ $nombreCompleto }},</p>
     <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta. Para proceder con el cambio de contraseña, haga clic en el siguiente botón:</p>
 
-    <a href="{{ env('APP_URL') }}/recuperar/{{$token}}" class="button">Restablecer Contraseña</a>
+    <a href="{{ env('APP_URL') }}/password/reset/{{$token}}" style="background-color: #007bff; color: #ffffff; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; margin-top: 20px;">Restablecer Contraseña</a>
 
     <p>Si el botón no funciona, puede copiar y pegar el siguiente enlace en su navegador:</p>
-    <p><a href="{{ env('APP_URL') }}/recuperar/{{$token}}">{{ env('APP_URL') }}/recuperar/{{$token}}</a></p>
+    <p><a href="{{ env('APP_URL') }}/password/reset/{{$token}}">{{ env('APP_URL') }}/password/reset/{{$token}}</a></p>
 
     <p>Si no ha solicitado este cambio, ignore este correo. Su contraseña actual seguirá siendo válida.</p>
 

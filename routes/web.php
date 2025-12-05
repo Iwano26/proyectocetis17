@@ -4,10 +4,12 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\GestionUsuarioController;
 use App\Http\Controllers\LoginController;
-use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\ResetPasswordController2;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\GestionCursoController; 
 // 1. IMPORTANTE: Importamos el nuevo controlador aquí
 use App\Http\Controllers\BusquedaCursoController; 
+use Illuminate\Http\Request;
 
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
@@ -28,7 +30,9 @@ Route::prefix('/register')->group(function () {
 // --- RUTA DE RESET PASSWORD ---
 Route::get('/resetpass', function () {
     return view('ResetPasswordViews/olvidosucontrasennia');
-}); 
+})->name('password.request'); 
+
+Route::put('/resetpass', [ResetPasswordController2::class,'sendResetLinkEmail'])->name ('pass'); 
 
 // --- RUTAS DE GESTIÓN (ADMINISTRACIÓN) ---
 Route::resource('gestioncurso', GestionCursoController::class)->only([
@@ -62,3 +66,14 @@ Route::get('/principal', function () {
 // Antes tenías una función anónima que no enviaba datos.
 // Ahora apunta al controlador que SÍ envía la variable $cursos.
 Route::get('/curso', [BusquedaCursoController::class, 'index'])->name('busqueda.curso');
+
+Route::get('/pruebas',function(Request $request){
+
+    $correo=$request->correo;
+    $res=DB::table('persona')
+                ->select(columns: "correo")
+                ->where("correo","=",$correo)
+                ->first();
+
+    return$res;
+});
