@@ -75,14 +75,7 @@
             e.preventDefault();
             mostrarAlerta('Error de Acceso', 'Correo o contraseña incorrecto.');
             return;
-        }
-
-        // Si el código llega a este punto, significa que todas las validaciones de JavaScript pasaron.
-        // El formulario se enviará automáticamente (comportamiento por defecto) al servidor,
-        // a la ruta definida en action="{{ route('login.post') }}" y
-        // si el servidor valida las credenciales, te redirigirá a la pantalla principal.
-
-        // Por lo tanto, NO NECESITAS AÑADIR código aquí, ya que el 'submit' sigue su curso normal.
+        }     
 
     });
 </script>
