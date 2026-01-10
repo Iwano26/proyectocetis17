@@ -211,7 +211,7 @@
 
     <footer class="bg-dark text-white text-center py-3 mt-5">
         <div class="container">
-            <small>&copy; 2024 CETIS 17 | Catálogo Académico.</small>
+            <small>&copy; 2025 CETIS 17 | Catálogo Académico.</small>
         </div>
     </footer>
 

@@ -2,47 +2,59 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
+    // 1. Especifica el nombre de tu tabla (si no se llama 'users')
+    // protected $table = 'usuarios'; 
+
+    // 2. Definir la llave primaria (en tu imagen parece ser 'correo')
+    protected $primaryKey = 'correo';
+    public $incrementing = false; // Como es un string, desactivamos el autoincremento
+    protected $keyType = 'string';
+
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Los atributos que se pueden asignar masivamente.
      */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
+        'correo',
+        'nombre',
+        'apellidoPa',
+        'apellidoMa',
+        'rol',
+        'pass', // Usamos 'pass' según tu esquema
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Los atributos que deben ocultarse para la serialización.
      */
     protected $hidden = [
-        'password',
+        'pass',
         'remember_token',
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Mapear el campo de contraseña para que Laravel sepa 
+     * que la contraseña no se llama 'password' en la DB.
+     */
+    public function getAuthPassword()
+    {
+        return $this->pass;
+    }
+
+    /**
+     * Los atributos que deben ser casteados.
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'pass' => 'hashed', // Laravel tratará 'pass' como una contraseña cifrada
         ];
     }
 }

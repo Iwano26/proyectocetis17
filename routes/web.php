@@ -62,6 +62,10 @@ Route::get('/principal', function () {
     return view('principal');
 });
 
+Route::get('/menu', function () {
+    return view('Menu');
+});
+
 // --- RUTA CORREGIDA PARA BÚSQUEDA DE CURSOS ---
 // Antes tenías una función anónima que no enviaba datos.
 // Ahora apunta al controlador que SÍ envía la variable $cursos.

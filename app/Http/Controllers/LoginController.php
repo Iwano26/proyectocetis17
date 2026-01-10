@@ -12,34 +12,49 @@ class LoginController extends Controller
         return view("LoginViews/inicio");
     }
 
-    public function login(Request $request)
-    {
-        // Validación
-        $request->validate([
-            'correo' => 'required',
-            'pass' => 'required'
-        ], [
-            'correo.required' => 'El campo usuario es obligatorio.',
-            'pass.required' => 'El campo contraseña es obligatorio.'
-        ]);
+public function login(Request $request)
+{
+    // 1. Validación
+    $request->validate([
+        'correo' => 'required',
+        'pass' => 'required'
+    ], [
+        'correo.required' => 'El campo usuario es obligatorio.',
+        'pass.required' => 'El campo contraseña es obligatorio.'
+    ]);
 
-        // Credenciales para Auth::attempt
-        $credenciales = [
-            'correo' => $request->correo,
-            'password' => $request->pass  // "pass" se mapea a getAuthPassword()
-        ];
+    // 2. Credenciales
+    $credenciales = [
+        'correo' => $request->correo,
+        'password' => $request->pass
+    ];
 
-        if (Auth::attempt($credenciales)) {
-            $request->session()->regenerate();
+    // 3. Intento de Login
+    if (Auth::attempt($credenciales)) {
+        $request->session()->regenerate();
+
+        // Obtenemos el usuario que acaba de entrar
+        $user = Auth::user();
+
+        // 4. Lógica de Redirección según el rol de tu DB
+        if ($user->rol === 'Administrador') {
             return redirect()->intended('/principal');
+        } 
+        
+        // Si es Estudiante o Asesor (maestro), van a /menu
+        if ($user->rol === 'Estudiante' || $user->rol === 'Asesor') {
+            return redirect()->intended('/menu');
         }
 
-        // Error personalizado
-        return back()->withErrors([
-            'login' => 'Correo o contraseña incorrectos.'
-        ])->withInput();
-
+        // Redirección por defecto si no coincide ninguno de los anteriores
+        return redirect()->intended('/home');
     }
+
+    // Error si fallan las credenciales
+    return back()->withErrors([
+        'login' => 'Correo o contraseña incorrectos.'
+    ])->withInput();
+}
     public function logout(Request $request)
     {
         Auth::logout();

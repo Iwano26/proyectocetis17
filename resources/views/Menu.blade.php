@@ -117,27 +117,7 @@
             <!-- Botón de colapso de Bootstrap (para el menú superior en móvil) -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <!-- Enlaces de Administrador -->
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold text-dark">ADMINISTACIÓN:</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/gestioncurso">Cursos</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Biblioteca</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Asesorías</a> 
-                    </li> 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/gestionusuario">Usuarios</a>
-                    </li>
-                </ul>
-            </div>
+            </button>         
         </div>
     </nav>
 
