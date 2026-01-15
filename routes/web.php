@@ -62,6 +62,18 @@ Route::get('/principal', function () {
     return view('principal');
 });
 
+Route::get('/buscarcurso', function () {
+    return view('BuscarCurso');
+});
+
+Route::get('/biblioteca', function () {
+    return view('Biblioteca');
+});
+
+Route::get('/agenda', function () {
+    return view('Agenda');
+});
+
 Route::get('/menu', function () {
     return view('Menu');
 });

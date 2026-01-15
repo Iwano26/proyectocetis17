@@ -99,6 +99,12 @@
             background-color: var(--cetis-primary);
             color: white;
         }
+
+        .offcanvas-body .nav-link.active {
+            background-color: #A61E34; /* Un rojo un poco más claro al pasar el mouse */
+            border-color: #A61E34;
+            color: white;
+        }
     </style>
 </head>
 <body>    
@@ -151,16 +157,20 @@
         <div class="offcanvas-body p-4">
             <p class="text-muted small mb-4">Módulos</p>
             <div class="nav flex-column nav-pills">
+                <!-- Opción: Principal -->
+                <a class="nav-link active" href="/principal">
+                    <i class="bi bi-calendar-event me-3"></i> Principal
+                </a>
                 <!-- Opción: Agenda -->
-                <a class="nav-link" href="#agenda">
+                <a class="nav-link" href="/agenda">
                     <i class="bi bi-calendar-event me-3"></i> Agenda
                 </a>
                 <!-- Opción: Cursos -->
-                <a class="nav-link" href="/curso">
+                <a class="nav-link" href="/buscarcurso">
                     <i class="bi bi-journal-bookmark me-3"></i> Cursos
                 </a>
                 <!-- Opción: Biblioteca -->
-                <a class="nav-link" href="#biblioteca">
+                <a class="nav-link" href="/biblioteca">
                     <i class="bi bi-archive me-3"></i> Biblioteca
                 </a>
             </div>
@@ -199,66 +209,56 @@
     <section id="funcionalidades" class="py-5 mt-4">
         <div class="container">
             <h2 class="text-center mb-5 display-5 fw-bold text-dark">Tu Camino al Éxito Educativo</h2>
-            <div class="row g-4">
-                <!-- Tarjeta 1: Cursos Personalizados -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card p-4 h-100 shadow-sm" id="cursos">
-                        <div class="text-center">
-                            <i class="feature-icon bi bi-book-half"></i>
+            <div class="row g-4 justify-content-center">
+                
+                <div class="col-md-6 col-lg-4">
+                    <a href="/agenda" class="text-decoration-none h-100">
+                        <div class="card p-4 h-100 shadow-sm">
+                            <div class="text-center">
+                                <i class="feature-icon bi bi-calendar-event"></i>
+                            </div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold text-cetis">Agenda</h5>
+                                <p class="card-text text-muted">
+                                    Revisa tus próximas asesorías, fechas importantes y organiza tu tiempo de estudio.
+                                </p>
+                            </div>
                         </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Cursos</h5>
-                            <p class="card-text text-muted">
-                                Material didáctico y asesorias enfocados en las áreas clave de tu bachillerato tecnológico.
-                            </p>
-                        </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- Tarjeta 2: Biblioteca Digital -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card p-4 h-100 shadow-sm" id="biblioteca">
-                        <div class="text-center">
-                            <i class="feature-icon bi bi-archive"></i>
+                <div class="col-md-6 col-lg-4">
+                    <a href="/buscarcurso" class="text-decoration-none h-100">
+                        <div class="card p-4 h-100 shadow-sm">
+                            <div class="text-center">
+                                <i class="feature-icon bi bi-journal-bookmark"></i>
+                            </div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold text-cetis">Cursos</h5>
+                                <p class="card-text text-muted">
+                                    Explora el material didáctico y las asesorías disponibles para tus materias.
+                                </p>
+                            </div>
                         </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Biblioteca Digital</h5>
-                            <p class="card-text text-muted">
-                                Acceso rápido a libros, tesis y documentos relevantes.
-                            </p>
-                        </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- Tarjeta 3: Asesorías Uno a Uno -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card p-4 h-100 shadow-sm" id="asesorias">
-                        <div class="text-center">
-                            <i class="feature-icon bi bi-chat-dots"></i>
+                <div class="col-md-6 col-lg-4">
+                    <a href="/biblioteca" class="text-decoration-none h-100">
+                        <div class="card p-4 h-100 shadow-sm">
+                            <div class="text-center">
+                                <i class="feature-icon bi bi-archive"></i>
+                            </div>
+                            <div class="card-body text-center">
+                                <h5 class="card-title fw-bold text-cetis">Biblioteca Digital</h5>
+                                <p class="card-text text-muted">
+                                    Acceso rápido a libros, guías de estudio y documentos relevantes en formato digital.
+                                </p>
+                            </div>
                         </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Asesorías</h5>
-                            <p class="card-text text-muted">
-                                Reserva un espacio con un profesor o estudiante avanzado para resolver dudas específicas.
-                            </p>
-                        </div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- Tarjeta 4: Foros de Comunidad -->
-                <div class="col-md-6 col-lg-3">
-                    <div class="card p-4 h-100 shadow-sm" id="foros">
-                        <div class="text-center">
-                            <i class="feature-icon bi bi-people"></i>
-                        </div>
-                        <div class="card-body text-center">
-                            <h5 class="card-title fw-bold text-cetis">Foros</h5>
-                            <p class="card-text text-muted">
-                                Participa en discusiones, comparte conocimiento y ayuda a tus compañeros de clase.
-                            </p>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </section>
