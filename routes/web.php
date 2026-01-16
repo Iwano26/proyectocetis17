@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 // --- RUTAS DE AUTENTICACIÓN ---
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
-Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // --- RUTAS DE REGISTRO ---
 Route::prefix('/register')->group(function () {
@@ -74,9 +74,8 @@ Route::get('/agenda', function () {
     return view('Agenda');
 });
 
-Route::get('/menu', function () {
-    return view('Menu');
-});
+use App\Http\Controllers\MenuController;
+Route::get('/menu', [MenuController::class, 'index'])->name('menu')->middleware('auth');
 
 // --- RUTA CORREGIDA PARA BÚSQUEDA DE CURSOS ---
 // Antes tenías una función anónima que no enviaba datos.

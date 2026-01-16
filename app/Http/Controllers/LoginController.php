@@ -56,9 +56,16 @@ public function login(Request $request)
     ])->withInput();
 }
     public function logout(Request $request)
-    {
-        Auth::logout();
-        $request->session()->invalidate();
-        return redirect('/LoginViews/inicio');
-    }
+{
+    Auth::logout();
+
+    // Invalida la sesión del usuario
+    $request->session()->invalidate();
+
+    // Regenera el token CSRF para evitar ataques de fijación de sesión
+    $request->session()->regenerateToken();
+
+    // Redirige a la vista de login
+    return redirect('/login'); 
+}
 }
