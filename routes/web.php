@@ -10,6 +10,7 @@ use App\Http\Controllers\GestionCursoController;
 use App\Http\Controllers\PrincipalController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\BusquedaCursoController; 
+use App\Http\Controllers\BibliotecaController;
 
 use Illuminate\Http\Request;
 
@@ -81,6 +82,26 @@ Route::get('/buscarcurso', function () {
 
 Route::get('/biblioteca', function () {
     return view('Biblioteca');
+});
+
+Route::get('/subirarchivo', function () {
+    return view('BibliotecaViews.SubirArchivo');
+});
+
+
+
+// Todas las rutas de la biblioteca protegidas por login
+Route::middleware(['auth'])->group(function () {
+
+    // 1. Ver la lista de archivos (Vista Principal)
+    Route::get('/biblioteca', [BibliotecaController::class, 'index'])->name('biblioteca.index');
+
+    // 2. Ver el formulario de subida
+    Route::get('/biblioteca/subir', [BibliotecaController::class, 'create'])->name('biblioteca.create');
+
+    // 3. Procesar el guardado del archivo (Acción del formulario)
+    Route::post('/biblioteca/guardar', [BibliotecaController::class, 'store'])->name('biblioteca.guardar');
+
 });
 
 Route::get('/agenda', function () {

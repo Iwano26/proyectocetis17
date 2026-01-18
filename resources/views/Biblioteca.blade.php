@@ -1,10 +1,3 @@
-<?php
-// VARIABLES DE EJEMPLO PARA UN ARCHIVO
-$id_archivo = 101;
-$nombre_doc = "Manual de Algoritmos v2.pdf";
-$fecha_subida = "2023-10-25";
-$autor = "Ing. Roberto Jiménez";
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -54,7 +47,7 @@ $autor = "Ing. Roberto Jiménez";
             width: 55px; height: 55px; background-color: #eee;
             border-radius: 8px; margin-right: 20px; flex-shrink: 0;
             display: flex; align-items: center; justify-content: center;
-            font-size: 1.5rem; color: #555;
+            font-size: 1.5rem; color: #8C001A;
         }
 
         .seccion-filtros { background-color: #eee; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
@@ -90,26 +83,12 @@ $autor = "Ing. Roberto Jiménez";
         <div class="offcanvas-body p-4">
             <p class="text-muted small mb-4">Módulos</p>
             <div class="nav flex-column nav-pills">
-                <!-- Opción: Principal -->
-                <a class="nav-link" href="/principal">
-                    <i class="bi bi-calendar-event me-3"></i> Principal
-                </a>
-                <!-- Opción: Agenda -->
-                <a class="nav-link" href="/agenda">
-                    <i class="bi bi-calendar-event me-3"></i> Agenda
-                </a>
-                <!-- Opción: Cursos -->
-                <a class="nav-link" href="/buscarcurso">
-                    <i class="bi bi-journal-bookmark me-3"></i> Cursos
-                </a>
-                <!-- Opción: Biblioteca -->
-                <a class="nav-link active" href="/biblioteca">
-                    <i class="bi bi-archive me-3"></i> Biblioteca
-                </a>
+                <a class="nav-link" href="/principal"><i class="bi bi-calendar-event me-3"></i> Principal</a>
+                <a class="nav-link" href="/agenda"><i class="bi bi-calendar-event me-3"></i> Agenda</a>
+                <a class="nav-link" href="/buscarcurso"><i class="bi bi-journal-bookmark me-3"></i> Cursos</a>
+                <a class="nav-link active" href="/biblioteca"><i class="bi bi-archive me-3"></i> Biblioteca</a>
             </div>
-            
             <hr class="my-4">
-            
             <a class="nav-link btn btn-outline-secondary mt-3 text-start" href="/login">
                 <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
             </a>
@@ -117,11 +96,21 @@ $autor = "Ing. Roberto Jiménez";
     </div>
 
     <div class="container-fluid mt-4 px-4">
+        {{-- Mensaje de Éxito --}}
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="fw-bold m-0">Biblioteca Virtual</h2>
             <div>
                 <button class="btn btn-outline-danger fw-bold me-2">MIS ARCHIVOS</button>
-                <button class="btn btn-danger fw-bold">SUBIR ARCHIVO</button>
+                <a href="{{ route('biblioteca.create') }}" class="btn btn-danger fw-bold">
+                    <i class="bi bi-cloud-upload me-1"></i> SUBIR ARCHIVO
+                </a>
             </div>
         </div>
         
@@ -143,6 +132,8 @@ $autor = "Ing. Roberto Jiménez";
                     <label class="form-label small fw-bold">Materia Relacionada:</label>
                     <select class="form-select">
                         <option value="">-- Seleccionar Materia --</option>
+                        <option value="Programación">Programación</option>
+                        <option value="Soporte Técnico">Soporte Técnico</option>
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
@@ -151,26 +142,40 @@ $autor = "Ing. Roberto Jiménez";
             </div>
         </div>
 
-        <div class="tarjeta-archivo shadow-sm">
-            <div class="row align-items-center">
-                <div class="col-lg-6 d-flex align-items-center">
-                    <div class="icono-archivo">
-                        <i class="bi bi-file-earmark-pdf"></i>
+        {{-- INICIO DEL BUCLE DE ARCHIVOS REALES --}}
+        @forelse($archivos as $archivo)
+            <div class="tarjeta-archivo shadow-sm">
+                <div class="row align-items-center">
+                    <div class="col-lg-6 d-flex align-items-center">
+                        <div class="icono-archivo">
+                            <i class="bi bi-file-earmark-pdf-fill"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold">{{ $archivo->nombre_doc }}</h4>
+                            <p class="mb-0 text-muted small">Subido el: <b>{{ $archivo->created_at->format('d/m/Y') }}</b></p>
+                            <p class="mb-0 text-muted small">Materia: <b>{{ $archivo->materia }}</b></p>
+                            <p class="mb-0 text-muted small">Por: <b>{{ $archivo->autor }}</b></p>
+                        </div>
                     </div>
-                    <div>
-                        <h4 class="mb-0 fw-bold"><?php echo $nombre_doc; ?></h4>
-                        <p class="mb-0 text-muted small">Subido el: <b><?php echo $fecha_subida; ?></b></p>
-                        <p class="mb-0 text-muted small">Por: <b><?php echo $autor; ?></b></p>
+                    <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+                        {{-- Abrir PDF en pestaña nueva --}}
+                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-info btn-sm text-white mx-1">VER</a>
+                        
+                        {{-- Descargar PDF --}}
+                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">DESCARGAR</a>
+                        
+                        <button class="btn btn-warning btn-sm text-white mx-1">MODIFICAR</button>
+                        <button class="btn btn-danger btn-sm mx-1">ELIMINAR</button>
                     </div>
-                </div>
-                <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
-                    <a href="#" class="btn btn-info btn-sm text-white mx-1">VER</a>
-                    <a href="#" class="btn btn-primary btn-sm mx-1">DESCARGAR</a>
-                    <button class="btn btn-warning btn-sm text-white mx-1">MODIFICAR</button>
-                    <button class="btn btn-danger btn-sm mx-1">ELIMINAR</button>
                 </div>
             </div>
-        </div>
+        @empty
+            <div class="text-center py-5">
+                <i class="bi bi-archive text-muted" style="font-size: 3rem;"></i>
+                <p class="text-muted mt-2">No hay archivos registrados en la biblioteca todavía.</p>
+            </div>
+        @endforelse
+        {{-- FIN DEL BUCLE --}}
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
