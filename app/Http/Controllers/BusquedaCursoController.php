@@ -8,12 +8,11 @@ use Illuminate\Support\Facades\DB;
 class BusquedaCursoController extends Controller
 {
     public function index(Request $request)
-    {
-        // Obtener los cursos de la base de datos
-        // Puedes agregar ->where('estado', 'ACTIVO') si solo quieres mostrar los activos
-        $cursos = DB::connection('mysql')->table('curso')->get();
+{
+    // Obtenemos los cursos. 
+    // Nota: Asegúrate de que los nombres de las columnas coincidan con tu DB (id, nombre, maestro, estado, etc.)
+    $cursos = DB::connection('mysql')->table('curso')->get();
 
-        // Retornar la vista 'BusquedaCurso' con los datos
-        return view('BusquedaCurso', ['cursos' => $cursos]);
-    }
+    return view('BuscarCurso', compact('cursos'));
+}
 }

@@ -1,11 +1,3 @@
-<?php
-// VARIABLES DE PRUEBA AMPLIADAS
-$id_ejemplo = 1;
-$nombre_curso = "Matemáticas IV";
-$nombre_maestro = "Lic. Andrea García Pérez";
-$estado_curso = "Abierto"; // Puede ser "Abierto" o "Cerrado"
-$participantes = 13;
-?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -66,9 +58,9 @@ $participantes = 13;
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item"><span class="nav-link fw-bold text-danger">ADMINISTRACIÓN:</span></li>
-                    <li class="nav-item"><a class="nav-link text-dark" href="#">Cursos</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark" href="#">Biblioteca</a></li>
-                    <li class="nav-item"><a class="nav-link text-dark" href="#">Usuarios</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="{{ route('cursos.index') }}">Cursos</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="/biblioteca">Biblioteca</a></li>
+                    <li class="nav-item"><a class="nav-link text-dark" href="/gestionusuario">Usuarios</a></li>
                 </ul>
             </div>
         </div>
@@ -86,13 +78,16 @@ $participantes = 13;
             <div class="nav flex-column nav-pills">
                 <a class="nav-link" href="/principal"><i class="bi bi-calendar-event me-3"></i> Principal</a>
                 <a class="nav-link" href="/agenda"><i class="bi bi-calendar-event me-3"></i> Agenda</a>
-                <a class="nav-link active" href="/buscarcurso"><i class="bi bi-journal-bookmark me-3"></i> Cursos</a>
+                <a class="nav-link active" href="{{ route('cursos.index') }}"><i class="bi bi-journal-bookmark me-3"></i> Cursos</a>
                 <a class="nav-link" href="/biblioteca"><i class="bi bi-archive me-3"></i> Biblioteca</a>
             </div>
             <hr class="my-4">
-            <a class="nav-link btn btn-outline-secondary mt-3 text-start" href="/login">
-                <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-            </a>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="nav-link btn btn-outline-secondary mt-3 text-start w-100">
+                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+                </button>
+            </form>
         </div>
     </div>
 
@@ -104,9 +99,9 @@ $participantes = 13;
             </a>
         </div>
         
-        <form action="" method="GET">
+        <form action="{{ route('cursos.index') }}" method="GET">
             <div class="mb-3">
-                <input type="text" name="buscar" class="form-control form-control-lg shadow-sm" placeholder="Buscar por nombre o profesor...">
+                <input type="text" name="buscar" value="{{ request('buscar') }}" class="form-control form-control-lg shadow-sm" placeholder="Buscar por nombre o materia...">
             </div>
 
             <div class="seccion-filtros shadow-sm">
@@ -127,15 +122,15 @@ $participantes = 13;
                         <label class="form-label small fw-bold">Materia:</label>
                         <select name="materia" class="form-select">
                             <option value="">-- Seleccionar Materia --</option>
-                        </select>
+                            </select>
                     </div>
 
                     <div class="col-md-3 mb-3">
                         <label class="form-label small fw-bold">Estado:</label>
                         <select name="estado" class="form-select">
                             <option value="">-- Todos --</option>
-                            <option value="Abierto">Abierto</option>
-                            <option value="Cerrado">Cerrado</option>
+                            <option value="ACTIVO">Activo</option>
+                            <option value="INACTIVO">Inactivo</option>
                         </select>
                     </div>
 
@@ -146,43 +141,54 @@ $participantes = 13;
             </div>
         </form>
 
-        <div class="tarjeta-curso shadow-sm">
-            <div class="row align-items-center">
-                <div class="col-md-6 d-flex align-items-center">
-                    <div class="circulo-rojo">
-                        <i class="bi bi-book fs-4"></i>
-                    </div>
-                    <div>
-                        <h4 class="mb-0 fw-bold"><?php echo $nombre_curso; ?></h4>
-                        <p class="mb-1 text-muted"><?php echo $nombre_maestro; ?></p>
-                        <span class="badge <?php echo ($estado_curso == 'Abierto') ? 'bg-success' : 'bg-secondary'; ?> rounded-pill">
-                            ESTADO: <?php echo strtoupper($estado_curso); ?>
-                        </span>
+        <div id="contenedor-cursos">
+            @forelse($cursos as $curso)
+                <div class="tarjeta-curso shadow-sm">
+                    <div class="row align-items-center">
+                        <div class="col-md-6 d-flex align-items-center">
+                            <div class="circulo-rojo">
+                                <i class="bi bi-book fs-4"></i>
+                            </div>
+                            <div>
+                                <h4 class="mb-0 fw-bold">{{ $curso->nombre_curso }}</h4>
+                                <p class="mb-1 text-muted">{{ $curso->materia }}</p>
+                                
+                                @php
+                                    $claseEstado = ($curso->estado == 'ACTIVO') ? 'bg-success' : 'bg-secondary';
+                                @endphp
+                                <span class="badge {{ $claseEstado }} rounded-pill">
+                                    ESTADO: {{ $curso->estado }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-2 text-center">
+                            <div class="p-2 border rounded bg-light">
+                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Horas Disp.</small>
+                                <span class="fs-4 fw-bold text-dark">{{ $curso->horas_disponibles }}</span>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="{{ route('cursos.show', $curso->id_curso) }}" class="btn btn-primary btn-sm mx-1">
+                                VER CURSO
+                            </a>
+
+                            <a href="{{ route('cursos.edit', $curso->id_curso) }}" class="btn btn-warning btn-sm mx-1 text-white">
+                                EDITAR
+                            </a>
+
+                            <a href="#" class="btn btn-success btn-sm mx-1 {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
+                                UNIRSE
+                            </a>
+                        </div>
                     </div>
                 </div>
-                
-                <div class="col-md-2 text-center">
-                    <div class="p-2 border rounded bg-light">
-                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Participantes</small>
-                        <span class="fs-4 fw-bold text-dark"><?php echo $participantes; ?></span>
-                    </div>
+            @empty
+                <div class="alert alert-warning text-center">
+                    No se encontraron cursos que coincidan con la búsqueda.
                 </div>
-
-                <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <a href="{{ route('cursos.show', $id_ejemplo) }}" class="btn btn-primary btn-sm mx-1">
-                        VER CURSO
-                    </a>
-
-                    <a href="{{ route('cursos.edit', $id_ejemplo) }}" class="btn btn-warning btn-sm mx-1 text-white">
-                        EDITAR
-                    </a>
-
-                    <a href="{{ route('cursos.show', $id_ejemplo) }}" 
-                    class="btn btn-success btn-sm mx-1 {{ ($estado_curso == 'Cerrado') ? 'disabled' : '' }}">
-                    UNIRSE
-                    </a>
-                </div>
-            </div>
+            @endforelse
         </div>
 
     </div>
