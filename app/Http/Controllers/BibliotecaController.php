@@ -72,4 +72,33 @@ class BibliotecaController extends Controller
 
         return back()->with('error', 'No se pudo procesar el archivo.');
     }
+
+    public function destroy($id) {
+        $archivo = Biblioteca::findOrFail($id);
+
+        // 1. Borrar el archivo físico de la carpeta public/documentos
+        $rutaFisica = public_path('documentos/' . $archivo->ruta_archivo);
+        if (file_exists($rutaFisica)) {
+            unlink($rutaFisica);
+        }
+
+        // 2. Borrar el registro de la base de datos
+        $archivo->delete();
+
+        return back()->with('success', 'Archivo eliminado correctamente.');
+    }
+
+    public function edit($id) {
+        $archivo = Biblioteca::findOrFail($id);
+        return view('BibliotecaViews.EditarArchivo', compact('archivo'));
+    }
+
+    public function update(Request $request, $id) {
+        $archivo = Biblioteca::findOrFail($id);
+        $archivo->nombre_doc = $request->nombre_doc;
+        $archivo->materia = $request->materia;
+        $archivo->save();
+
+        return redirect()->route('biblioteca.index')->with('success', 'Archivo actualizado.');
+    }
 }

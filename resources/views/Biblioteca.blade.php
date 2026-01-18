@@ -159,13 +159,28 @@
                     </div>
                     <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
                         {{-- Abrir PDF en pestaña nueva --}}
-                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-info btn-sm text-white mx-1">VER</a>
+                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-info btn-sm text-white mx-1">
+                            <i class="bi bi-eye"></i> VER
+                        </a>
                         
                         {{-- Descargar PDF --}}
-                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">DESCARGAR</a>
+                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">
+                            <i class="bi bi-download"></i> DESCARGAR
+                        </a>
                         
-                        <button class="btn btn-warning btn-sm text-white mx-1">MODIFICAR</button>
-                        <button class="btn btn-danger btn-sm mx-1">ELIMINAR</button>
+                        {{-- MODIFICAR: Enlace a la ruta de edición --}}
+                        <a href="{{ route('biblioteca.edit', $archivo->id) }}" class="btn btn-warning btn-sm text-white mx-1">
+                            <i class="bi bi-pencil"></i> MODIFICAR
+                        </a>
+
+                        {{-- ELIMINAR: Formulario para enviar petición DELETE --}}
+                        <form action="{{ route('biblioteca.eliminar', $archivo->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('¿Estás seguro de que deseas eliminar este archivo?')">
+                                <i class="bi bi-trash"></i> ELIMINAR
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>

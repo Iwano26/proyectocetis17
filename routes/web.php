@@ -102,6 +102,13 @@ Route::middleware(['auth'])->group(function () {
     // 3. Procesar el guardado del archivo (Acción del formulario)
     Route::post('/biblioteca/guardar', [BibliotecaController::class, 'store'])->name('biblioteca.guardar');
 
+    // Ruta para eliminar
+    Route::delete('/biblioteca/eliminar/{id}', [BibliotecaController::class, 'destroy'])->name('biblioteca.eliminar');
+
+    // Rutas para modificar (una para ver el formulario y otra para guardar el cambio)
+    Route::get('/biblioteca/editar/{id}', [BibliotecaController::class, 'edit'])->name('biblioteca.edit');
+    Route::put('/biblioteca/actualizar/{id}', [BibliotecaController::class, 'update'])->name('biblioteca.actualizar');
+
 });
 
 Route::get('/agenda', function () {
