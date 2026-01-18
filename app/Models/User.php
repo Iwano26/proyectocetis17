@@ -14,6 +14,7 @@ class User extends Authenticatable
     // protected $table = 'usuarios'; 
 
     // 2. Definir la llave primaria (en tu imagen parece ser 'correo')
+    protected $table = 'persona';
     protected $primaryKey = 'correo';
     public $incrementing = false; // Como es un string, desactivamos el autoincremento
     protected $keyType = 'string';
@@ -38,6 +39,21 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+
+    /**
+     * Indica el nombre de la columna que sirve como identificador único (tu llave primaria).
+     */
+    public function getAuthIdentifierName()
+    {
+        return 'correo';
+    }
+
+
+
+    public function getKey()
+{
+    return $this->getAttribute($this->primaryKey);
+}
     /**
      * Mapear el campo de contraseña para que Laravel sepa 
      * que la contraseña no se llama 'password' en la DB.

@@ -7,8 +7,10 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ResetPasswordController2;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\GestionCursoController; 
-// 1. IMPORTANTE: Importamos el nuevo controlador aquí
+use App\Http\Controllers\PrincipalController;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\BusquedaCursoController; 
+
 use Illuminate\Http\Request;
 
 // --- RUTAS DE AUTENTICACIÓN ---
@@ -59,8 +61,19 @@ Route::get('/gestionasesoria', function () {
 });
 
 Route::get('/principal', function () {
+    
     return view('principal');
 });
+
+
+Route::get('/test-user', function() {
+    return [
+        'ID_en_Sesion' => Auth::id(),
+        'Nombre_Detectado' => Auth::user()->nombre,
+        'Email_Detectado' => Auth::user()->correo,
+    ];
+})->middleware('auth');
+
 
 Route::get('/buscarcurso', function () {
     return view('BuscarCurso');

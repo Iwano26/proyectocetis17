@@ -36,6 +36,7 @@ public function login(Request $request)
         // Obtenemos el usuario que acaba de entrar
         $user = Auth::user();
 
+
         // 4. Lógica de Redirección según el rol de tu DB
         if ($user->rol === 'Administrador') {
             return redirect()->intended('/principal');

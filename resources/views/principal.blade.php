@@ -124,26 +124,52 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+            
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav mx-auto">
-                    <!-- Enlaces de Administrador -->
-                    <li class="nav-item">
-                        <a class="nav-link fw-bold text-dark">ADMINISTACIÓN:</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/gestioncurso">Cursos</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Biblioteca</a> 
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="">Asesorías</a> 
-                    </li> 
-                    <li class="nav-item">
-                        <a class="nav-link" href="/gestionusuario">Usuarios</a>
+    <ul class="navbar-nav mx-auto">
+        <li class="nav-item">
+            <a class="nav-link fw-bold text-dark">ADMINISTRACIÓN:</a> 
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/gestioncurso">Cursos</a> 
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="">Biblioteca</a> 
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="/gestionusuario">Usuarios</a>
+        </li>
+    </ul>
+
+
+
+    <ul class="navbar-nav ms-auto">
+        @auth
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle fw-bold text-cetis" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle me-1"></i>
+                    {{-- Usamos auth()->user() para llamar directamente al guard de autenticación --}}
+                    Bienvenido, {{ auth()->user()->nombre }}
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
+                    <li class="px-3 py-2 small text-muted">Rol: {{ Auth::user()->rol }}</li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="dropdown-item text-danger">
+                                <i class="bi bi-box-arrow-right me-2"></i>Cerrar Sesión
+                            </button>
+                        </form>
                     </li>
                 </ul>
-            </div>
+            </li>
+        @endauth
+    </ul>
+</div>
+
+
+
         </div>
     </nav>
 
