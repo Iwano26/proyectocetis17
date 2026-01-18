@@ -132,6 +132,10 @@
                                     <label for="fecha_fin" class="form-label">Fecha de Fin</label>
                                     <input type="date" name="fecha_fin" id="fecha_fin" class="form-control" value="{{ old('fecha_fin') }}" required>
                                 </div>
+                                <div class="mb-3">
+                                <label for="acceso" class="form-label">Acceso</label>
+                                <textarea name="acceso" id="acceso" placeholder="Ejemplo: 234" class="form-control" maxlength="20" rows="2">{{ old('acceso') }}</textarea>
+                            </div>
                             </div>
                             @error('fecha_fin')
                                 <div class="error-message">La fecha de fin debe ser igual o posterior a la fecha de inicio.</div>
@@ -185,8 +189,9 @@
                                         <th>Inicio</th>
                                         <th>Fin</th>
                                         <th>Hrs. Disp.</th>
+                                        <th>Acceso</th>
                                         <th>Estado</th>
-                                        <th>Acciones</th>
+                                        <th>Acciones</th>                                        
                                     </tr>
                                 </thead>
                                 <tbody> 
@@ -199,6 +204,7 @@
                                         <td>{{ $curso->fecha_inicio }}</td>
                                         <td>{{ $curso->fecha_fin }}</td>
                                         <td>{{ $curso->horas_disponibles }}</td>
+                                        <td>{{ $curso->acceso }}</td>
                                         <td>
                                             <span class="badge 
                                                 @if($curso->estado == 'ACTIVO') bg-success 
@@ -222,6 +228,7 @@
                                                         fecha_fin: '{{ $curso->fecha_fin }}', 
                                                         materia: '{{ $curso->materia }}',
                                                         horas_disponibles: '{{ $curso->horas_disponibles }}', 
+                                                        acceso: '{{ $curso->acceso }}', 
                                                         estado: '{{ $curso->estado }}'
                                                     }
                                                 )">
@@ -279,6 +286,7 @@
             document.getElementById('fecha_fin').value = courseData.fecha_fin;
             document.getElementById('materia').value = courseData.materia;
             document.getElementById('horas_disponibles').value = courseData.horas_disponibles;
+            document.getElementById('acceso').value = courseData.acceso;
             document.getElementById('estado').value = courseData.estado;
             
             // 2. No hay campos clave que deshabilitar/limpiar como la contraseña en cursos, pero el ID va en un campo oculto.

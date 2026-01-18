@@ -81,11 +81,20 @@ Route::get('/test-user', function() {
 // Pantalla principal
 Route::get('/buscarcurso', [CursoController::class, 'index'])->name('cursos.index');
 // Crear
-Route::get('CursosViews/crear', [CursoController::class, 'create'])->name('cursos.create');
+// Crear (Vista y Proceso)
+Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.create');
 Route::post('/cursos/guardar', [CursoController::class, 'store'])->name('cursos.store');
-// Editar
+
+// Ver Detalle
+Route::get('/cursos/{id}', [CursoController::class, 'show'])->name('cursos.show');
+// Editar (Vista y Proceso)
 Route::get('/cursos/{id}/editar', [CursoController::class, 'edit'])->name('cursos.edit');
 Route::put('/cursos/{id}/actualizar', [CursoController::class, 'update'])->name('cursos.update');
+
+Route::get('/curso', [BusquedaCursoController::class, 'index'])->name('busqueda.curso');
+
+// Eliminar
+Route::delete('/cursos/{id}', [CursoController::class, 'destroy'])->name('cursos.destroy');
 
 
 

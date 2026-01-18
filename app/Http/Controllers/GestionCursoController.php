@@ -57,6 +57,7 @@ class GestionCursoController extends Controller
             'materia' => 'required|string|max:50',
             'horas_disponibles' => 'required|integer|min:1|max:24', // Asumiendo min 1 y max 24 por el valor que tenías
             'estado' => 'required|in:ACTIVO,INACTIVO,COMPLETADO', // Usando los valores ENUM de tu tabla
+            'acceso' => 'required|string|max:20',
         ]);
         
         $Mensaje = "";
@@ -72,6 +73,7 @@ class GestionCursoController extends Controller
                     'materia' => $request->materia,
                     'horas_disponibles' => $request->horas_disponibles,
                     'estado' => $request->estado,
+                    'acceso' => $request->acceso,
                     // id_curso es AUTO_INCREMENT, no se inserta
                 ]);
 
@@ -110,6 +112,7 @@ class GestionCursoController extends Controller
             'materia' => 'required|string|max:50',
             'horas_disponibles' => 'required|integer|min:1|max:24',
             'estado' => 'required|in:ACTIVO,INACTIVO,COMPLETADO',
+            'acceso' => 'required|string|max:20',
         ];
         
         $request->validate($rules);
@@ -122,6 +125,7 @@ class GestionCursoController extends Controller
             'materia' => $request->materia,
             'horas_disponibles' => $request->horas_disponibles,
             'estado' => $request->estado,
+            'acceso' => $request->acceso,
         ];
         
         $Mensaje = "";
