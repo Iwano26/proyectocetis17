@@ -169,9 +169,18 @@ $participantes = 13;
                 </div>
 
                 <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                    <a href="ver.php?id=<?php echo $id_ejemplo; ?>" class="btn btn-primary btn-sm mx-1">VER CURSO</a>
-                    <a href="{{ route('cursos.edit', $id_ejemplo) }}" class="btn btn-warning btn-sm mx-1 text-white">EDITAR</a>
-                    <button class="btn btn-success btn-sm mx-1" <?php echo ($estado_curso == 'Cerrado') ? 'disabled' : ''; ?>>UNIRSE</button>
+                    <a href="{{ route('cursos.show', $id_ejemplo) }}" class="btn btn-primary btn-sm mx-1">
+                        VER CURSO
+                    </a>
+
+                    <a href="{{ route('cursos.edit', $id_ejemplo) }}" class="btn btn-warning btn-sm mx-1 text-white">
+                        EDITAR
+                    </a>
+
+                    <a href="{{ route('cursos.show', $id_ejemplo) }}" 
+                    class="btn btn-success btn-sm mx-1 {{ ($estado_curso == 'Cerrado') ? 'disabled' : '' }}">
+                    UNIRSE
+                    </a>
                 </div>
             </div>
         </div>

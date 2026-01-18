@@ -132,6 +132,11 @@ Route::get('/menu', [MenuController::class, 'index'])->name('menu')->middleware(
 // Ahora apunta al controlador que SÍ envía la variable $cursos.
 Route::get('/curso', [BusquedaCursoController::class, 'index'])->name('busqueda.curso');
 
+// El nombre 'cursos.show' es el estándar para mostrar un recurso
+Route::get('/cursos/{id}', [App\Http\Controllers\CursoController::class, 'show'])->name('cursos.show');
+
+
+
 Route::get('/pruebas',function(Request $request){
 
     $correo=$request->correo;

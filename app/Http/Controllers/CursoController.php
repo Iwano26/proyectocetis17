@@ -51,4 +51,41 @@ class CursoController extends Controller
             'datos_recibidos' => $request->all()
         ]);
     }
+
+    public function show($id) {
+    $curso = (object)[
+        'id' => $id,
+        'nombre' => 'MATEMÁTICAS IV',
+        'materia' => 'Cálculo Integral',
+        'descripcion' => 'Espacio dedicado a la resolución de dudas sobre métodos de integración y aplicaciones de la integral definida.',
+        'instructor' => 'Ing. Juan Pérez',
+        'asesorias' => [
+            (object)[
+                'tema' => 'Fracciones Parciales',
+                'dia' => 'Lunes',
+                'fecha' => '20 de Octubre',
+                'hora' => '10:00 - 12:00',
+                'salon' => 'Laboratorio A',
+                'tipo' => 'Presencial'
+            ],
+            (object)[
+                'tema' => 'Integración por Partes',
+                'dia' => 'Miércoles',
+                'fecha' => '22 de Octubre',
+                'hora' => '14:00 - 16:00',
+                'salon' => 'Aula 12',
+                'tipo' => 'Presencial'
+            ],
+            (object)[
+                'tema' => 'Repaso de Examen',
+                'dia' => 'Viernes',
+                'fecha' => '24 de Octubre',
+                'hora' => '09:00 - 11:00',
+                'salon' => 'Biblioteca',
+                'tipo' => 'Grupal'
+            ],
+        ]
+    ];
+    return view('CursosViews/vercurso', compact('curso'));
+}
 }
