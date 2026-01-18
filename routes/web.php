@@ -11,6 +11,7 @@ use App\Http\Controllers\PrincipalController;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\BusquedaCursoController; 
 use App\Http\Controllers\BibliotecaController;
+use App\Http\Controllers\CursoController;
 
 use Illuminate\Http\Request;
 
@@ -76,9 +77,17 @@ Route::get('/test-user', function() {
 })->middleware('auth');
 
 
-Route::get('/buscarcurso', function () {
-    return view('BuscarCurso');
-});
+
+// Pantalla principal
+Route::get('/buscarcurso', [CursoController::class, 'index'])->name('cursos.index');
+// Crear
+Route::get('CursosViews/crear', [CursoController::class, 'create'])->name('cursos.create');
+Route::post('/cursos/guardar', [CursoController::class, 'store'])->name('cursos.store');
+// Editar
+Route::get('/cursos/{id}/editar', [CursoController::class, 'edit'])->name('cursos.edit');
+Route::put('/cursos/{id}/actualizar', [CursoController::class, 'update'])->name('cursos.update');
+
+
 
 Route::get('/biblioteca', function () {
     return view('Biblioteca');

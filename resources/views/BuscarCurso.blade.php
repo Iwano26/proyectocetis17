@@ -1,8 +1,10 @@
 <?php
-// VARIABLES DE PRUEBA
+// VARIABLES DE PRUEBA AMPLIADAS
 $id_ejemplo = 1;
 $nombre_curso = "Matemáticas IV";
 $nombre_maestro = "Lic. Andrea García Pérez";
+$estado_curso = "Abierto"; // Puede ser "Abierto" o "Cerrado"
+$participantes = 13;
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -20,7 +22,6 @@ $nombre_maestro = "Lic. Andrea García Pérez";
         }
         body { background-color: #f8f9fa; }
 
-        /* Estilo Botón Menú Principal */
         #menu-toggle-btn {
             position: fixed; top: 15px; left: 20px; z-index: 1040; 
             background-color: white; color: var(--cetis-rojo);
@@ -30,20 +31,17 @@ $nombre_maestro = "Lic. Andrea García Pérez";
         }
         #menu-toggle-btn:hover { background-color: var(--cetis-primary); color: white; }
 
-        /* Barra Superior */
         .navbar {
             background-color: white !important; border-bottom: 1px solid #dee2e6;
             min-height: 70px; padding-left: 80px; 
         }
         .navbar-brand { color: var(--cetis-rojo) !important; font-weight: bold; }
 
-        /* Estilos Offcanvas Principal */
         .offcanvas-header { background-color: var(--cetis-primary); color: white; }
         .offcanvas-header .btn-close { filter: invert(1); }
         .offcanvas-body .nav-link { color: #333; font-weight: 500; padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
         .offcanvas-body .nav-link:hover, .offcanvas-body .nav-link.active { background-color: var(--cetis-primary); color: white !important; }
 
-        /* Filtros y Tarjetas */
         .seccion-filtros { background-color: #eee; padding: 20px; border-radius: 8px; margin-bottom: 25px; }
         .tarjeta-curso {
             background-color: white; border: 2px solid var(--cetis-rojo);
@@ -52,6 +50,7 @@ $nombre_maestro = "Lic. Andrea García Pérez";
         .circulo-rojo {
             width: 55px; height: 55px; background-color: var(--cetis-rojo);
             border-radius: 50%; margin-right: 20px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center; color: white;
         }
     </style>
 </head>
@@ -85,26 +84,12 @@ $nombre_maestro = "Lic. Andrea García Pérez";
         <div class="offcanvas-body p-4">
             <p class="text-muted small mb-4">Módulos</p>
             <div class="nav flex-column nav-pills">
-                <!-- Opción: Principal -->
-                <a class="nav-link" href="/principal">
-                    <i class="bi bi-calendar-event me-3"></i> Principal
-                </a>
-                <!-- Opción: Agenda -->
-                <a class="nav-link" href="/agenda">
-                    <i class="bi bi-calendar-event me-3"></i> Agenda
-                </a>
-                <!-- Opción: Cursos -->
-                <a class="nav-link" href="/buscarcurso">
-                    <i class="bi bi-journal-bookmark me-3"></i> Cursos
-                </a>
-                <!-- Opción: Biblioteca -->
-                <a class="nav-link" href="/biblioteca">
-                    <i class="bi bi-archive me-3"></i> Biblioteca
-                </a>
+                <a class="nav-link" href="/principal"><i class="bi bi-calendar-event me-3"></i> Principal</a>
+                <a class="nav-link" href="/agenda"><i class="bi bi-calendar-event me-3"></i> Agenda</a>
+                <a class="nav-link active" href="/buscarcurso"><i class="bi bi-journal-bookmark me-3"></i> Cursos</a>
+                <a class="nav-link" href="/biblioteca"><i class="bi bi-archive me-3"></i> Biblioteca</a>
             </div>
-            
             <hr class="my-4">
-            
             <a class="nav-link btn btn-outline-secondary mt-3 text-start" href="/login">
                 <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
             </a>
@@ -112,7 +97,12 @@ $nombre_maestro = "Lic. Andrea García Pérez";
     </div>
 
     <div class="container-fluid mt-4 px-4">
-        <h2 class="fw-bold mb-3">Búsqueda de Cursos</h2>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold m-0">Búsqueda de Cursos</h2>
+            <a href="{{ route('cursos.create') }}" class="btn btn-danger fw-bold shadow-sm">
+                <i class="bi bi-plus-circle me-2"></i>CREAR CURSO
+            </a>
+        </div>
         
         <form action="" method="GET">
             <div class="mb-3">
@@ -121,7 +111,7 @@ $nombre_maestro = "Lic. Andrea García Pérez";
 
             <div class="seccion-filtros shadow-sm">
                 <div class="row align-items-end">
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label small fw-bold">Día de la semana:</label>
                         <select name="dia" class="form-select">
                             <option value="">-- Seleccionar Día --</option>
@@ -133,14 +123,23 @@ $nombre_maestro = "Lic. Andrea García Pérez";
                         </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
                         <label class="form-label small fw-bold">Materia:</label>
                         <select name="materia" class="form-select">
                             <option value="">-- Seleccionar Materia --</option>
                         </select>
                     </div>
 
-                    <div class="col-md-4 mb-3">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label small fw-bold">Estado:</label>
+                        <select name="estado" class="form-select">
+                            <option value="">-- Todos --</option>
+                            <option value="Abierto">Abierto</option>
+                            <option value="Cerrado">Cerrado</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
                         <button type="submit" class="btn btn-dark w-100 fw-bold">APLICAR FILTROS</button>
                     </div>
                 </div>
@@ -149,17 +148,30 @@ $nombre_maestro = "Lic. Andrea García Pérez";
 
         <div class="tarjeta-curso shadow-sm">
             <div class="row align-items-center">
-                <div class="col-md-7 d-flex align-items-center">
-                    <div class="circulo-rojo"></div>
+                <div class="col-md-6 d-flex align-items-center">
+                    <div class="circulo-rojo">
+                        <i class="bi bi-book fs-4"></i>
+                    </div>
                     <div>
                         <h4 class="mb-0 fw-bold"><?php echo $nombre_curso; ?></h4>
-                        <p class="mb-0 text-muted"><?php echo $nombre_maestro; ?></p>
+                        <p class="mb-1 text-muted"><?php echo $nombre_maestro; ?></p>
+                        <span class="badge <?php echo ($estado_curso == 'Abierto') ? 'bg-success' : 'bg-secondary'; ?> rounded-pill">
+                            ESTADO: <?php echo strtoupper($estado_curso); ?>
+                        </span>
                     </div>
                 </div>
-                <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                
+                <div class="col-md-2 text-center">
+                    <div class="p-2 border rounded bg-light">
+                        <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Participantes</small>
+                        <span class="fs-4 fw-bold text-dark"><?php echo $participantes; ?></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
                     <a href="ver.php?id=<?php echo $id_ejemplo; ?>" class="btn btn-primary btn-sm mx-1">VER CURSO</a>
-                    <a href="editar.php?id=<?php echo $id_ejemplo; ?>" class="btn btn-warning btn-sm mx-1 text-white">EDITAR</a>
-                    <button class="btn btn-success btn-sm mx-1">UNIRSE</button>
+                    <a href="{{ route('cursos.edit', $id_ejemplo) }}" class="btn btn-warning btn-sm mx-1 text-white">EDITAR</a>
+                    <button class="btn btn-success btn-sm mx-1" <?php echo ($estado_curso == 'Cerrado') ? 'disabled' : ''; ?>>UNIRSE</button>
                 </div>
             </div>
         </div>
