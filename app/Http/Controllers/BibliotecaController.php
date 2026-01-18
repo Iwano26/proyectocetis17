@@ -12,12 +12,35 @@ class BibliotecaController extends Controller
     /**
      * Muestra la lista de archivos en la biblioteca
      */
-    public function index()
+    public function index(Request $request)
     {
-        // Jalamos todos los registros de la tabla biblioteca
-        $archivos = Biblioteca::all();
-        
-        // Retornamos la vista principal de la biblioteca enviando los datos
+        // 1. Iniciamos la consulta (sin ejecutarla aún con all())
+        $query = Biblioteca::query();
+
+        // 2. Filtro por Buscador (Nombre del documento o Autor)
+        if ($request->filled('buscar')) {
+            $term = $request->input('buscar');
+            $query->where(function($q) use ($term) {
+                $q->where('nombre_doc', 'LIKE', "%{$term}%")
+                ->orWhere('autor', 'LIKE', "%{$term}%");
+            });
+        }
+
+        // 3. Filtro por Materia (si el usuario seleccionó una)
+        if ($request->filled('materia')) {
+            $query->where('materia', $request->input('materia'));
+        }
+
+        // 4. Ordenar por Fecha (más reciente o más antiguo)
+        if ($request->input('orden') == 'antiguo') {
+            $query->orderBy('created_at', 'asc');
+        } else {
+            $query->orderBy('created_at', 'desc'); // Por defecto los últimos subidos
+        }
+
+        // 5. Ejecutamos la consulta y enviamos los resultados
+        $archivos = $query->get();
+
         return view('biblioteca', compact('archivos'));
     }
 

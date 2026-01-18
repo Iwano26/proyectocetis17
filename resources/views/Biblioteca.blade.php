@@ -114,33 +114,61 @@
             </div>
         </div>
         
-        <div class="mb-3">
-            <input type="text" class="form-control form-control-lg shadow-sm" placeholder="Buscar documentos por nombre o autor...">
-        </div>
 
-        <div class="seccion-filtros shadow-sm">
-            <div class="row align-items-end">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label small fw-bold">Filtrar por Fecha:</label>
-                    <select class="form-select">
-                        <option value="">-- Seleccionar --</option>
-                        <option value="reciente">Más recientes</option>
-                        <option value="antiguo">Más antiguos</option>
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label small fw-bold">Materia Relacionada:</label>
-                    <select class="form-select">
-                        <option value="">-- Seleccionar Materia --</option>
-                        <option value="Programación">Programación</option>
-                        <option value="Soporte Técnico">Soporte Técnico</option>
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <button class="btn btn-dark w-100 fw-bold">APLICAR FILTROS</button>
+        {{-- FORMULARIO DE BÚSQUEDA Y FILTROS --}}
+        <form action="{{ route('biblioteca.index') }}" method="GET">
+            
+            {{-- Buscador Principal --}}
+            <div class="mb-3">
+                <div class="input-group shadow-sm">
+                    <input type="text" name="buscar" class="form-control form-control-lg" 
+                        placeholder="Buscar documentos por nombre o autor..." 
+                        value="{{ request('buscar') }}">
+                    <button class="btn btn-danger px-4" type="submit">
+                        <i class="bi bi-search"></i>
+                    </button>
                 </div>
             </div>
-        </div>
+
+            {{-- Cuadro de Filtros --}}
+            <div class="seccion-filtros shadow-sm">
+                <div class="row align-items-end">
+                    {{-- Filtro por Fecha --}}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label small fw-bold">Filtrar por Fecha:</label>
+                        <select name="orden" class="form-select">
+                            <option value="reciente" {{ request('orden') == 'reciente' ? 'selected' : '' }}>Más recientes</option>
+                            <option value="antiguo" {{ request('orden') == 'antiguo' ? 'selected' : '' }}>Más antiguos</option>
+                        </select>
+                    </div>
+
+                    {{-- Filtro por Materia --}}
+                    <div class="col-md-4 mb-3">
+                        <label class="form-label small fw-bold">Materia Relacionada:</label>
+                        <select name="materia" class="form-select">
+                            <option value="">-- Todas las Materias --</option>
+                            <option value="Programación" {{ request('materia') == 'Programación' ? 'selected' : '' }}>Programación</option>
+                            <option value="Soporte Técnico" {{ request('materia') == 'Soporte Técnico' ? 'selected' : '' }}>Soporte Técnico</option>
+                            <option value="Ofimática" {{ request('materia') == 'Ofimática' ? 'selected' : '' }}>Ofimática</option>
+                            <option value="Base de Datos" {{ request('materia') == 'Base de Datos' ? 'selected' : '' }}>Base de Datos</option>
+                        </select>
+                    </div>
+
+                    {{-- Botones de Acción --}}
+                    <div class="col-md-4 mb-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-dark w-100 fw-bold">APLICAR FILTROS</button>
+                            {{-- Botón para limpiar filtros --}}
+                            <a href="{{ route('biblioteca.index') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                                <i class="bi bi-arrow-clockwise"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+
 
         {{-- INICIO DEL BUCLE DE ARCHIVOS REALES --}}
         @forelse($archivos as $archivo)
