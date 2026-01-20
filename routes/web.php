@@ -38,6 +38,10 @@ Route::get('/resetpass', function () {
 
 Route::put('/resetpass', [ResetPasswordController2::class,'sendResetLinkEmail'])->name ('pass'); 
 
+Route::get('/cambiarpass', function () {    
+    return view('ResetPasswordViews/cambiarcontrasennia');
+});
+
 // --- RUTAS DE GESTIÓN (ADMINISTRACIÓN) ---
 Route::resource('gestioncurso', GestionCursoController::class)->only([
     'index',   // GET /gestioncurso (Listar)
@@ -62,8 +66,7 @@ Route::get('/gestionasesoria', function () {
     return view('GestionAsesoriaViews/asesoria');
 });
 
-Route::get('/principal', function () {
-    
+Route::get('/principal', function () {    
     return view('principal');
 });
 
@@ -136,9 +139,7 @@ Route::get('/agenda', function () {
 use App\Http\Controllers\MenuController;
 Route::get('/menu', [MenuController::class, 'index'])->name('menu')->middleware('auth');
 
-// --- RUTA CORREGIDA PARA BÚSQUEDA DE CURSOS ---
-// Antes tenías una función anónima que no enviaba datos.
-// Ahora apunta al controlador que SÍ envía la variable $cursos.
+
 Route::get('/curso', [BusquedaCursoController::class, 'index'])->name('busqueda.curso');
 
 // El nombre 'cursos.show' es el estándar para mostrar un recurso

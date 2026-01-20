@@ -40,14 +40,14 @@
         <p>Hemos recibido una solicitud para restablecer la contraseña de su cuenta de asesorías CETIS 17. Para completar el proceso de forma segura, haga clic en el botón a continuación:</p>
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="{{ env('APP_URL') }}/password/reset/{{$token}}" 
+            <a href="cetis17.test/cambiarpass" 
                style="background-color: #A31F2E; color: #ffffff; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block; border-radius: 5px; font-weight: bold; font-size: 16px;">
                 Restablecer Contraseña
             </a>
         </div>
         
         <p style="font-size: 14px; color: #666;">Si el botón no funciona o no se visualiza correctamente, puede copiar y pegar el siguiente enlace en la barra de direcciones de su navegador:</p>
-        <p style="font-size: 12px; word-break: break-all;"><a href="{{ env('APP_URL') }}/password/reset/{{$token}}">{{ env('APP_URL') }}/password/reset/{{$token}}</a></p>
+        <p style="font-size: 12px; word-break: break-all;"><a href="cetis17.test/cambiarpass">{{ env('APP_URL') }}/cambiarpass</a></p>
 
         <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
         
