@@ -136,6 +136,10 @@ Route::get('/agenda', function () {
     return view('Agenda');
 });
 
+Route::get('/vercurso', function () {
+    return view('CursosViews/vercurso');
+});
+
 use App\Http\Controllers\MenuController;
 Route::get('/menu', [MenuController::class, 'index'])->name('menu')->middleware('auth');
 

@@ -14,10 +14,8 @@
 </head>
 <body>
     
-
     @if (session('success'))
         <script>
-            // El script se ejecuta porque el Controller redirige aquí con la sesión 'success'
             Swal.fire({
                 icon: 'success',
                 title: '¡Registro Exitoso!',
@@ -25,7 +23,6 @@
                 confirmButtonText: 'Iniciar Sesión'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirige a la vista de Login después de que el usuario hace clic
                     window.location.href = "{{ url('/login') }}"; 
                 }
             });
@@ -62,11 +59,7 @@
                 <input type="text" name="telefono" placeholder="Número de Teléfono" maxlength="10">
                 @error('telefono') <div class="error-message">{{ $message }}</div> @enderror
 
-                <label for="rol">Rol</label>
-                <select name="rol">
-                    <option value="Estudiante">Estudiante</option> 
-                </select>
-                @error('rol') <div class="error-message">{{ $message }}</div> @enderror
+                <input type="hidden" name="rol" value="Estudiante">
 
                 <label for="contrasennia">Contraseña</label>
                 <input type="password" name="contrasennia" id="contrasennia" placeholder="Contraseña, min 8, Mayús/Minús/Número">
@@ -75,7 +68,6 @@
                 <label for="recontrasennia">Confirmar Contraseña</label>
                 <input type="password" name="recontrasennia" placeholder="Confirma tu Contraseña">
                 @error('recontrasennia') <div class="error-message">{{ $message }}</div> @enderror
-                
                 
                 <button type="submit" id="enviarFormulario">REGISTRAR</button>
                 
@@ -88,50 +80,24 @@
 
     <script>
         $(document).ready(function() {
-            // Requisitos de Contraseña: al menos 8 caracteres, una minúscula, una mayúscula y un número.
             const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
             
-            // --- MÉTODO DE VALIDACIÓN: Correo Institucional ---
-            $.validator.addMethod(
-                "correoInstitucional",
-                function(value, element) {
-                    const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
-                    if (this.optional(element)) {
-                        return true;
-                    }
-                    return regexCorreo.test(value);
-                },
-                "Correo inválido"
-            );
+            $.validator.addMethod("correoInstitucional", function(value, element) {
+                const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
+                return this.optional(element) || regexCorreo.test(value);
+            }, "Correo inválido");
 
-            // Método de validación para el formato de la contraseña 
-            $.validator.addMethod(
-                "regexContrasennia",
-                function(value, element) {
-                    if (this.optional(element)) {
-                        return true;
-                    }
-                    return regex.test(value);
-                },
-                "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número."
-            );
+            $.validator.addMethod("regexContrasennia", function(value, element) {
+                return this.optional(element) || regex.test(value);
+            }, "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número.");
 
-            // Método de validación para confirmar la contraseña
-            $.validator.addMethod(
-                "compararContrasennias",
-                function(value, element) {
-                    return value == $("#contrasennia").val();
-                }
-            );
+            $.validator.addMethod("compararContrasennias", function(value, element) {
+                return value == $("#contrasennia").val();
+            });
 
-            // Método de validación para el teléfono (10 dígitos)
-            $.validator.addMethod(
-                "telefonoValido",
-                function(value, element) {
-                    return this.optional(element) || /^\d{10}$/.test(value);
-                },
-                "El número de teléfono debe tener exactamente 10 dígitos."
-            );
+            $.validator.addMethod("telefonoValido", function(value, element) {
+                return this.optional(element) || /^\d{10}$/.test(value);
+            }, "El número de teléfono debe tener exactamente 10 dígitos.");
 
             $('#registroForm').validate({
                 rules: {
@@ -144,10 +110,11 @@
                         correoInstitucional: true 
                     },
                     telefono: { required: true, telefonoValido: true },
+                    // El campo 'rol' ya no necesita validación de usuario pero se deja por estructura
                     rol: { required: true },
                     contrasennia: {
                         required: true,                        
-                        minlength: 6, 
+                        minlength: 8, 
                         regexContrasennia: true
                     },
                     recontrasennia: {
@@ -165,7 +132,6 @@
                         correoInstitucional: "Correo inválido"
                     },
                     telefono: { required: "Favor de ingresar tu número de teléfono" },
-                    rol: { required: "Favor de seleccionar un rol" },
                     contrasennia: {
                         required: "Favor de ingresar una contraseña",                      
                         minlength: "Contraseña débil", 
@@ -179,11 +145,7 @@
                 errorElement: 'div', 
                 errorPlacement: function (error, element) {                
                     error.addClass('error-message'); 
-                    if (element.attr("name") == "rol" || element.attr("name") == "terminos") {
-                        error.insertAfter(element.parent());
-                    } else {
-                        error.insertAfter(element);
-                    }
+                    error.insertAfter(element);
                 },
                 submitHandler: function (form) {
                     form.submit();

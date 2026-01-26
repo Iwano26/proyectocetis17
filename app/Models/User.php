@@ -70,7 +70,8 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
-            'pass' => 'hashed', // Laravel tratará 'pass' como una contraseña cifrada
+            'pass' => 'hashed', 
+            'correo' => 'string',
         ];
     }
 }

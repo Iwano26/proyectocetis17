@@ -169,10 +169,11 @@
                             </div>
                         </div>
 
-                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            <a href="{{ route('cursos.show', $curso->id_curso) }}" class="btn btn-primary btn-sm mx-1">
-                                VER CURSO
+                  <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="/vercurso" class="btn btn-primary btn-sm mx-1">
+                            VER CURSO
                             </a>
+
 
                             <a href="{{ route('cursos.edit', $curso->id_curso) }}" class="btn btn-warning btn-sm mx-1 text-white">
                                 EDITAR

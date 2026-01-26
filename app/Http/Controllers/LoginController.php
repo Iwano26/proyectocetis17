@@ -36,19 +36,14 @@ public function login(Request $request)
         // Obtenemos el usuario que acaba de entrar
         $user = Auth::user();
 
-
-        // 4. Lógica de Redirección según el rol de tu DB
-        if ($user->rol === 'Administrador') {
-            return redirect()->intended('/principal');
-        } 
-        
-        // Si es Estudiante o Asesor (maestro), van a /menu
-        if ($user->rol === 'Estudiante' || $user->rol === 'Asesor') {
-            return redirect()->intended('/menu');
-        }
-
-        // Redirección por defecto si no coincide ninguno de los anteriores
-        return redirect()->intended('/home');
+        return match($user->rol){
+        'Administrador' => redirect('/principal')
+        ->with('bienvenido', $user->nombre),
+        'Estudiante' => redirect('/menu')
+        ->with('bienvenido', $user->nombre),
+        default => redirect('/home')
+         ->with('bienvenido', $user->nombre),
+        };                
     }
 
     // Error si fallan las credenciales

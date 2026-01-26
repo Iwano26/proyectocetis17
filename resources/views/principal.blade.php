@@ -147,12 +147,11 @@
         @auth
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle fw-bold text-cetis" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                    <i class="bi bi-person-circle me-1"></i>
-                    {{-- Usamos auth()->user() para llamar directamente al guard de autenticación --}}
-                    Bienvenido, {{ auth()->user()->nombre }}
+                    <i class="bi bi-person-circle me-1"></i>                    
+                    Bienvenido, {{ session('bienvenido') }}
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="navbarDropdown">
-                    <li class="px-3 py-2 small text-muted">Rol: {{ Auth::user()->rol }}</li>
+                    <li class="px-3 py-2 small text-muted">Rol: Administrador</li>
                     <li><hr class="dropdown-divider"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">

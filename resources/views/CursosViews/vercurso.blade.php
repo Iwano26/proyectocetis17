@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $curso->nombre }} | CETIS 17</title>
+    <title>CETIS 17 | Curso Base de Datos</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
@@ -13,13 +13,11 @@
             --cetis-rojo: #8C001A; 
             --cetis-primary: #8C001A;
         }
-        /* Aplicando la fuente Inter a todo el documento */
         body { 
             background-color: #f8f9fa; 
             font-family: 'Inter', sans-serif; 
         }
 
-        /* ESTILOS DE TU BUSCADOR (PARA MANTENER LA BARRA Y BOTÓN) */
         #menu-toggle-btn {
             position: fixed; top: 15px; left: 20px; z-index: 1040; 
             background-color: white; color: var(--cetis-rojo);
@@ -40,8 +38,6 @@
         .offcanvas-body .nav-link { color: #333; font-weight: 500; padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
         .offcanvas-body .nav-link:hover, .offcanvas-body .nav-link.active { background-color: var(--cetis-primary); color: white !important; }
 
-        /* --- NUEVOS ESTILOS DEL CONTENIDO --- */
-        
         .tarjeta-curso-interna {
             background-color: white; 
             border: 2px solid var(--cetis-rojo);
@@ -50,7 +46,6 @@
             margin-bottom: 15px;
         }
 
-        /* Menú de opciones a la izquierda */
         .opciones-curso .nav-link {
             color: #333;
             font-weight: 700;
@@ -73,7 +68,6 @@
             justify-content: center; color: white; margin-bottom: 15px;
         }
 
-        /* Formato de horarios solicitado */
         .formato-horario {
             display: inline-block;
             background-color: #eee;
@@ -126,8 +120,8 @@
         <div class="tarjeta-curso-interna shadow-sm bg-white mb-4">
             <div class="row align-items-center">
                 <div class="col-md-9">
-                    <h2 class="fw-bold m-0 text-uppercase">{{ $curso->nombre }}</h2>
-                    <p class="text-muted mb-0">Impartido por: <strong>{{ $curso->instructor }}</strong></p>
+                    <h2 class="fw-bold m-0 text-uppercase">ADMINISTRACIÓN DE BASES DE DATOS</h2>
+                    <p class="text-muted mb-0">Impartido por: </p>
                 </div>
                 <div class="col-md-3 text-md-end">
                     <span class="badge bg-success shadow-sm">ESTADO: ABIERTO</span>
@@ -152,14 +146,14 @@
                     <div class="row align-items-start">
                         <div class="col-md-8">
                             <div class="circulo-rojo-mini">
-                                <i class="bi bi-journal-text fs-5"></i>
+                                <i class="bi bi-database-fill-gear fs-5"></i>
                             </div>
-                            <h5 class="fw-bold text-uppercase mb-1">Tema: Cálculo de Límites</h5>
-                            <p class="text-muted small mb-0">Lugar: Aula 5 - Edificio Principal</p>
+                            <h5 class="fw-bold text-uppercase mb-1">Tema: Diseño Entidad-Relación</h5>
+                            <p class="text-muted small mb-0">Lugar: Centro de Cómputo B</p>
                             
                             <div class="mt-2">
-                                <div class="formato-horario">Miercoles-12:00</div>
-                                <div class="formato-horario">Viernes-11:00-13:00</div>
+                                <div class="formato-horario">Lunes-10:00</div>
+                                <div class="formato-horario">Martes-09:00-11:00</div>
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end mt-3 mt-md-0">
@@ -172,14 +166,14 @@
                     <div class="row align-items-start">
                         <div class="col-md-8">
                             <div class="circulo-rojo-mini">
-                                <i class="bi bi-journal-text fs-5"></i>
+                                <i class="bi bi-code-square fs-5"></i>
                             </div>
-                            <h5 class="fw-bold text-uppercase mb-1">Tema: Derivadas por Definición</h5>
-                            <p class="text-muted small mb-0">Lugar: Laboratorio de Cómputo</p>
+                            <h5 class="fw-bold text-uppercase mb-1">Tema: Consultas SQL Avanzadas (JOINS)</h5>
+                            <p class="text-muted small mb-0">Lugar: Aula de Medios 2</p>
                             
                             <div class="mt-2">
-                                <div class="formato-horario">Lunes-09:00</div>
-                                <div class="formato-horario">Jueves-14:00-15:00</div>
+                                <div class="formato-horario">Jueves-08:00</div>
+                                <div class="formato-horario">Viernes-08:00-10:00</div>
                             </div>
                         </div>
                         <div class="col-md-4 text-md-end mt-3 mt-md-0">

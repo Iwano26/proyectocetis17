@@ -108,7 +108,7 @@
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item me-3">
                         <span class="nav-link fw-bold text-dark">
-                            <i class="bi bi-person-check-fill text-success"></i> Hola, {{ $user->nombre }}
+                            <i class="bi bi-person-check-fill text-success"></i> Hola, {{ session('bienvenido') }}
                         </span>
                     </li>
 
@@ -125,7 +125,7 @@
     <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
         <div class="offcanvas-header">
             <h5 class="offcanvas-title fw-bold">
-            <i class="bi bi-person-circle me-2"></i> {{ $user->nombre }}
+            <i class="bi bi-person-circle me-2"></i> {{ session('bienvenido') }}    
             </h5>
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
@@ -155,7 +155,7 @@
 
     <header class="hero-section text-center">
         <div class="container">
-            <h1 class="display-3 fw-bolder mb-3">¡Bienvenido, {{ $user->nombre }}!</h1>
+            <h1 class="display-3 fw-bolder mb-3">¡Bienvenido,{{ session('bienvenido') }}!</h1>
             <p class="lead mb-5 opacity-75">Plataforma de Refuerzo Académico CETIS 17</p>
             <div class="d-flex justify-content-center gap-3">
                 <a href="/buscarcurso" class="btn btn-cetis-primary btn-lg fw-bold shadow-lg">Solicitar Asesoría</a>
