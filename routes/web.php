@@ -66,6 +66,10 @@ Route::get('/gestionasesoria', function () {
     return view('GestionAsesoriaViews/asesoria');
 });
 
+Route::get('/modificarperfil', function () {
+    return view('GestionUsuarioViews/perfil');
+});
+
 Route::get('/principal', function () {    
     return view('principal');
 });
