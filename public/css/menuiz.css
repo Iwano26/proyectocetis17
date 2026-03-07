@@ -1,0 +1,96 @@
+/* public/css/style.css */
+:root {
+    --cetis-primary: #8C001A;
+    --cetis-secondary: #004A77;
+    --cetis-light: #f8f9fa;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cetis-light);
+}
+
+.navbar-brand, .text-cetis {
+    color: var(--cetis-primary) !important;
+}
+
+.hero-section {
+    background: linear-gradient(135deg, var(--cetis-primary), #A61E34);
+    color: white;
+    padding: 100px 0;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+}
+
+.card {
+    border-radius: 15px;
+    border-left: 5px solid var(--cetis-primary);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--cetis-primary);
+    margin-bottom: 15px;
+}
+
+.btn-cetis-primary {
+    background-color: var(--cetis-primary);
+    border-color: var(--cetis-primary);
+    color: white;
+    border-radius: 50rem;
+    padding: 0.75rem 1.5rem;
+    transition: background-color 0.3s;
+}
+
+.btn-cetis-primary:hover {
+    background-color: #A61E34;
+    color: white;
+}
+
+#menu-toggle-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1040;
+    font-size: 1.5rem;
+    color: var(--cetis-primary);
+    background-color: white;
+    border: 2px solid var(--cetis-primary);
+    padding: 5px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#menu-toggle-btn:hover {
+    background-color: var(--cetis-primary);
+    color: white;
+}
+
+.offcanvas-header {
+    background-color: var(--cetis-primary);
+    color: white;
+}
+
+.offcanvas-header .btn-close {
+    filter: invert(1);
+}
+
+.offcanvas-body .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 8px;
+}
+
+.offcanvas-body .nav-link:hover, .offcanvas-body .nav-link.active {
+    background-color: var(--cetis-primary);
+    color: white;
+}
+

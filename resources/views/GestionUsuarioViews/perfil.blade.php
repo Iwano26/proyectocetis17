@@ -7,161 +7,120 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
-        /* Definición de la paleta de colores de CETIS 17 */
         :root {
-            --color-guinda: #8C2329;    /* Marrón rojizo principal del logo */
-            --color-guinda-hover: #731c21; /* Versión más oscura para hover de botones */
-            --color-guinda-focus: rgba(140, 35, 41, 0.25); /* Color de foco para inputs */
-            --color-dorado: #C4A77D;      /* Dorado claro para labels de campos */
-            --color-bg: #F8F9FA;          /* Fondo gris muy claro */
-            --color-card: #FFFFFF;        /* Fondo de la tarjeta */
+            --color-guinda: #8C2329;    /* Color principal DGETI */
+            --color-guinda-hover: #731c21;
+            --color-guinda-focus: rgba(140, 35, 41, 0.25);
+            --color-dorado: #C4A77D;      /* Color de acento del logo */
+            --color-bg: #f4f4f4;
         }
 
-        body { background-color: var(--color-bg); }
+        body { 
+            background-color: var(--color-bg);
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-        /* Estilos personalizados para inputs y labels */
+        .card {
+            border: none;
+            border-top: 5px solid var(--color-guinda);
+        }
+
         .form-label {
-            color: var(--color-dorado) !important;
-            font-weight: bold;
+            color: var(--color-dorado);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
         }
 
-        .form-control:focus, .input-group-text {
+        .form-control {
+            border-radius: 8px;
+            padding: 12px;
+        }
+
+        .form-control:focus {
             border-color: var(--color-guinda);
             box-shadow: 0 0 0 0.25rem var(--color-guinda-focus);
         }
 
-        .input-group-text {
-            background-color: var(--color-guinda);
-            color: #ffffff;
-            border-color: var(--color-guinda);
-        }
-
-        /* Estilos personalizados para botones */
-        .btn-custom {
+        .btn-save {
             background-color: var(--color-guinda);
             color: white;
-            border-color: var(--color-guinda);
+            padding: 12px 30px;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: 0.3s;
         }
-        
-        .btn-custom:hover, .btn-custom:focus {
+
+        .btn-save:hover {
             background-color: var(--color-guinda-hover);
             color: white;
-            border-color: var(--color-guinda-hover);
+            transform: translateY(-1px);
         }
 
-        /* Estilos específicos para la sección de avatar */
-        .avatar-upload {
-            position: relative;
-            max-width: 120px;
-            margin: 0 auto 20px;
-        }
-        .avatar-preview {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            border: 4px solid #fff;
-            box-shadow: 0px 2px 10px rgba(0,0,0,0.1);
-            object-fit: cover;
-        }
-
-        /* Ajuste de color para el título del panel */
-        .card-header .bi-person-gear {
+        .section-title {
             color: var(--color-guinda);
+            font-weight: 800;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-bottom: 25px;
         }
-
-        /* Ajuste de color para títulos de sección secundarios */
-        h6.text-guinda {
-            color: var(--color-guinda) !important;
-            font-weight: bold;
-        }
-
     </style>
 </head>
 <body>
 
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow-sm rounded-3">
-                <div class="card-header bg-white py-3">
-                    <h5 class="mb-0 fw-bold"><i class="bi bi-person-gear me-2"></i>Edición de Perfil</h5>
-                </div>
-                <div class="card-body p-4">
-                    <form>
-                        <div class="text-center mb-4">
-                            <div class="avatar-upload">
-                                <img id="imgPreview" src="https://ui-avatars.com/api/?name=CETIS+17&background=8C2329&color=fff&size=128" class="avatar-preview" alt="Avatar">
-                            </div>
-                            <label for="fileUpload" class="btn btn-outline-guinda btn-sm">
-                                <i class="bi bi-camera me-1"></i> Actualizar Foto
-                            </label>
-                            <input type="file" id="fileUpload" class="d-none" accept="image/*">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow p-4">
+                <h4 class="section-title text-center">
+                    <i class="bi bi-person-check-fill me-2"></i>Actualizar Información
+                </h4>
+                
+                <form>
+                    <div class="mb-4">
+                        <label for="fullName" class="form-label">Nombre Completo</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-person text-muted"></i></span>
+                            <input type="text" id="fullName" class="form-control border-start-0" placeholder="Ej. Juan Pérez García" required>
                         </div>
+                    </div>
 
-                        <hr class="my-4 text-muted">
-
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Nombre completo</label>
-                                <input type="text" class="form-control" value="">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Matrícula o Nombre de usuario</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                    <input type="text" class="form-control" value="">
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Correo electrónico institucional</label>
-                                <input type="email" class="form-control" value="">
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label">Biografía o Información adicional</label>
-                                <textarea class="form-control" rows="3" placeholder="Comparte algo sobre ti..."></textarea>
-                            </div>
+                    <div class="mb-4">
+                        <label for="email" class="form-label">Correo Electrónico</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+                            <input type="email" id="email" class="form-control border-start-0" placeholder="usuario@cetis17.edu.mx" required>
                         </div>
+                    </div>
 
-                        <h6 class="mt-4 mb-3 text-guinda">Actualización de Contraseña</h6>
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Contraseña actual</label>
-                                <input type="password" class="form-control" placeholder="••••••••">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Nueva contraseña</label>
-                                <input type="password" class="form-control" placeholder="••••••••">
-                            </div>
+                    <div class="mb-4">
+                        <label for="phone" class="form-label">Teléfono de Contacto</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+                            <input type="tel" id="phone" class="form-control border-start-0" placeholder="248 000 0000">
                         </div>
+                    </div>
 
-                        <div class="d-flex justify-content-end gap-2 mt-5">
-                            <button type="button" class="btn btn-light px-4">Cancelar</button>
-                            <button type="submit" class="btn btn-custom px-4">Guardar Cambios</button>
-                        </div>
-                    </form>
-                </div>
+                    <hr class="my-4">
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-save">
+                            Guardar Cambios
+                        </button>
+                        <button type="button" class="btn btn-link text-muted text-decoration-none">
+                            Cancelar y Volver
+                        </button>
+                    </div>
+                </form>
             </div>
+            <p class="text-center mt-4 text-muted" style="font-size: 0.8rem;">
+                © 2026 CETIS 17 - Dirección General de Educación Tecnológica Industrial
+            </p>
         </div>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<script>
-    const fileInput = document.getElementById('fileUpload');
-    const imgPreview = document.getElementById('imgPreview');
-
-    fileInput.addEventListener('change', function() {
-        const file = this.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                imgPreview.setAttribute('src', e.target.result);
-            }
-            reader.readAsDataURL(file);
-        }
-    });
-</script>
-
 </body>
 </html>
