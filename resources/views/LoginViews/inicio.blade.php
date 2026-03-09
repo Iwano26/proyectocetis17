@@ -19,65 +19,57 @@
                     <p style="color:red;">{{ $errors->first('login') }}</p>
                 @endif
             </div>
-            <form id="loginForm" method="POST" action="{{ route('login.post') }}">
-                @csrf
-                <label for="usuario">Correo </label>
-                <input type="text" id="correo" name="correo" placeholder="Ingresa tu correo institucional">
-                @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
+         <form id="loginForm" method="POST" action="{{ route('login.post') }}">
+    @csrf
+    <label for="correo">Correo </label>
+    <input type="text" id="correo" name="correo" placeholder="Ingresa tu correo institucional" value="{{ old('correo') }}">
+    @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
 
-                <label for="password">Contraseña </label>
-                <input type="password" id="pass" name="pass" placeholder="Ingresa tu contraseña">
-                @error('pass') <small style="color:red;">{{ $message }}</small> @enderror
+    <label for="pass">Contraseña </label>
+    <input type="password" id="pass" name="pass" placeholder="Ingresa tu contraseña">
+    @error('pass') <small style="color:red;">{{ $message }}</small> @enderror
 
-                <button type="submit">ACCESO</button>
-                <div class="links">
-                    <a href="/register">¿No tienes una cuenta?</a>
-                    <a href="/resetpass">¿Se te olvidó tu contraseña?</a>
-                </div>
-            </form>
-        </div>
+    <button type="submit">ACCESO</button>
+    <div class="links">
+        <a href="/register">¿No tienes una cuenta?</a>
+        <a href="/resetpass">¿Se te olvidó tu contraseña?</a>
+    </div>
+</form>
     </div>
 
     <script>
-    document.getElementById("loginForm").addEventListener("submit", function(e) {
-        const correo = document.getElementById("correo").value.trim();
-        const pass = document.getElementById("pass").value;
+document.getElementById("loginForm").addEventListener("submit", function(e) {
+    const correo = document.getElementById("correo").value.trim();
+    const pass = document.getElementById("pass").value;
 
-        const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
-        const regexPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
-        
-        // Función para mostrar la alerta con el estilo solicitado
-        function mostrarAlerta(titulo, texto) {
-            Swal.fire({
-                icon: 'error', 
-                title: titulo,
-                text: texto,
-                confirmButtonText: 'OK',
-            });
-        }
+    const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
+    
+    function mostrarAlerta(titulo, texto) {
+        Swal.fire({
+            icon: 'error', 
+            title: titulo,
+            text: texto,
+            confirmButtonText: 'OK',
+        });
+    }
 
-        // --- 1. Alerta de Campos Vacíos ---
-        if (correo === "" || pass === "") {
-            e.preventDefault();
-            mostrarAlerta('Campos Vacíos', 'Debes ingresar tu correo y contraseña.');
-            return;
-        }
+    // 1. Solo validamos que no estén vacíos
+    if (correo === "" || pass === "") {
+        e.preventDefault();
+        mostrarAlerta('Campos Vacíos', 'Debes ingresar tu correo y contraseña.');
+        return;
+    }
 
-        // --- 2. Alerta de Correo Inválido (Dominio @cetis17.edu.mx) ---
-        if (!regexCorreo.test(correo)) {
-            e.preventDefault();
-            mostrarAlerta('Correo inválido', 'Debes ingresar un correo institucional con dominio @cetis17.edu.mx');
-            return;
-        }
-        
-        // --- 3. Alerta de Contraseña Inválida (Simula 'Contraseña incorrecta') ---
-        if (!regexPassword.test(pass)) {
-            e.preventDefault();
-            mostrarAlerta('Error de Acceso', 'Correo o contraseña incorrecto.');
-            return;
-        }     
-
-    });
+    // 2. Validar dominio institucional
+    if (!regexCorreo.test(correo)) {
+        e.preventDefault();
+        mostrarAlerta('Correo inválido', 'Usa tu correo institucional @cetis17.edu.mx');
+        return;
+    }
+    
+    // ELIMINAMOS la validación regexPassword aquí. 
+    // Deja que el servidor (Laravel) decida si la contraseña es correcta o no.
+});
 </script>
 </body>
 </html>

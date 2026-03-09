@@ -10,9 +10,13 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {
-        //
+    ->withMiddleware(function (Middleware $middleware) {
+        // Configuramos las redirecciones globales
+        $middleware->redirectTo(
+            guests: '/login',    // Si no está logueado y quiere entrar a una ruta protegida
+            users: '/principal'  // Si ya está logueado e intenta ir al login
+        );
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
+    ->withExceptions(function (Exceptions $exceptions) {
         //
     })->create();

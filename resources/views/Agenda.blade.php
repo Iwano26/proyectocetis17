@@ -43,7 +43,7 @@ $eventos_calendario = [
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div class="d-flex align-items-center">
             <i class="bi bi-calendar3 fs-2 me-3 text-cetis"></i>
-            <h2 class="fw-bold mb-0">Agenda de {{session('bienvenido') }}</h2>
+            <h2 class="fw-bold mb-0">Agenda de {{ Auth::user()->nombre }}</h2>
         </div>
         <span class="badge bg-danger">Sesión activa como: {{ Auth::user()->rol }}</span>
     </div>

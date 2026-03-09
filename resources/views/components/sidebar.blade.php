@@ -5,7 +5,7 @@
 <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title fw-bold"> 
-            <i class="bi bi-person-circle me-2"></i> {{session('bienvenido') }}    
+            <i class="bi bi-person-circle me-2"></i> {{ Auth::user()->nombre}}    
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
     </div>

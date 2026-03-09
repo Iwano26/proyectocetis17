@@ -34,7 +34,7 @@
               <div class="mb-3">
                 <label>Fecha:</label>
                 <input type="date" name="fecha_registro" placeholder="0000/00/00" class="form-control" required>
-              </div>                                        
+              </div> 
               <div class="text-end">
                 <button type="submit" class="btn btn-danger">Registrar</button>
               </div>
@@ -58,11 +58,11 @@
                   <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>                  
+              <tbody> 
                 <tr>
                   <td>Manual de PHP</td>
                   <td><a href="#" target="_blank">Ver Enlace</a></td>
-                  <td>2024/10/01</td>                   
+                  <td>2024/10/01</td> 
                   <td>
                     <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de querer eliminar este archivo?');">Eliminar</a>
                     <a href="#" class="btn btn-warning btn-sm text-white">Editar</a>
@@ -71,7 +71,7 @@
                 <tr>
                   <td>Guía de Bootstrap</td>
                   <td><a href="#" target="_blank">Ver Enlace</a></td>
-                  <td>2024/09/15</td>                   
+                  <td>2024/09/15</td> 
                   <td>
                     <a href="#" class="btn btn-danger btn-sm" onclick="return confirm('¿Estás seguro de querer eliminar este archivo?');">Eliminar</a>
                     <a href="#" class="btn btn-warning btn-sm text-white">Editar</a>

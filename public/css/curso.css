@@ -1,0 +1,68 @@
+/* Variables de color CETIS */
+:root { 
+    --cetis-rojo: #8C001A; 
+    --cetis-primary: #8C001A;
+}
+
+body { 
+    background-color: #f8f9fa; 
+    font-family: 'Inter', sans-serif; 
+}
+
+/* Contenedor principal para no chocar con el Sidebar */
+.main-content {
+    margin-left: 75px; /* Ajusta según el ancho de tu sidebar colapsado */
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.text-cetis { color: var(--cetis-rojo); }
+
+.navbar-cursos {
+    background-color: white !important; 
+    border-bottom: 1px solid #dee2e6;
+    min-height: 70px; 
+    padding-left: 85px; 
+}
+
+/* Estilos de Filtros */
+.seccion-filtros { 
+    background-color: #ffffff; 
+    padding: 20px; 
+    border-radius: 12px; 
+    margin-bottom: 25px; 
+    border: 1px solid #eee;
+}
+
+/* Estilos de Tarjetas de Curso */
+.tarjeta-curso {
+    background-color: white; 
+    border: 1px solid #e0e0e0;
+    border-radius: 12px; 
+    padding: 20px; 
+    margin-bottom: 15px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tarjeta-curso:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.icono-curso {
+    width: 50px; 
+    height: 50px; 
+    background-color: var(--cetis-rojo);
+    border-radius: 10px; 
+    margin-right: 20px; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    color: white;
+    flex-shrink: 0;
+}
+
+.badge-estado {
+    font-size: 0.7rem;
+    padding: 5px 10px;
+}

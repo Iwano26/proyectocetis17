@@ -10,19 +10,22 @@ class Usuario extends Authenticatable
     use Notifiable;
 
     protected $table = 'persona';
-    protected $primaryKey = 'correo';
+    protected $primaryKey = 'correo'; 
+    public $incrementing = false;     
+    protected $keyType = 'string';    
+    public $timestamps = false; 
 
     protected $fillable = [
         'correo','pass','nombre','apellidoPa','apellidoMa','rol','telefono','activo'
     ];
 
-    protected $hidden =[
-        'pass'
+    protected $hidden = [
+        'pass', 
+        'remember_token'
     ];
 
     public function getAuthPassword()
     {
         return $this->pass;
     }
-
 }
