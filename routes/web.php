@@ -10,7 +10,8 @@ use App\Http\Controllers\{
     GestionCursoController, 
     BusquedaCursoController, 
     BibliotecaController, 
-    CursoController
+    CursoController,
+    PerfilController
 };
 
 // --- PÚBLICAS ---
@@ -38,7 +39,11 @@ Route::middleware(['auth'])->group(function () {
         return view('principal');
     })->name('principal');
 
-    Route::resource('gestioncurso', GestionCursoController::class)->except(['show', 'edit', 'create']);
+
+   Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+
+    Route::resource('gestioncurso', GestionCursoController::class);
+
     Route::resource('gestionusuario', GestionUsuarioController::class);
 
     Route::controller(BibliotecaController::class)->group(function () {

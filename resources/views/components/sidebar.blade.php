@@ -28,6 +28,9 @@
             <a class="nav-link {{ request()->is('biblioteca') ? 'active' : '' }}" href="/biblioteca">
                 <i class="bi bi-archive me-3"></i> Biblioteca Digital
             </a>
+            <a class="nav-link {{ request()->is('perfil') ? 'active' : '' }}" href="/perfil">
+                <i class="bi bi-person me-3"></i> Mi perfil
+            </a>
         </div>
         
         <hr class="my-4">

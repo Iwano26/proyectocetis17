@@ -28,6 +28,7 @@ class User extends Authenticatable
         'apellidoPa',
         'apellidoMa',
         'rol',
+        'telefono',
         'pass', // Usamos 'pass' según tu esquema
     ];
 
