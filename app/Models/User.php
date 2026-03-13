@@ -19,6 +19,8 @@ class User extends Authenticatable
     public $incrementing = false; // Como es un string, desactivamos el autoincremento
     protected $keyType = 'string';
 
+    public $timestamps = false;
+
     /**
      * Los atributos que se pueden asignar masivamente.
      */

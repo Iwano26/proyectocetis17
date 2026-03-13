@@ -41,6 +41,8 @@ Route::middleware(['auth'])->group(function () {
 
 
    Route::get('/perfil', [PerfilController::class, 'index'])->name('perfil.index');
+    Route::get('/perfil/editar', [PerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil/actualizar', [PerfilController::class, 'update'])->name('perfil.update');
 
     Route::resource('gestioncurso', GestionCursoController::class);
 

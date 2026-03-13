@@ -4,31 +4,70 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Log;
 
 class PerfilController extends Controller
 {
     /**
-     * Muestra el perfil del usuario autenticado.
+     * Muestra la vista del perfil (Vista de Lectura)
      */
     public function index()
     {
-        // Obtenemos el usuario que inició sesión
         $user = Auth::user();
-
-        // Validamos que exista una sesión activa
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Debes iniciar sesión primero.');
-        }
-
-        // Concatenamos el nombre completo para enviarlo a la vista
+        // Concatenamos para la vista principal de perfil
         $nombreCompleto = "{$user->nombre} {$user->apellidoPa} {$user->apellidoMa}";
 
-        // Retornamos la vista en la carpeta específica que solicitaste
         return view('ModPerfilViews.perfil', [
             'nombre'   => $nombreCompleto,
             'correo'   => $user->correo,
-            // Si el campo teléfono no existe en tu tabla, puedes dejarlo como 'No disponible'
-            'telefono' => $user->telefono ?? 'No registrado' 
+            'telefono' => $user->telefono ?? 'No registrado'
         ]);
     }
+
+    /**
+     * Muestra el formulario para editar (Vista de Edición)
+     */
+    public function edit()
+    {
+        $user = Auth::user();
+        return view('ModPerfilViews.edit', compact('user'));
+    }
+
+    /**
+     * Procesa la actualización de los datos
+     */
+    public function update(Request $request)
+{
+    $request->validate([
+        'nombre'     => 'required|string|max:255',
+        'apellidoPa' => 'required|string|max:255',
+        'apellidoMa' => 'required|string|max:255',
+        'telefono'   => 'required|digits:10',
+    ]);
+
+    try {
+        // Buscamos al usuario por correo
+        $user = User::where('correo', Auth::user()->correo)->first();
+
+        if ($user) {
+            $user->nombre     = $request->nombre;
+            $user->apellidoPa = $request->apellidoPa;
+            $user->apellidoMa = $request->apellidoMa;
+            $user->telefono   = $request->telefono;
+            
+            // Ahora que timestamps = false, esto no buscará 'updated_at'
+            $user->save(); 
+
+            return redirect()->route('perfil.index')
+                ->with('mensaje', 'Perfil actualizado exitosamente.')
+                ->with('sessionInsertado', 'true');
+        }
+    } catch (\Exception $e) {
+        return redirect()->back()
+            ->withInput()
+            ->with('mensaje', 'Error al actualizar: ' . $e->getMessage())
+            ->with('sessionInsertado', 'false');
+    }
+}
 }
