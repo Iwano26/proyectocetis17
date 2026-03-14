@@ -72,19 +72,23 @@ class BibliotecaController extends Controller
         return view('BibliotecaViews.EditarArchivo', compact('archivo', 'materias'));
     }
 
-    public function update(Request $request, $id)
-    {
-        $archivo = Biblioteca::where('id_biblioteca', $id)->firstOrFail();
-        $curso = DB::table('curso')->where('id_curso', $request->id_curso)->first();
+ public function update(Request $request, $id)
+{
+    // Buscamos el archivo por su llave primaria real
+    $archivo = Biblioteca::where('id_biblioteca', $id)->firstOrFail();
+    
+    // Validamos que el curso exista antes de intentar leer su propiedad "materia"
+    $curso = DB::table('curso')->where('id_curso', $request->id_curso)->first();
 
-        $archivo->update([
-            'nombre_doc' => $request->nombre_doc,
-            'id_curso'   => $request->id_curso,
-            'materia'    => $curso->materia
-        ]);
+    $archivo->update([
+        'nombre_doc' => $request->nombre_doc,
+        'id_curso'   => $request->id_curso,
+        // Si por alguna razón no encuentra el curso, mantiene la materia que ya tenía
+        'materia'    => $curso ? $curso->materia : $archivo->materia 
+    ]);
 
-        return redirect()->route('biblioteca.index')->with('success', 'Información actualizada.');
-    }
+    return redirect()->route('biblioteca.index')->with('success', 'Información actualizada correctamente.');
+}
 
     public function destroy($id)
     {
