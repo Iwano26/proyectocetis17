@@ -161,22 +161,30 @@
                     </div>
 
                     <div class="col-md-4 border-start border-end">
-                        <h6 class="fw-bold small text-muted text-uppercase mb-2"><i class="bi bi-clock-history me-1"></i> Horarios:</h6>
-                        <div class="row g-1">
-                            @if(isset($curso->horarios) && $curso->horarios->count() > 0)
-                                @foreach($curso->horarios as $horario)
-                                    <div class="col-12">
-                                        <span class="badge bg-light text-dark border w-100 text-start">
-                                            <i class="bi bi-calendar3 me-1"></i> {{ $horario->dia }}: 
-                                            <span class="fw-normal">{{ date('H:i', strtotime($horario->hora_inicio)) }} - {{ date('H:i', strtotime($horario->hora_fin)) }}</span>
+                    <h6 class="fw-bold small text-muted text-uppercase mb-2">
+                        <i class="bi bi-clock-history me-1"></i> Horarios registrados:
+                    </h6>
+                    <div class="row g-2">
+                        @if(isset($curso->horarios) && $curso->horarios->count() > 0)
+                            @foreach($curso->horarios as $horario)
+                                <div class="col-12">
+                                    <div class="p-2 border rounded bg-light d-flex justify-content-between align-items-center">
+                                        <span class="small fw-bold text-dark">
+                                            <i class="bi bi-calendar-event text-danger me-1"></i> {{ $horario->dia_semana }}
+                                        </span>
+                                        <span class="badge bg-white text-dark border fw-normal">
+                                            {{ date('g:i A', strtotime($horario->hora_inicio)) }} - {{ date('g:i A', strtotime($horario->hora_fin)) }}
                                         </span>
                                     </div>
-                                @endforeach
-                            @else
-                                <span class="text-muted small">Sin horarios definidos</span>
-                            @endif
-                        </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="col-12">
+                                <p class="text-muted small italic m-0">No hay horarios asignados</p>
+                            </div>
+                        @endif
                     </div>
+                </div>
 
                     <div class="col-md-3 text-md-end d-flex flex-column justify-content-between">
                         <div>
