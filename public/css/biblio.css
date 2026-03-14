@@ -1,0 +1,107 @@
+/* Variables Globales */
+:root {
+    --cetis-rojo: #8C001A;
+    --cetis-primary: #8C001A;
+    --cetis-secondary: #004A77;
+    --cetis-light: #f8f9fa;
+}
+
+/* Estilos Generales */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cetis-light);
+}
+
+.navbar-brand, .text-cetis {
+    color: var(--cetis-primary) !important;
+    font-weight: bold;
+}
+
+/* Botón Menú Flotante */
+#menu-toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 1040;
+    background-color: white;
+    color: var(--cetis-rojo);
+    border: 2px solid var(--cetis-rojo);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+#menu-toggle-btn:hover {
+    background-color: var(--cetis-primary);
+    color: white;
+}
+
+/* Barra Superior (Navbar) */
+.navbar {
+    background-color: white !important;
+    border-bottom: 1px solid #dee2e6;
+    min-height: 70px;
+    padding-left: 80px;
+}
+
+/* Offcanvas (Sidebar) */
+.offcanvas-header {
+    background-color: var(--cetis-primary);
+    color: white;
+}
+
+.offcanvas-header .btn-close {
+    filter: invert(1);
+}
+
+.offcanvas-body .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.offcanvas-body .nav-link:hover, 
+.offcanvas-body .nav-link.active {
+    background-color: var(--cetis-primary);
+    color: white !important;
+}
+
+/* Sección de Biblioteca y Filtros */
+.seccion-filtros {
+    background-color: #eee;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.tarjeta-archivo {
+    background-color: white;
+    border: 2px solid var(--cetis-rojo);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: transform 0.3s;
+}
+
+.tarjeta-archivo:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.icono-archivo {
+    width: 55px;
+    height: 55px;
+    background-color: #eee;
+    border-radius: 8px;
+    margin-right: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: var(--cetis-rojo);
+}
