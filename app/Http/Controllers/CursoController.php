@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Curso;
+use App\Models\Horario;
 
 class CursoController extends Controller
 {
@@ -24,7 +26,10 @@ class CursoController extends Controller
             $materia = $request->input('materia');
             $dia = $request->input('dia');
 
-            $query = DB::table($this->tableName);
+            //$query = DB::table($this->tableName)->select('curso.*'); // Seleccionamos solo campos de curso para evitar conflictos con horarios
+            // En lugar de \App\Models\Curso::with...
+            $query = Curso::query()->with('horarios');
+            
 
             // Filtro por nombre o materia
             if ($buscar) {

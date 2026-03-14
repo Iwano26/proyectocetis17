@@ -143,48 +143,68 @@
 
         <div id="contenedor-cursos">
             @forelse($cursos as $curso)
-                <div class="tarjeta-curso shadow-sm">
-                    <div class="row align-items-center">
-                        <div class="col-md-6 d-flex align-items-center">
-                            <div class="circulo-rojo">
-                                <i class="bi bi-book fs-4"></i>
-                            </div>
-                            <div>
-                                <h4 class="mb-0 fw-bold">{{ $curso->nombre_curso }}</h4>
-                                <p class="mb-1 text-muted">{{ $curso->materia }}</p>
-                                
-                                @php
-                                    $claseEstado = ($curso->estado == 'ACTIVO') ? 'bg-success' : 'bg-secondary';
-                                @endphp
-                                <span class="badge {{ $claseEstado }} rounded-pill">
-                                    ESTADO: {{ $curso->estado }}
-                                </span>
+                <div class="tarjeta-curso shadow-sm mb-4">
+                <div class="row">
+                    <div class="col-md-5 d-flex">
+                        <div class="circulo-rojo">
+                            <i class="bi bi-book fs-4"></i>
+                        </div>
+                        <div>
+                            <h4 class="mb-0 fw-bold text-uppercase">{{ $curso->nombre_curso }}</h4>
+                            <p class="text-muted mb-2"><i class="bi bi-tags-fill me-1"></i>{{ $curso->materia }}</p>
+                            
+                            <p class="small text-secondary mb-0">
+                                <strong>Descripción:</strong><br>
+                                {{ Str::limit($curso->descripcion ?? 'Sin descripción disponible.', 100) }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4 border-start border-end">
+                        <h6 class="fw-bold small text-muted text-uppercase mb-2"><i class="bi bi-clock-history me-1"></i> Horarios:</h6>
+                        <div class="row g-1">
+                            @if(isset($curso->horarios) && $curso->horarios->count() > 0)
+                                @foreach($curso->horarios as $horario)
+                                    <div class="col-12">
+                                        <span class="badge bg-light text-dark border w-100 text-start">
+                                            <i class="bi bi-calendar3 me-1"></i> {{ $horario->dia }}: 
+                                            <span class="fw-normal">{{ date('H:i', strtotime($horario->hora_inicio)) }} - {{ date('H:i', strtotime($horario->hora_fin)) }}</span>
+                                        </span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <span class="text-muted small">Sin horarios definidos</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    <div class="col-md-3 text-md-end d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="form-check form-switch d-inline-block align-middle">
+                                <input class="form-check-input" type="checkbox" role="switch" id="switch-{{ $curso->id_curso }}" 
+                                    {{ $curso->estado == 'ACTIVO' ? 'checked' : '' }} style="cursor: pointer; width: 2.5em; height: 1.25em;">
+                                <label class="form-check-label small fw-bold ms-2" for="switch-{{ $curso->id_curso }}">
+                                    {{ $curso->estado }}
+                                </label>
                             </div>
                         </div>
-                        
-                        <div class="col-md-2 text-center">
-                            <div class="p-2 border rounded bg-light">
-                                <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.7rem;">Horas Disp.</small>
-                                <span class="fs-4 fw-bold text-dark">{{ $curso->horas_disponibles }}</span>
+
+                        <div class="mt-3">
+                            <div class="btn-group w-100">
+                                <a href="{{ route('cursos.edit', $curso->id_curso) }}" class="btn btn-outline-warning btn-sm fw-bold">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="/vercurso" class="btn btn-outline-primary btn-sm fw-bold">
+                                    VER
+                                </a>
+                                <button class="btn btn-danger btn-sm fw-bold {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
+                                    UNIRSE
+                                </button>
                             </div>
-                        </div>
-
-                  <div class="col-md-4 text-md-end mt-3 mt-md-0">
-                            <a href="/vercurso" class="btn btn-primary btn-sm mx-1">
-                            VER CURSO
-                            </a>
-
-
-                            <a href="{{ route('cursos.edit', $curso->id_curso) }}" class="btn btn-warning btn-sm mx-1 text-white">
-                                EDITAR
-                            </a>
-
-                            <a href="#" class="btn btn-success btn-sm mx-1 {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
-                                UNIRSE
-                            </a>
                         </div>
                     </div>
                 </div>
+            </div>
             @empty
                 <div class="alert alert-warning text-center">
                     No se encontraron cursos que coincidan con la búsqueda.

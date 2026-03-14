@@ -8,6 +8,8 @@ class Curso extends Model
     //hacemos  referencia a la tabla usuarios
 
     protected $table = 'curso';
+    protected $primaryKey = 'id_curso';
+    public $timestamps = false;
 
   //hacer que los campos sean editables
 
@@ -26,6 +28,11 @@ class Curso extends Model
     public function correoPersona()
     {
        return $this->belongsToMany(Usuario::class, 'persona', 'correo', 'correo_persona');
+    }
+
+    public function horarios() {
+        
+        return $this->hasMany(Horario::class, 'id_curso');
     }
 
 }
