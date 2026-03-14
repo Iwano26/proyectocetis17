@@ -33,7 +33,6 @@
     </nav>
 
     <div class="container-fluid mt-4 px-4">
-        {{-- Mensaje de Éxito --}}
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('success') }}
@@ -51,12 +50,11 @@
             </div>
         </div>
 
-        {{-- FORMULARIO DE BÚSQUEDA Y FILTROS --}}
         <form action="{{ route('biblioteca.index') }}" method="GET">
             <div class="mb-3">
                 <div class="input-group shadow-sm">
                     <input type="text" name="buscar" class="form-control form-control-lg" 
-                           placeholder="Buscar documentos por nombre o autor..." 
+                           placeholder="Buscar documentos..." 
                            value="{{ request('buscar') }}">
                     <button class="btn btn-danger px-4" type="submit">
                         <i class="bi bi-search"></i>
@@ -88,7 +86,7 @@
                     <div class="col-md-4 mb-3">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-dark w-100 fw-bold">APLICAR FILTROS</button>
-                            <a href="{{ route('biblioteca.index') }}" class="btn btn-outline-secondary" title="Limpiar filtros">
+                            <a href="{{ route('biblioteca.index') }}" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-clockwise"></i>
                             </a>
                         </div>
@@ -97,7 +95,6 @@
             </div>
         </form>
 
-        {{-- BUCLE DE ARCHIVOS --}}
         @forelse($archivos as $archivo)
             <div class="tarjeta-archivo shadow-sm">
                 <div class="row align-items-center">
@@ -109,7 +106,7 @@
                             <h4 class="mb-0 fw-bold">{{ $archivo->nombre_doc }}</h4>
                             <p class="mb-0 text-muted small">Subido el: <b>{{ $archivo->created_at->format('d/m/Y') }}</b></p>
                             <p class="mb-0 text-muted small">Materia: <b>{{ $archivo->materia }}</b></p>
-                            <p class="mb-0 text-muted small">Por: <b>{{ $archivo->autor }}</b></p>
+                            {{-- Se eliminó la línea de autor para evitar errores SQL --}}
                         </div>
                     </div>
                     <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
@@ -119,10 +116,10 @@
                         <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">
                             <i class="bi bi-download"></i> DESCARGAR
                         </a>
-                        <a href="{{ route('biblioteca.edit', $archivo->id) }}" class="btn btn-warning btn-sm text-white mx-1">
+                        <a href="{{ route('biblioteca.edit', $archivo->id_biblioteca) }}" class="btn btn-warning btn-sm text-white mx-1">
                             <i class="bi bi-pencil"></i> MODIFICAR
                         </a>
-                        <form action="{{ route('biblioteca.eliminar', $archivo->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('biblioteca.eliminar', $archivo->id_biblioteca) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('¿Estás seguro?')">

@@ -8,23 +8,15 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     <style>
-        :root { 
-            --cetis-rojo: #8C001A; 
-        }
+        :root { --cetis-rojo: #8C001A; }
         body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
-
         .form-container {
             background-color: white;
             border-radius: 15px;
             padding: 30px;
-            border-left: 5px solid #ffc107; /* Color amarillo para indicar edición */
+            border-left: 5px solid #8C001A;
         }
-
-        .btn-update {
-            background-color: #ffc107;
-            color: #000;
-            font-weight: bold;
-        }
+        .btn-update { background-color: #8C001A; color: #ffffff; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -40,7 +32,6 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-8 col-lg-6">
-                
                 <div class="form-container shadow">
                     <div class="text-center mb-4">
                         <i class="bi bi-pencil-square display-4 text-warning"></i>
@@ -48,9 +39,9 @@
                         <p class="text-muted">Modifica los detalles del documento seleccionado.</p>
                     </div>
 
-                    <form action="{{ route('biblioteca.actualizar', $archivo->id) }}" method="POST">
+                    <form action="{{ route('biblioteca.actualizar', $archivo->id_biblioteca) }}" method="POST">
                         @csrf
-                        @method('PUT') {{-- IMPORTANTE: Indica que es una actualización --}}
+                        @method('PUT')
 
                         <div class="mb-4">
                             <label for="nombre_doc" class="form-label fw-bold">Título del Archivo</label>
@@ -73,7 +64,7 @@
 
                         <div class="alert alert-info small">
                             <i class="bi bi-info-circle me-2"></i>
-                            El archivo físico (PDF) no se puede cambiar desde aquí para mantener la integridad. Si deseas cambiar el archivo, por favor elimínalo y sube uno nuevo.
+                            El archivo físico (PDF) no se puede cambiar desde aquí para mantener la integridad.
                         </div>
 
                         <hr class="my-4">
@@ -84,12 +75,10 @@
                             </button>
                             <a href="{{ route('biblioteca.index') }}" class="btn btn-outline-secondary">Cancelar</a>
                         </div>
-
                     </form>
                 </div>
             </div>
         </div>
     </div>
-
 </body>
 </html>

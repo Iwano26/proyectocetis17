@@ -9,14 +9,18 @@ class Biblioteca extends Model
 {
     use HasFactory;
 
-    // Indicamos el nombre exacto de la tabla que hiciste en DBeaver
     protected $table = 'biblioteca';
+    protected $primaryKey = 'id_biblioteca'; // Ajustado según tu imagen de tabla
 
-    // Lista de campos que se pueden llenar (coinciden con tu SQL)
     protected $fillable = [
+        'id_curso',
+        'correo_usuario',
         'nombre_doc',
         'materia',
         'ruta_archivo',
         'autor'
     ];
+
+    // Si tu tabla tiene created_at y updated_at, déjalo en true
+    public $timestamps = true; 
 }
