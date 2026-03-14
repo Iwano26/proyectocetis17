@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class CursoController extends Controller
 {
@@ -61,56 +62,49 @@ class CursoController extends Controller
     /**
      * Guarda un nuevo curso y sus múltiples horarios.
      */
-  public function store(Request $request)
+    public function store(Request $request)
     {
-        // 1. Validar datos
-        $request->validate([
-            'nombre_curso' => 'required|string|max:60',
-            'descripcion' => 'nullable|string|max:50',
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'materia' => 'required|string|max:50',
-            'horas_disponibles' => 'required|integer|min:1|max:24', // Asumiendo min 1 y max 24 por el valor que tenías
-            'estado' => 'required|in:ACTIVO,INACTIVO,COMPLETADO', // Usando los valores ENUM de tu tabla
-            'acceso' => 'required|string|max:20',
-        ]);
-        
-        $Mensaje = "";
-        try{
-            // 2. Insertar en la tabla 'curso'
-            DB::connection('mysql')
-                ->table($this->tableName)
-                ->insert([
-                    'nombre_curso' => $request->nombre_curso,
-                    'descripcion' => $request->descripcion,
-                    'fecha_inicio' => $request->fecha_inicio,
-                    'fecha_fin' => $request->fecha_fin,
-                    'materia' => $request->materia,
-                    'horas_disponibles' => $request->horas_disponibles,
-                    'estado' => $request->estado,
-                    'acceso' => $request->acceso,
-                    // id_curso es AUTO_INCREMENT, no se inserta
-                ]);
+        // 1. Quita el dd($request->all()); para que pueda seguir el proceso
 
-            $Mensaje = "Curso registrado exitosamente: " . $request->nombre_curso;
+        try {
+            DB::beginTransaction();
 
-            return redirect()->route($this->indexRoute)
-                ->with('sessionInsertado', 'true')
-                ->with('mensaje', $Mensaje);
+            $id_nuevo_curso = DB::table($this->tableName)->insertGetId([
+                'correo_persona'    => Auth::user()->correo, // <--- FALTABA ESTE
+                'nombre_curso'      => $request->nombre_curso,
+                // 'descripcion'       => $request->descripcion,
+                'fecha_inicio'      => $request->fecha_inicio,
+                'fecha_fin'         => $request->fecha_fin,
+                'materia'           => $request->materia,
+                'horas_disponibles' => $request->horas_disponibles,
+                'estado'            => $request->estado,
+                // 'acceso'            => $request->acceso ?? '', // Si es null, manda cadena vacía
+            ]);
 
-        } catch (\Exception $e){
-            Log::error('Error al registrar curso: ' . $e->getMessage());
-            $Mensaje = "Hubo un error al registrar el curso: " . $e->getMessage();
-            
-            return redirect()->back()
-                ->withInput()
-                ->with('sessionInsertado', 'false')
-                ->with('mensaje', $Mensaje);
+            // 2. Insertar horarios (asegúrate que el nombre de la tabla sea curso_horarios)
+            if ($request->has('dia')) {
+                foreach ($request->dia as $key => $valorDia) {
+                    DB::table('curso_horarios')->insert([
+                        'id_curso'    => $id_nuevo_curso,
+                        'dia_semana'  => $valorDia,
+                        'hora_inicio' => $request->hora_inicio[$key],
+                        'hora_fin'    => $request->hora_fin[$key],
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route($this->indexRoute)->with('mensaje', 'Curso guardado con éxito');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            // Esto te dirá el error exacto en pantalla si algo falla
+            return "Error al guardar: " . $e->getMessage(); 
         }
     }
 
     /**
-     * Mostrar formulario de edición con datos reales y horarios.
+     * Mostrar formulario de edición con horarios reales.
      */
     public function edit($id) {
         $curso = DB::table($this->tableName)->where($this->primaryKey, $id)->first();
@@ -119,11 +113,8 @@ class CursoController extends Controller
             return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
         }
 
-        // Renombrar id_curso a id para que coincida con tu blade (route('cursos.update', $curso->id))
-        $curso->id = $curso->id_curso;
-
-        // Cargar horarios reales de la base de datos
-        $curso->horarios = DB::table('horarios')->where('id_curso', $id)->get();
+        // Importante: usar el nombre correcto de tu tabla 'curso_horarios'
+        $curso->horarios = DB::table('curso_horarios')->where('id_curso', $id)->get();
 
         return view('CursosViews/editar', compact('curso'));
     }

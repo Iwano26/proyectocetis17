@@ -57,8 +57,17 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/biblioteca/actualizar/{id}', 'update')->name('biblioteca.actualizar');
     });
 
+
+    // Rutas para cursos
     Route::get('/buscarcurso', [CursoController::class, 'index'])->name('cursos.index');
-    Route::resource('cursos', CursoController::class)->except(['index']);
+    // Esta es la ruta que procesa el formulario
+    Route::post('/cursos/guardar', [CursoController::class, 'store'])->name('cursos.store');
+    // Esta es la que muestra el formulario
+    Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.create');
+    // Si usas rutas individuales, asegúrate de que tengan el ->name()
+    Route::get('/cursos/{id}/editar', [CursoController::class, 'edit'])->name('cursos.edit');
+    Route::put('/cursos/{id}', [CursoController::class, 'update'])->name('cursos.update');
+
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
     Route::get('/agenda', function () { return view('Agenda'); });
 });

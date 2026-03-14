@@ -43,6 +43,9 @@
                     <form action="{{ route('cursos.store') }}" method="POST">
                         @csrf
                         
+
+                        {{-- Agrega esto dentro de tu formulario --}}
+                        <input type="hidden" name="correo_persona" value="profe@cetis17.edu.mx">
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label fw-bold small">Nombre del Curso:</label>
@@ -89,16 +92,78 @@
                             </div>
                         </div>
 
+                        <hr class="my-4">
+                        <h5 class="fw-bold mb-3" style="color: var(--cetis-rojo);">
+                            <i class="bi bi-clock-fill me-2"></i>CONFIGURAR HORARIOS
+                        </h5>
+
+                        <div id="contenedor-horarios">
+                            <div class="row g-2 mb-2 horario-fila">
+                                <div class="col-md-4">
+                                    <label class="form-label small fw-bold">Día:</label>
+                                    <select name="dia[]" class="form-select" required>
+                                        <option value="Lunes">Lunes</option>
+                                        <option value="Martes">Martes</option>
+                                        <option value="Miércoles">Miércoles</option>
+                                        <option value="Jueves">Jueves</option>
+                                        <option value="Viernes">Viernes</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Hora Inicio:</label>
+                                    <input type="time" name="hora_inicio[]" class="form-control" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label small fw-bold">Hora Fin:</label>
+                                    <input type="time" name="hora_fin[]" class="form-control" required>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" class="btn btn-outline-danger w-100 btn-quitar" style="display:none;">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btn-agregar-horario" class="btn btn-sm btn-outline-secondary mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Agregar otro día
+                        </button>
+
                         <div class="mt-4 d-flex justify-content-end">
                             <a href="{{ route('cursos.index') }}" class="btn btn-light me-2 fw-bold">CANCELAR</a>
                             <button type="submit" class="btn btn-danger px-4 fw-bold shadow">PUBLICAR CURSO</button>
                         </div>
                     </form>
+
+                    <script>
+                        document.getElementById('btn-agregar-horario').addEventListener('click', function() {
+                            // Clonar la primera fila de horario
+                            const contenedor = document.getElementById('contenedor-horarios');
+                            const nuevaFila = contenedor.querySelector('.horario-fila').cloneNode(true);
+                            
+                            // Limpiar los valores de los inputs clonados
+                            nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
+                            
+                            // Mostrar el botón de eliminar en la nueva fila
+                            const btnQuitar = nuevaFila.querySelector('.btn-quitar');
+                            btnQuitar.style.display = 'block';
+                            
+                            // Agregar evento para eliminar la fila
+                            btnQuitar.addEventListener('click', function() {
+                                nuevaFila.remove();
+                            });
+                            
+                            contenedor.appendChild(nuevaFila);
+                        });
+                    </script>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 
 </body>
 </html>
