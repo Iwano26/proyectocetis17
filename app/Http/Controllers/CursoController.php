@@ -72,13 +72,13 @@ class CursoController extends Controller
             $id_nuevo_curso = DB::table($this->tableName)->insertGetId([
                 'correo_persona'    => Auth::user()->correo, // <--- FALTABA ESTE
                 'nombre_curso'      => $request->nombre_curso,
-                // 'descripcion'       => $request->descripcion,
+                'descripcion'       => $request->descripcion,
                 'fecha_inicio'      => $request->fecha_inicio,
                 'fecha_fin'         => $request->fecha_fin,
                 'materia'           => $request->materia,
                 'horas_disponibles' => $request->horas_disponibles,
                 'estado'            => $request->estado,
-                // 'acceso'            => $request->acceso ?? '', // Si es null, manda cadena vacía
+                'acceso'            => $request->password_curso ?? '', // Si es null, manda cadena vacía
             ]);
 
             // 2. Insertar horarios (asegúrate que el nombre de la tabla sea curso_horarios)
@@ -107,13 +107,14 @@ class CursoController extends Controller
      * Mostrar formulario de edición con horarios reales.
      */
     public function edit($id) {
+        // Buscamos el curso por id_curso
         $curso = DB::table($this->tableName)->where($this->primaryKey, $id)->first();
 
         if (!$curso) {
             return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
         }
 
-        // Importante: usar el nombre correcto de tu tabla 'curso_horarios'
+        // Obtenemos los horarios de la tabla correcta
         $curso->horarios = DB::table('curso_horarios')->where('id_curso', $id)->get();
 
         return view('CursosViews/editar', compact('curso'));
@@ -122,28 +123,35 @@ class CursoController extends Controller
     /**
      * Actualiza curso y reemplaza horarios.
      */
-    public function update(Request $request, $id) { 
+    public function update(Request $request, $id)
+    {
+        // 1. Quita el dd($request->all()); cuando estés listo para probar
+        
         try {
             DB::beginTransaction();
 
-            // Actualizar datos básicos
+            // 2. Actualizar el curso (Verifica los nombres de tus columnas)
             DB::table($this->tableName)
-                ->where($this->primaryKey, $id)
+                ->where('id_curso', $id) // <-- Asegúrate que sea id_curso
                 ->update([
-                    'nombre_curso' => $request->nombre_curso,
-                    'materia'      => $request->materia,
-                    'estado'       => $request->estado,
-                    'password_curso' => ($request->estado == 'Cerrado') ? $request->password_curso : null,
+                    'nombre_curso'      => $request->nombre_curso,
+                    'descripcion'       => $request->descripcion,
+                    'materia'           => $request->materia,
+                    'estado'            => $request->estado,
+                    'acceso'            => $request->password_curso ?? '',
+                    'fecha_inicio'   => $request->fecha_inicio,
+                    'fecha_fin'      => $request->fecha_fin,
                 ]);
 
-            // Actualizar horarios: Lo más limpio es borrar los anteriores y crear los nuevos
-            DB::table('horarios')->where('id_curso', $id)->delete();
-            
+            // 3. Gestionar Horarios (La técnica de "Borrar y Reinsertar")
+            // Es más fácil borrar los horarios viejos y meter los nuevos que intentar editarlos uno por uno
+            DB::table('curso_horarios')->where('id_curso', $id)->delete();
+
             if ($request->has('dia')) {
-                foreach ($request->dia as $key => $val) {
-                    DB::table('horarios')->insert([
+                foreach ($request->dia as $key => $valorDia) {
+                    DB::table('curso_horarios')->insert([
                         'id_curso'    => $id,
-                        'dia'         => $request->dia[$key],
+                        'dia_semana'  => $valorDia, // Verifica si es 'dia' o 'dia_semana' en tu DB
                         'hora_inicio' => $request->hora_inicio[$key],
                         'hora_fin'    => $request->hora_fin[$key],
                     ]);
@@ -151,12 +159,11 @@ class CursoController extends Controller
             }
 
             DB::commit();
-            return redirect()->route('cursos.index')->with('success', 'Curso creado exitosamente');
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso actualizado con éxito');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error en update: ' . $e->getMessage());
-            return back()->with('mensaje', 'Error al actualizar.');
+            return "Error al actualizar: " . $e->getMessage();
         }
     }
 

@@ -28,7 +28,7 @@
                     </h4>
                 </div>
                 <div class="card-body p-4">
-                    <form action="{{ route('cursos.update', $curso->id) }}" method="POST">
+                    <form action="{{ route('cursos.update', $curso->id_curso) }}" method="POST">
                         @csrf
                         @method('PUT')
                         
@@ -38,6 +38,11 @@
                                 <input type="text" name="nombre_curso" class="form-control" value="{{ $curso->nombre_curso }}" required>
                             </div>
                             
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold small">Descripción del Curso:</label>
+                                <textarea name="descripcion" class="form-control" rows="3" placeholder="¿De qué trata el curso?">{{ $curso->descripcion ?? '' }}</textarea>
+                            </div>
+
                             <div class="col-md-3">
                                 <label class="form-label fw-bold small">Materia:</label>
                                 <select name="materia" class="form-select" required>
@@ -87,7 +92,7 @@
                                     <label class="form-label small">Día:</label>
                                     <select name="dia[]" class="form-select" required>
                                         @foreach(['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes'] as $dia)
-                                            <option value="{{ $dia }}" {{ $horario->dia == $dia ? 'selected' : '' }}>{{ $dia }}</option>
+                                            <option value="{{ $dia }}" {{ $horario->dia_semana == $dia ? 'selected' : '' }}>{{ $dia }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -126,12 +131,14 @@
     const inputPass = document.getElementById('input-password');
 
     function actualizarInterfazEstado() {
-    if (selectorEstado.value === 'Cerrado') {
-            contenedorPass.style.display = 'block'; // Esto lo muestra correctamente en la fila
+        // Si el estado es 'Cerrado', pedimos contraseña
+        if (selectorEstado.value === 'Cerrado') {
+            contenedorPass.style.display = 'block';
             inputPass.setAttribute('required', 'required');
         } else {
             contenedorPass.style.display = 'none';
             inputPass.removeAttribute('required');
+            inputPass.value = ''; // Limpiamos si se vuelve a abrir
         }
     }
 

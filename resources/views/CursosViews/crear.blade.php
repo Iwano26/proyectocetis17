@@ -57,9 +57,9 @@
                                 <input type="text" name="materia" class="form-control" placeholder="Ej: Programacion" value="{{ old('materia') }}" required maxlength="50">
                             </div>
 
-                            <div class="col-12">
-                                <label class="form-label fw-bold small">Descripción:</label>
-                                <textarea name="descripcion" class="form-control" rows="2" placeholder="Pequeña descripcion del curso" maxlength="50">{{ old('descripcion') }}</textarea>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label fw-bold small">Descripción del Curso:</label>
+                                <textarea name="descripcion" class="form-control" rows="3" placeholder="¿De qué trata el curso?">{{ $curso->descripcion ?? '' }}</textarea>
                             </div>
 
                             <div class="col-md-3">
@@ -93,41 +93,41 @@
                         </div>
 
                         <hr class="my-4">
-                        <h5 class="fw-bold mb-3" style="color: var(--cetis-rojo);">
-                            <i class="bi bi-clock-fill me-2"></i>CONFIGURAR HORARIOS
-                        </h5>
-
-                        <div id="contenedor-horarios">
-                            <div class="row g-2 mb-2 horario-fila">
-                                <div class="col-md-4">
-                                    <label class="form-label small fw-bold">Día:</label>
-                                    <select name="dia[]" class="form-select" required>
-                                        <option value="Lunes">Lunes</option>
-                                        <option value="Martes">Martes</option>
-                                        <option value="Miércoles">Miércoles</option>
-                                        <option value="Jueves">Jueves</option>
-                                        <option value="Viernes">Viernes</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-bold">Hora Inicio:</label>
-                                    <input type="time" name="hora_inicio[]" class="form-control" required>
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label small fw-bold">Hora Fin:</label>
-                                    <input type="time" name="hora_fin[]" class="form-control" required>
-                                </div>
-                                <div class="col-md-2 d-flex align-items-end">
-                                    <button type="button" class="btn btn-outline-danger w-100 btn-quitar" style="display:none;">
-                                        <i class="bi bi-trash"></i>
-                                    </button>
-                                </div>
-                            </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold m-0 small"><i class="bi bi-clock me-2"></i>GESTIONAR HORARIOS</h5>
+                            <button type="button" id="agregar-horario" class="btn btn-sm btn-outline-dark fw-bold">
+                                <i class="bi bi-plus-lg"></i> AÑADIR OTRO DÍA
+                            </button>
                         </div>
 
-                        <button type="button" id="btn-agregar-horario" class="btn btn-sm btn-outline-secondary mt-2">
-                            <i class="bi bi-plus-circle me-1"></i> Agregar otro día
-                        </button>
+
+                        <div id="contenedor-horarios">
+                        <div class="row g-2 mb-2 fila-horario"> 
+                            <div class="col-md-4">
+                                <label class="form-label small fw-bold">Día:</label>
+                                <select name="dia[]" class="form-select" required>
+                                    <option value="Lunes">Lunes</option>
+                                    <option value="Martes">Martes</option>
+                                    <option value="Miércoles">Miércoles</option>
+                                    <option value="Jueves">Jueves</option>
+                                    <option value="Viernes">Viernes</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Hora Inicio:</label>
+                                <input type="time" name="hora_inicio[]" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-bold">Hora Fin:</label>
+                                <input type="time" name="hora_fin[]" class="form-control" required>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="button" class="btn btn-outline-danger w-100 eliminar-fila">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
                         <div class="mt-4 d-flex justify-content-end">
                             <a href="{{ route('cursos.index') }}" class="btn btn-light me-2 fw-bold">CANCELAR</a>
@@ -136,26 +136,48 @@
                     </form>
 
                     <script>
-                        document.getElementById('btn-agregar-horario').addEventListener('click', function() {
-                            // Clonar la primera fila de horario
-                            const contenedor = document.getElementById('contenedor-horarios');
-                            const nuevaFila = contenedor.querySelector('.horario-fila').cloneNode(true);
-                            
-                            // Limpiar los valores de los inputs clonados
-                            nuevaFila.querySelectorAll('input').forEach(input => input.value = '');
-                            
-                            // Mostrar el botón de eliminar en la nueva fila
-                            const btnQuitar = nuevaFila.querySelector('.btn-quitar');
-                            btnQuitar.style.display = 'block';
-                            
-                            // Agregar evento para eliminar la fila
-                            btnQuitar.addEventListener('click', function() {
-                                nuevaFila.remove();
+                        document.addEventListener('DOMContentLoaded', function() {
+                        const btnAgregar = document.getElementById('agregar-horario');
+                        const contenedorHorarios = document.getElementById('contenedor-horarios');
+
+                        // Lógica para añadir horarios
+                        if (btnAgregar && contenedorHorarios) {
+                            btnAgregar.addEventListener('click', function() {
+                                // Buscamos la fila con la clase correcta
+                                const filas = document.querySelectorAll('.fila-horario');
+                                
+                                if (filas.length > 0) {
+                                    const nuevaFila = filas[0].cloneNode(true);
+                                    
+                                    // Limpiar los datos de la nueva fila
+                                    nuevaFila.querySelectorAll('input').forEach(i => i.value = '');
+                                    nuevaFila.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+                                    
+                                    // Asegurarnos de que el botón de eliminar sea visible en las nuevas filas
+                                    const btnEliminar = nuevaFila.querySelector('.eliminar-fila');
+                                    if(btnEliminar) btnEliminar.style.display = 'block';
+                                    
+                                    contenedorHorarios.appendChild(nuevaFila);
+                                }
                             });
-                            
-                            contenedor.appendChild(nuevaFila);
+                        }
+
+                        // Lógica para eliminar (Delegación de eventos)
+                        document.addEventListener('click', function(e) {
+                            // Detecta si el clic fue en el botón de eliminar o en su icono
+                            if (e.target.closest('.eliminar-fila')) {
+                                const filas = document.querySelectorAll('.fila-horario');
+                                if (filas.length > 1) {
+                                    e.target.closest('.fila-horario').remove();
+                                } else {
+                                    alert("Mínimo un día de horario es requerido.");
+                                }
+                            }
                         });
+                    });
                     </script>
+
+                    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
                 </div>
             </div>
