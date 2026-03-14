@@ -1,0 +1,52 @@
+/* Variables de Estilo */
+:root { 
+    --cetis-rojo: #8C001A; 
+    --cetis-warning-bg: #fff3cd;
+    --cetis-warning-border: #ffeeba;
+}
+
+/* Estilos de Base */
+body { 
+    background-color: #f8f9fa; 
+    font-family: 'Inter', sans-serif; 
+}
+
+/* Contenedor del Formulario */
+.form-container {
+    background-color: white;
+    border-radius: 15px;
+    padding: 30px;
+    border-top: 5px solid var(--cetis-rojo); /* Variación para distinguir de 'Subir' */
+}
+
+/* Botón Personalizado */
+.btn-cetis {
+    background-color: var(--cetis-rojo);
+    color: white;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-cetis:hover {
+    background-color: #6a0014;
+    color: white;
+    box-shadow: 0 4px 12px rgba(106, 0, 20, 0.2);
+}
+
+/* Iconos y Grupos de Entrada */
+.input-group-text {
+    background-color: #f8f9fa;
+    color: var(--cetis-rojo);
+}
+
+/* Alerta Informativa */
+.alert-warning {
+    background-color: var(--cetis-warning-bg);
+    border: 1px solid var(--cetis-warning-border);
+    color: #856404;
+    border-radius: 10px;
+}
+
+.navbar-brand:hover {
+    opacity: 0.8;
+}

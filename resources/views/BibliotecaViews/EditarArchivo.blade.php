@@ -8,27 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
-    <style>
-        :root { --cetis-rojo: #8C001A; }
-        body { background-color: #f8f9fa; font-family: 'Inter', sans-serif; }
-        .form-container {
-            background-color: white;
-            border-radius: 15px;
-            padding: 30px;
-        }
-        .btn-cetis {
-            background-color: var(--cetis-rojo);
-            color: white;
-            font-weight: bold;
-        }
-        .btn-cetis:hover {
-            background-color: #6a0014;
-            color: white;
-        }
-        .input-group-text {
-            background-color: #f8f9fa;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ asset('css/editar_archivo.css') }}">
 </head>
 <body>
 
@@ -51,7 +31,6 @@
                         <p class="text-muted">Modifica la información del recurso digital.</p>
                     </div>
 
-                    {{-- Formulario apuntando a la ruta con id_biblioteca --}}
                     <form action="{{ route('biblioteca.actualizar', $archivo->id_biblioteca) }}" method="POST">
                         @csrf
                         @method('PUT')
@@ -81,7 +60,7 @@
 
                         <div class="alert alert-warning small border-0 shadow-sm">
                             <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            Solo puedes editar el nombre y la materia. Para cambiar el PDF, debes eliminarlo y subirlo nuevamente.
+                            Solo puedes editar el nombre y la materia. Para cambiar el archivo físico, es necesario eliminarlo y subir uno nuevo.
                         </div>
 
                         <hr class="my-4">
@@ -92,7 +71,6 @@
                             </button>
                             <a href="{{ route('biblioteca.index') }}" class="btn btn-outline-secondary">Cancelar</a>
                         </div>
-
                     </form>
                 </div>
 
