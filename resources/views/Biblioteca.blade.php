@@ -18,16 +18,22 @@
     
     <x-sidebar />
 
-    <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Sistema de Asesorías</a>
-            <div class="collapse navbar-collapse">
-                <ul class="navbar-nav ms-auto">
+   <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">Sistema de Asesorías</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                {{-- Solo visible para Administradores --}}
+                @if(Auth::user()->rol === 'Administrador')
                     <li class="nav-item"><span class="nav-link fw-bold text-danger">ADMINISTRACIÓN:</span></li>
                     <li class="nav-item"><a class="nav-link text-dark" href="/gestioncurso">Cursos</a></li>
                     <li class="nav-item"><a class="nav-link text-dark fw-bold" href="#">Biblioteca</a></li>
                     <li class="nav-item"><a class="nav-link text-dark" href="/gestionusuario">Usuarios</a></li>
-                </ul>
+                @else
+                    {{-- Opciones para Alumnos y Asesores (opcional) --}}
+                    <li class="nav-item"><a class="nav-link text-dark fw-bold" href="/biblioteca">Biblioteca</a></li>
+                @endif
+            </ul>
             </div>
         </div>
     </nav>
@@ -109,24 +115,28 @@
                             {{-- Se eliminó la línea de autor para evitar errores SQL --}}
                         </div>
                     </div>
-                    <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
-                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-info btn-sm text-white mx-1">
-                            <i class="bi bi-eye"></i> VER
-                        </a>
-                        <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">
-                            <i class="bi bi-download"></i> DESCARGAR
-                        </a>
-                        <a href="{{ route('biblioteca.edit', $archivo->id_biblioteca) }}" class="btn btn-warning btn-sm text-white mx-1">
-                            <i class="bi bi-pencil"></i> MODIFICAR
-                        </a>
-                        <form action="{{ route('biblioteca.eliminar', $archivo->id_biblioteca) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('¿Estás seguro?')">
-                                <i class="bi bi-trash"></i> ELIMINAR
-                            </button>
-                        </form>
-                    </div>
+                 <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+    <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-info btn-sm text-white mx-1">
+        <i class="bi bi-eye"></i> VER
+    </a>
+    <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" download="{{ $archivo->nombre_doc }}" class="btn btn-primary btn-sm mx-1">
+        <i class="bi bi-download"></i> DESCARGAR
+    </a>
+
+    {{-- Solo Administradores (y quizás Asesores) pueden editar/borrar --}}
+    @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
+        <a href="{{ route('biblioteca.edit', $archivo->id_biblioteca) }}" class="btn btn-warning btn-sm text-white mx-1">
+            <i class="bi bi-pencil"></i> MODIFICAR
+        </a>
+        <form action="{{ route('biblioteca.eliminar', $archivo->id_biblioteca) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button type="submit" class="btn btn-danger btn-sm mx-1" onclick="return confirm('¿Estás seguro?')">
+                <i class="bi bi-trash"></i> ELIMINAR
+            </button>
+        </form>
+    @endif
+</div>
                 </div>
             </div>
         @empty

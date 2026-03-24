@@ -63,7 +63,7 @@
                                 <i class="bi bi-gear-fill me-2"></i> Configurar Perfil
                                </a>
                                 
-                                <a href="{{ url('/home') }}" class="btn btn-cetis-primary fw-bold shadow-sm">
+                                <a href="{{ url('/principal') }}" class="btn btn-cetis-primary fw-bold shadow-sm">
                                     <i class="bi bi-arrow-left me-2"></i> Volver al Inicio
                                 </a>
                             </div>
