@@ -1,68 +1,110 @@
-/* Variables de color CETIS */
-:root { 
-    --cetis-rojo: #8C001A; 
+/* Variables Globales CETIS */
+:root {
+    --cetis-rojo: #8C001A;
     --cetis-primary: #8C001A;
+    --cetis-secondary: #004A77;
+    --cetis-light: #f8f9fa;
 }
 
-body { 
-    background-color: #f8f9fa; 
-    font-family: 'Inter', sans-serif; 
+/* Estilos Generales */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--cetis-light);
 }
 
-/* Contenedor principal para no chocar con el Sidebar */
-.main-content {
-    margin-left: 75px; /* Ajusta según el ancho de tu sidebar colapsado */
-    padding: 20px;
+/* Botón Menú Flotante (Ajustado) */
+#menu-toggle-btn {
+    position: fixed;
+    top: 15px;
+    left: 20px;
+    z-index: 1040;
+    background-color: white;
+    color: var(--cetis-rojo);
+    border: 2px solid var(--cetis-rojo);
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 1.5rem;
+    cursor: pointer;
     transition: all 0.3s;
 }
 
-.text-cetis { color: var(--cetis-rojo); }
-
-.navbar-cursos {
-    background-color: white !important; 
-    border-bottom: 1px solid #dee2e6;
-    min-height: 70px; 
-    padding-left: 85px; 
-}
-
-/* Estilos de Filtros */
-.seccion-filtros { 
-    background-color: #ffffff; 
-    padding: 20px; 
-    border-radius: 12px; 
-    margin-bottom: 25px; 
-    border: 1px solid #eee;
-}
-
-/* Estilos de Tarjetas de Curso */
-.tarjeta-curso {
-    background-color: white; 
-    border: 1px solid #e0e0e0;
-    border-radius: 12px; 
-    padding: 20px; 
-    margin-bottom: 15px;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.tarjeta-curso:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-}
-
-.icono-curso {
-    width: 50px; 
-    height: 50px; 
-    background-color: var(--cetis-rojo);
-    border-radius: 10px; 
-    margin-right: 20px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
+#menu-toggle-btn:hover {
+    background-color: var(--cetis-primary);
     color: white;
-    flex-shrink: 0;
 }
 
-.badge-estado {
-    font-size: 0.7rem;
-    padding: 5px 10px;
+/* Navbar Superior */
+.navbar {
+    background-color: white !important;
+    border-bottom: 1px solid #dee2e6;
+    min-height: 70px;
+    padding-left: 85px; /* Espacio para el botón flotante */
+}
+
+.navbar-brand {
+    color: var(--cetis-primary) !important;
+    font-weight: bold;
+}
+
+/* Sidebar (Offcanvas) - Estilo Biblioteca */
+.offcanvas-header {
+    background-color: var(--cetis-primary) !important; /* Rojo intenso */
+    color: white !important;
+}
+
+/* Corrección del botón cerrar (X) en el sidebar */
+.offcanvas-header .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+    opacity: 0.8;
+}
+
+.offcanvas-body .nav-link {
+    color: #333;
+    font-weight: 500;
+    padding: 12px 15px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+}
+
+/* Estilo para el link activo y hover (Rojo CETIS) */
+.offcanvas-body .nav-link:hover, 
+.offcanvas-body .nav-link.active {
+    background-color: var(--cetis-primary) !important;
+    color: white !important;
+}
+
+.offcanvas-body .nav-link i {
+    font-size: 1.2rem;
+}
+
+/* Tarjetas de Curso/Archivo */
+.tarjeta-curso, .tarjeta-archivo {
+    background-color: white;
+    border: 2px solid var(--cetis-rojo);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.tarjeta-curso:hover, .tarjeta-archivo:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(140, 0, 26, 0.1);
+}
+
+/* Iconos circulares */
+.circulo-rojo, .icono-archivo {
+    width: 55px;
+    height: 55px;
+    background-color: var(--cetis-light);
+    border-radius: 8px;
+    margin-right: 20px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cetis-rojo);
+    font-size: 1.5rem;
 }
