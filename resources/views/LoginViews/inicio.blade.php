@@ -32,7 +32,7 @@
     <button type="submit">ACCESO</button>
     <div class="links">
         <a href="/register">¿No tienes una cuenta?</a>
-        <a href="/resetpass">¿Se te olvidó tu contraseña?</a>
+        <a href="/olvido-contrasennia">¿Se te olvidó tu contraseña?</a>
     </div>
 </form>
     </div>

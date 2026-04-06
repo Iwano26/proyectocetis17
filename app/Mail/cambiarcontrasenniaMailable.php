@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Address;
 use Illuminate\Mail\Mailables\Content;
@@ -13,28 +12,33 @@ use Illuminate\Queue\SerializesModels;
 class cambiarcontrasenniaMailable extends Mailable
 {
     use Queueable, SerializesModels;
-    private $nombreCompleto;
-    private $token;
+    
+    public $nombreCompleto;
+    public $token;
 
-    public function __construct($nombrecompleto, $token)
+    public function __construct($nombre, $token)
     {
-        $this->nombreCompleto = $nombrecompleto;
+        // Asignamos las variables que vienen del controlador
+        $this->nombreCompleto = $nombre;
         $this->token = $token;
     }
 
     /**
-     * Get the message envelope.
+     * Definición del Sobre (Remitente y Asunto)
      */
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address(env("MAIL_FROM_ADDRESS"),'Tomás González'),
-            subject: 'Cambiar contraseña',
+            from: new Address(
+                config('mail.from.address'), 
+                config('mail.from.name')
+            ),
+            subject: 'Recuperación de Contraseña - Asesorías CETIS 17',
         );
     }
 
     /**
-     * Get the message content definition.
+     * Definición del Contenido (Vista y Variables)
      */
     public function content(): Content
     {
@@ -48,9 +52,7 @@ class cambiarcontrasenniaMailable extends Mailable
     }
 
     /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     * Adjuntos (Vacío por ahora)
      */
     public function attachments(): array
     {

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -13,136 +12,74 @@ use Illuminate\Support\Facades\Hash;
 
 class ResetPasswordController extends Controller
 {
-    //
-    public function showResetform(){
-        return view('ResetPasswordViews.olvidocontrasennia');
+    public function showResetForm()
+    {
+        return view('ResetPasswordViews.olvidosucontrasennia');
     }
 
-    public function showResetFormWithToken($token){
-//        echo $token;
-        try{
-            $res=DB::connection('mysql')
-                ->table("usuarios")
-                ->select("token_expiracion")
-                ->where("token_recuperacion","=",$token)
-                ->first();
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['correo' => 'required|email']);
 
-            if ($res) {
-                $fechaExpiracion = Carbon::parse($res->token_expiracion);
-                $fechaActual = Carbon::now();
+        // Buscamos en tu tabla 'persona'
+        $persona = DB::table('persona')->where('correo', $request->correo)->first();
 
-                if ($fechaExpiracion->greaterThan($fechaActual)) { //Verifica si el token aún es vigente
-                    return view('ResetPasswordViews.cambiarcontrasennia', [
-                        'token' => $token
-                    ]);
-                }
-                else{
-                    $MensajeError="El enlace ha expirado";
-                    return redirect(route('login'))
-                        ->with('sessionCambiarContrasennia', 'false')
-                        ->with('mensaje', $MensajeError);
-                }
-            }
-            else {
-                $MensajeError="Enlace incorecto o ha expirado";
-                return redirect(route('login'))
-                    ->with('sessionCambiarContrasennia', 'false')
-                    ->with('mensaje', $MensajeError);
-            }
+        if ($persona) {
+            $token = Str::random(64);
+            
+            // Actualizamos los campos de recuperación de esa persona
+            DB::table('persona')->where('correo', $request->correo)->update([
+                'token_recuperacion' => $token,
+                'token_expiracion' => Carbon::now()->addMinutes(15)
+            ]);
+
+            // Enviamos el correo (Aquí es donde falla por tu configuración .env)
+            Mail::to($request->correo)->send(new cambiarcontrasenniaMailable($persona->nombre, $token));
         }
-        catch (\Swift_TransportException $e){
-            $MensajeError="Hubo un error con las credenciales de correo";
-            return redirect(route('password.reset'))
-                ->with('sessionCambiarContrasennia', 'false')
-                ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-        }
-        catch (\Exception $e){
-            $MensajeError="Hubo un error en el servidor";
-            return redirect(route('password.reset'))
-                ->with('sessionCambiarContrasennia', 'false')
-                ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-        }
+
+        return back()->with('sessionRecuperarContrasennia', 'false')
+                     ->with('mensaje', 'Si el correo es institucional, recibirás un enlace pronto.');
     }
 
-    public function sendResetLinkEmail(Request $request){
-        $correo=$request->correo;
+    public function showResetFormWithToken($token)
+    {
+        // Validamos que el token exista en la tabla persona y no haya expirado
+        $persona = DB::table('persona')
+            ->where('token_recuperacion', $token)
+            ->where('token_expiracion', '>', Carbon::now())
+            ->first();
 
-        try{
-            $res=DB::connection('mysql')
-                ->table('usuarios')
-                ->where("correo_electronico","=",$correo)
-                ->get();
-
-            if (!$res->isEmpty()) {
-
-                $res=DB::connection('mysql')
-                    ->table('usuarios')
-                    ->select("id","nombre_completo")
-                    ->where("correo_electronico","=",$correo)
-                    ->where('activo', '=', 1)
-                    ->first();
-
-                if ($res) {
-                    $nombre=$res->nombre_completo;
-
-                    $token = Str::uuid()->toString();
-
-                    // Calcular la fecha y hora de expiración con 10 minutos de expiración
-                    $expiraEn = Carbon::now()->addMinutes(10);
-
-                    //insertar en la base de datos el token y la fecha de expiración
-                    DB::connection('mysql')
-                        ->table('usuarios')
-                        ->where('correo_electronico', $correo)
-                        ->update([
-                            'token_recuperacion' => $token,
-                            'token_expiracion' => $expiraEn,
-                        ]);
-
-                    //enviar  el correo con el mensaje de recuperación
-                    Mail::to($correo)
-                        ->send(new cambiarcontrasenniaMailable($nombre,$token));
-
-//                    echo "Nombre: $nombre ----  Token = $token.  expira el token: $expiraEn";
-
-                    $MensajeError = "¡Listo! Revisa tu correo";
-                    return redirect('/login')
-                        ->with('sessionRecuperarContrasennia', 'true')
-                        ->with('mensaje', $MensajeError) //With envía en una session slash dos claves y sus valores
-                        ->with('token',$token);
-                }
-                else{
-                    $MensajeError = "Aun no confirmas tu correo";
-                    return redirect(route('password.request'))
-                        ->with('sessionRecuperarContrasennia', 'false')
-                        ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-                }
-            }
-            else {
-                $MensajeError = "Este correo no existe";
-                return redirect(route('password.request'))
-                    ->with('sessionRecuperarContrasennia', 'false')
-                    ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-            }
+        if (!$persona) {
+            return redirect()->route('login')->with('mensaje', 'El enlace es inválido o ya expiró.');
         }
-        catch (\Swift_TransportException $e){ //Esta excepción se lanza si hay un problema con la conexión al servidor de correo.
-            $MensajeError="Hubo un error con las credenciales de correo";
-            return redirect(route('password.request'))
-                ->with('sessionRecuperarContrasennia', 'false')
-                ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-        }
-        catch (\Exception $e){
-            $MensajeError="Hubo un error en el servidor";
-//            dd($e->getMessage());
-            return redirect(route('password.request'))
-                ->with('sessionRecuperarContrasennia', 'false')
-                ->with('mensaje', $MensajeError); //With envía en una session flash dos claves y sus valores
-        }
+
+        return view('ResetPasswordViews.cambiarcontrasennia', ['token' => $token]);
     }
 
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required|min:8',
+            'password_confirmation' => 'required|same:password',
+            'mytoken' => 'required'
+        ]);
 
+        $persona = DB::table('persona')
+            ->where('token_recuperacion', $request->mytoken)
+            ->where('token_expiracion', '>', Carbon::now())
+            ->first();
+
+        if (!$persona) {
+            return redirect()->route('login')->with('mensaje', 'Sesión de recuperación inválida.');
+        }
+
+        // Actualizamos la contraseña y limpiamos los tokens
+        DB::table('persona')->where('correo', $persona->correo)->update([
+            'pass' => Hash::make($request->password),
+            'token_recuperacion' => null,
+            'token_expiracion' => null
+        ]);
+
+        return redirect()->route('login')->with('mensaje', '¡Contraseña actualizada exitosamente!');
+    }
 }
-
-
-
-

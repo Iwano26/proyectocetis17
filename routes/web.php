@@ -6,12 +6,12 @@ use App\Http\Controllers\{
     RegisterController, 
     GestionUsuarioController, 
     LoginController, 
-    ResetPasswordController2, 
+    ResetPasswordController, 
     GestionCursoController, 
     BusquedaCursoController, 
     BibliotecaController, 
     CursoController,
-    PerfilController
+    PerfilController    
 };
 
 // --- PÚBLICAS ---
@@ -29,8 +29,18 @@ Route::prefix('/register')->group(function () {
     Route::get('/{correo}/confirmar', [RegisterController::class, 'ConfirmMail'])->name('register.confirmmail'); 
 });
 
-Route::get('/resetpass', function () { return view('ResetPasswordViews/olvidosucontrasennia'); })->name('password.request');
-Route::put('/resetpass', [ResetPasswordController2::class, 'sendResetLinkEmail'])->name('pass');
+
+// --- RECUPERACIÓN DE CONTRASEÑA ---
+Route::get('/olvido-contrasennia',       [ResetPasswordController::class, 'showResetForm'])->name('password.request');
+Route::post('/resetpass',                 [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/cambiarpass/{token}',        [ResetPasswordController::class, 'showResetFormWithToken'])->name('password.reset');
+Route::post('/actualizar-contrasennia',   [ResetPasswordController::class, 'resetPassword'])->name('password.update');
+
+// --- VERIFICACIÓN DE CUENTA ---
+Route::get('/confirmar-cuenta/{correo}',  [ResetPasswordController::class, 'confirmarCuenta'])->name('correo.confirmar');
+
+
+
 
 // --- PROTEGIDAS ---
 Route::middleware(['auth'])->group(function () {

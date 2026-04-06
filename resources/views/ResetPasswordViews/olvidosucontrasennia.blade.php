@@ -31,8 +31,6 @@
             height: 3rem;
         }
         
-        /* Aseguramos que el cuerpo use el estilo del fondo definido en estiloindex.css */
-        /* Eliminamos 'hold-transition login-page' y usamos la clase 'fondo' del login */
         body {
             background: none !important; 
         }
@@ -53,9 +51,8 @@
                 Ingresa tu correo institucional para recibir el enlace de recuperación.
             </p>
             
-            <form id="registroForm" action="http://cetis17.test/resetpass" method="post">
+            <form id="registroForm" action="{{ route('password.email') }}" method="post">
                 @csrf
-                @method('PUT')
                 
                 <label for="correo">Correo institucional</label>
                 <input type="text" id="correo" class="form-control" name="correo" placeholder="Ingresa tu correo institucional">
@@ -91,6 +88,7 @@
                 timer: 3000
             });
 
+            // Mostrar mensaje de éxito si existe la sesión
             @if (session('sessionRecuperarContrasennia') == 'false')
                 Toast.fire({
                     icon: 'success',
@@ -100,9 +98,9 @@
 
             $(function () {
                 $.validator.setDefaults({
-                    submitHandler: function () {
+                    submitHandler: function (form) {
                         $('#preloader').css('display', 'flex'); // Muestra el preloader
-                        $('#registroForm').submit();
+                        form.submit(); // Envía el formulario correctamente
                     }
                 });
 
@@ -120,10 +118,8 @@
                         },
                     },
                     errorElement: 'span',
-                    // Adaptamos errorPlacement para que funcione con el estilo del login
                     errorPlacement: function (error, element) {
                         error.addClass('invalid-feedback');
-                        // En lugar de closest('.input-group') usamos after(error) para colocar el mensaje debajo del input
                         error.insertAfter(element); 
                     },
                     highlight: function (element, errorClass, validClass) {
