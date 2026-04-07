@@ -27,7 +27,7 @@ class ConfirmarCorreoMailable extends Mailable
         return new Envelope(
             // Usamos el remitente de tu .env
             from: new Address(config('mail.from.address'), config('mail.from.name')),
-            subject: 'Confirma tu cuenta - Academia de Karate',
+            subject: 'Confirma tu cuenta - Asesorías CETIS 17',
         );
     }
 

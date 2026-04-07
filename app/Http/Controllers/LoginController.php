@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator; // Añadido para validación manual en API
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB; // Necesario para verificar estado pendiente
 
 class LoginController extends Controller
 {
@@ -18,9 +19,11 @@ class LoginController extends Controller
             'pass' => 'required'
         ]);
 
+        // Añadimos 'confirmado' => 1 a las credenciales
         $credenciales = [
             'correo' => $request->correo,
-            'password' => $request->pass
+            'password' => $request->pass,
+            'confirmado' => 1 
         ];
 
         if (Auth::attempt($credenciales)) {
@@ -28,6 +31,14 @@ class LoginController extends Controller
             $request->session()->save(); 
 
             return redirect()->intended('/principal'); 
+        }
+
+        // Si falla, revisamos si es porque no está confirmado para avisar al usuario
+        $usuario = DB::table('persona')->where('correo', $request->correo)->first();
+        if ($usuario && $usuario->confirmado == 0) {
+            return back()->withErrors([
+                'login' => 'Debes confirmar tu cuenta por correo antes de iniciar sesión.'
+            ])->withInput($request->only('correo'));
         }
 
         return back()->withErrors([
@@ -46,7 +57,6 @@ class LoginController extends Controller
      * Versión para App Móvil (React Native)
      */
     public function loginMovil(Request $request) {
-        // 1. Validar que lleguen los datos (Si fallan, mandamos JSON, no redirección)
         $validator = Validator::make($request->all(), [
             'correo' => 'required|email',
             'pass' => 'required'
@@ -60,19 +70,15 @@ class LoginController extends Controller
             ], 422);
         }
 
+        // También aplicamos el filtro de 'confirmado' aquí
         $credenciales = [
             'correo' => $request->correo,
-            'password' => $request->pass
+            'password' => $request->pass,
+            'confirmado' => 1
         ];
 
-        // 2. Intentar el login
         if (Auth::attempt($credenciales)) {
             $user = Auth::user();
-            
-            // Opcional: Si usas Sanctum (instalado con artisan install:api), 
-            // aquí podrías generar un token:
-            // $token = $user->createToken('auth_token')->plainTextToken;
-
             return response()->json([
                 'success' => true,
                 'user' => [
@@ -85,7 +91,15 @@ class LoginController extends Controller
             ], 200);
         }
 
-        // 3. Fallo de credenciales
+        // Revisar si el fallo es por falta de confirmación
+        $usuario = DB::table('persona')->where('correo', $request->correo)->first();
+        if ($usuario && $usuario->confirmado == 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Por favor, confirma tu cuenta desde tu correo institucional.'
+            ], 403);
+        }
+
         return response()->json([
             'success' => false,
             'message' => 'El correo o la contraseña son incorrectos.'

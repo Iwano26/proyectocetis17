@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str; 
+use Illuminate\Support\Facades\Mail; 
+use App\Mail\ConfirmarCuentaMailable; 
 
 class RegisterController extends Controller
 {
@@ -14,7 +17,6 @@ class RegisterController extends Controller
     }
     
     public function store(Request $request){
-        
         $correo = $request->correo;
         $nombre = $request->nombre;
         $apellidoPa = $request->apellidoPa;
@@ -24,10 +26,9 @@ class RegisterController extends Controller
         $contrasennia = $request->contrasennia;
         
         $contraseniaCifrada = Hash::make($contrasennia);
-        
-        $MensajeError = "";
+        $token = Str::random(64);
 
-        try{
+        try {
             DB::connection('mysql')
                 ->table('persona')
                 ->insert([
@@ -39,22 +40,35 @@ class RegisterController extends Controller
                     'telefono' => $telefono,
                     'pass' => $contraseniaCifrada, 
                     'activo' => 1, 
+                    'confirmado' => 0, 
+                    'token_confirmacion' => $token,
                 ]);
 
-            $MensajeExito = "Tu cuenta ha sido creada con éxito. Ahora puedes iniciar sesión.";
+            // Enviamos el mailable
+            Mail::to($correo)->send(new ConfirmarCuentaMailable($nombre, $token));
 
-            // *** CAMBIO CRUCIAL: Redirige a /register con el mensaje 'success' ***
-            // Esto permite que el SweetAlert se ejecute en la vista de registro.
-            return redirect('/register')->with('success', $MensajeExito);
+            return redirect('/register')->with('success', "Cuenta creada. Revisa tu correo institucional para activarla.");
 
+            } catch (\Exception $e){
+            Log::error('Error al registrar: ' . $e->getMessage()); 
+        // Cambia el mensaje temporalmente para ver el error real en pantalla:
+        return redirect('/register')->with('mensaje', "Error: " . $e->getMessage());
         }
-        catch (\Exception $e){
-            Log::error('Error al registrar usuario: ' . $e->getMessage()); 
-            $MensajeError = "Hubo un error en el servidor al intentar registrar el usuario. Por favor, intenta más tarde.";
-            
-            return redirect('/register')
-                ->with('sessionInsertado', 'false')
-                ->with('mensaje', $MensajeError);
+    }
+
+    public function confirmar($token) {
+        $persona = DB::table('persona')->where('token_confirmacion', $token)->first();
+
+        if (!$persona) {
+            return redirect('/login')->with('mensaje', 'El enlace ya no es válido.');
         }
+
+        DB::table('persona')->where('correo', $persona->correo)->update([
+            'confirmado' => 1,
+            'token_confirmacion' => null
+        ]);
+
+        // Mandamos a la vista de éxito
+        return view('RegisterViews.mensajecorreoconfirmado');
     }
 }

@@ -9,8 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../plugins/jquery-validation/jquery.validate.min.js"></script>
-    <script src="../plugins/jquery-validation/additional-methods.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
 </head>
 <body>
     
@@ -20,11 +19,19 @@
                 icon: 'success',
                 title: '¡Registro Exitoso!',
                 text: '{{ session('success') }}',
-                confirmButtonText: 'Iniciar Sesión'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = "{{ url('/login') }}"; 
-                }
+                confirmButtonText: 'Entendido',
+                confirmButtonColor: '#A71F21'
+            });
+        </script>
+    @endif
+
+    @if (session('mensaje'))
+        <script>
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: '{{ session('mensaje') }}',
+                confirmButtonColor: '#A71F21'
             });
         </script>
     @endif
@@ -40,29 +47,29 @@
                 @csrf
                 
                 <label for="nombre">Nombre</label>
-                <input type="text" name="nombre" placeholder="Nombre">
+                <input type="text" name="nombre" placeholder="Nombre" value="{{ old('nombre') }}">
                 @error('nombre') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="apellidoPa">Apellido Paterno</label>
-                <input type="text" name="apellidoPa" placeholder="Apellido Paterno">
+                <input type="text" name="apellidoPa" placeholder="Apellido Paterno" value="{{ old('apellidoPa') }}">
                 @error('apellidoPa') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="apellidoMa">Apellido Materno</label>
-                <input type="text" name="apellidoMa" placeholder="Apellido Materno">
+                <input type="text" name="apellidoMa" placeholder="Apellido Materno" value="{{ old('apellidoMa') }}">
                 @error('apellidoMa') <div class="error-message">{{ $message }}</div> @enderror
                 
-                <label for="correo">Correo Institucional</label>
-                <input type="email" name="correo" placeholder="Correo Institucional">
+                <label for="correo">Correo Electrónico</label>
+                <input type="email" name="correo" placeholder="Correo Personal o Institucional" value="{{ old('correo') }}">
                 @error('correo') <div class="error-message">{{ $message }}</div> @enderror
 
                 <label for="telefono">Teléfono</label>
-                <input type="text" name="telefono" placeholder="Número de Teléfono" maxlength="10">
+                <input type="text" name="telefono" placeholder="Número de Teléfono" maxlength="10" value="{{ old('telefono') }}">
                 @error('telefono') <div class="error-message">{{ $message }}</div> @enderror
 
                 <input type="hidden" name="rol" value="Estudiante">
 
                 <label for="contrasennia">Contraseña</label>
-                <input type="password" name="contrasennia" id="contrasennia" placeholder="Contraseña, min 8, Mayús/Minús/Número">
+                <input type="password" name="contrasennia" id="contrasennia" placeholder="Mín 8 caracteres, Mayús/Minús/Número">
                 @error('contrasennia') <div class="error-message">{{ $message }}</div> @enderror
                 
                 <label for="recontrasennia">Confirmar Contraseña</label>
@@ -82,14 +89,16 @@
         $(document).ready(function() {
             const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/; 
             
+            // MÉTODO MODIFICADO PARA PRUEBAS: Acepta cualquier correo válido
             $.validator.addMethod("correoInstitucional", function(value, element) {
-                const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
-                return this.optional(element) || regexCorreo.test(value);
-            }, "Correo inválido");
+                // Para la prueba, simplemente validamos que sea un email correcto
+                const regexGeneral = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+                return this.optional(element) || regexGeneral.test(value);
+            }, "Ingresa un correo electrónico válido");
 
             $.validator.addMethod("regexContrasennia", function(value, element) {
                 return this.optional(element) || regex.test(value);
-            }, "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número.");
+            }, "La contraseña debe tener: 8 caracteres, una mayúscula, una minúscula y un número.");
 
             $.validator.addMethod("compararContrasennias", function(value, element) {
                 return value == $("#contrasennia").val();
@@ -97,7 +106,7 @@
 
             $.validator.addMethod("telefonoValido", function(value, element) {
                 return this.optional(element) || /^\d{10}$/.test(value);
-            }, "El número de teléfono debe tener exactamente 10 dígitos.");
+            }, "El teléfono debe tener 10 dígitos.");
 
             $('#registroForm').validate({
                 rules: {
@@ -110,10 +119,8 @@
                         correoInstitucional: true 
                     },
                     telefono: { required: true, telefonoValido: true },
-                    // El campo 'rol' ya no necesita validación de usuario pero se deja por estructura
-                    rol: { required: true },
                     contrasennia: {
-                        required: true,                        
+                        required: true,                                         
                         minlength: 8, 
                         regexContrasennia: true
                     },
@@ -123,22 +130,20 @@
                     },
                 },
                 messages: {
-                    nombre: { required: "Favor de ingresar tu nombre" },
-                    apellidoPa: { required: "Favor de ingresar tu apellido paterno" },
-                    apellidoMa: { required: "Favor de ingresar tu apellido materno" },
+                    nombre: { required: "Ingresa tu nombre" },
+                    apellidoPa: { required: "Ingresa tu apellido paterno" },
+                    apellidoMa: { required: "Ingresa tu apellido materno" },
                     correo: { 
-                        required: "Favor de ingresar un correo institucional", 
-                        email: "Correo electrónico no válido",
-                        correoInstitucional: "Correo inválido"
+                        required: "Ingresa un correo para la prueba", 
+                        email: "Formato de correo no válido"
                     },
-                    telefono: { required: "Favor de ingresar tu número de teléfono" },
+                    telefono: { required: "Ingresa tu teléfono" },
                     contrasennia: {
-                        required: "Favor de ingresar una contraseña",                      
-                        minlength: "Contraseña débil", 
-                        regexContrasennia: "Tu contraseña debe tener como mínimo: 8 caracteres, una mayúscula, una minúscula y un número."
+                        required: "Ingresa una contraseña",                                       
+                        minlength: "Muy corta", 
                     },
                     recontrasennia: {
-                        required: "Favor de confirmar la contraseña",
+                        required: "Confirma la contraseña",
                         compararContrasennias: "Las contraseñas no coinciden."
                     },
                 },

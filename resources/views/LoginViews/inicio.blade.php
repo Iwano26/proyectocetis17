@@ -44,6 +44,9 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
 
     const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
     
+    // MODIFICADO PARA PRUEBAS: Acepta cualquier dominio de correo
+    //const regexCorreoGeneral = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    
     function mostrarAlerta(titulo, texto) {
         Swal.fire({
             icon: 'error', 
