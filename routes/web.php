@@ -26,19 +26,18 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::prefix('/register')->group(function () {
     Route::get('/', [RegisterController::class, 'create'])->name('register.create'); 
     Route::post('/post', [RegisterController::class, 'store'])->name('register.store'); 
-    // Esta ruta se mantiene por si la usas en otro lado, pero la principal es la de abajo
     Route::get('/{correo}/confirmar', [RegisterController::class, 'ConfirmMail'])->name('register.confirmmail'); 
 });
 
 
 // --- RECUPERACIÓN DE CONTRASEÑA ---
 Route::get('/olvido-contrasennia',           [ResetPasswordController::class, 'showResetForm'])->name('password.request');
+// Cambiado de /resetpass a /password/email para mayor claridad, pero manteniendo tu lógica
 Route::post('/resetpass',                 [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/cambiarpass/{token}',        [ResetPasswordController::class, 'showResetFormWithToken'])->name('password.reset');
 Route::post('/actualizar-contrasennia',   [ResetPasswordController::class, 'resetPassword'])->name('password.update');
 
-// --- VERIFICACIÓN DE CUENTA (ACTUALIZADO) ---
-// Cambiamos a RegisterController y usamos {token} para validar el registro nuevo
+// --- VERIFICACIÓN DE CUENTA ---
 Route::get('/confirmar-cuenta/{token}', [RegisterController::class, 'confirmar'])->name('correo.confirmar');
 
 
@@ -56,13 +55,21 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('gestioncurso', GestionCursoController::class);
 
-    Route::resource('gestionusuario', GestionUsuarioController::class);
+    // --- SECCIÓN PROTEGIDA PARA ADMINISTRADORES ---
+    // Usamos Route::group para envolver el recurso con el middleware de lógica personalizada
+    Route::group(['middleware' => function ($request, $next) {
+        if (Auth::user()->rol !== 'Administrador') {
+            return redirect('/principal')->with('mensaje', 'No tienes permisos de administrador.');
+        }
+        return $next($request);
+    }], function () {
+        Route::resource('gestionusuario', GestionUsuarioController::class);
+    });
 
     Route::controller(BibliotecaController::class)->group(function () {
         Route::get('/biblioteca', 'index')->name('biblioteca.index');
         Route::get('/biblioteca/subir', 'create')->name('biblioteca.create');
         Route::post('/biblioteca/guardar', 'store')->name('biblioteca.guardar');
-        // Usamos {id} como lo tenías originalmente
         Route::delete('/biblioteca/eliminar/{id}', 'destroy')->name('biblioteca.eliminar');
         Route::get('/biblioteca/editar/{id}', 'edit')->name('biblioteca.edit');
         Route::put('/biblioteca/actualizar/{id}', 'update')->name('biblioteca.actualizar');

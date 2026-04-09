@@ -6,41 +6,31 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class GestionUsuarioController extends Controller
 {
-    /**
-     * Muestra la lista de todos los usuarios y la vista de gestión (CRUD READ).
-     * @return \Illuminate\View\View
-     */
+    // El constructor con $this->middleware() se eliminó 
+    // porque ahora la protección está en routes/web.php
+
     public function index()
     {
         try {
-            // Obtener todos los usuarios de la tabla 'persona'
+            // Obtenemos todos los registros de la tabla persona
             $usuarios = DB::connection('mysql')->table('persona')->get();
-            
-            // Devolver la vista, pasando la colección de usuarios
             return view('GestionUsuarioViews/usuarios', compact('usuarios'));
-
         } catch (\Exception $e) {
             Log::error('Error al cargar la gestión de usuarios: ' . $e->getMessage());
-            // En caso de error, pasa una colección vacía y un mensaje de error a la vista.
             return view('GestionUsuarioViews/usuarios', ['usuarios' => collect()])
-                        ->with('mensaje', 'Error al conectar con la base de datos: ' . $e->getMessage())
+                        ->with('mensaje', 'Error al conectar con la base de datos.')
                         ->with('sessionInsertado', 'false');
         }
     }
 
-    /**
-     * Almacena un nuevo usuario registrado por un Administrador (CRUD CREATE).
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function store(Request $request)
     {
-        // 1. Validar datos básicos
+        // Validamos que los datos cumplan con las reglas del negocio
         $request->validate([
-            // Correo debe ser único y seguir el patrón institucional
             'correo' => 'required|email|unique:persona,correo|regex:/@cetis17\.edu\.mx$/',
             'nombre' => 'required|string|max:255',
             'contrasennia' => 'required|min:8',
@@ -48,63 +38,48 @@ class GestionUsuarioController extends Controller
             'telefono' => 'required|digits:10',
         ]);
         
-        $Mensaje = "";
-        try{
-            // Cifrar la contraseña antes de guardar
-            $contraseniaCifrada = Hash::make($request->contrasennia);
-            
-            // 2. Insertar en la tabla 'persona'
-            DB::connection('mysql')
-                ->table('persona')
-                ->insert([
-                    'correo' => $request->correo,         
-                    'nombre' => $request->nombre,
-                    'apellidoPa' => $request->apellidoPa,
-                    'apellidoMa' => $request->apellidoMa,
-                    'rol' => $request->rol, 
-                    'telefono' => $request->telefono,
-                    'pass' => $contraseniaCifrada, 
-                    'activo' => 1,
-                ]);
-
-            $Mensaje = "Usuario registrado exitosamente.";
+        try {
+            DB::table('persona')->insert([
+                'correo' => $request->correo,         
+                'nombre' => $request->nombre,
+                'apellidoPa' => $request->apellidoPa,
+                'apellidoMa' => $request->apellidoMa,
+                'rol' => $request->rol, 
+                'telefono' => $request->telefono,
+                'pass' => Hash::make($request->contrasennia), 
+                'activo' => 1,
+                'confirmado' => 1 // Activado automáticamente al ser creado por admin
+            ]);
 
             return redirect()->route('gestionusuario.index')
                 ->with('sessionInsertado', 'true')
-                ->with('mensaje', $Mensaje);
+                ->with('mensaje', "Usuario registrado exitosamente.");
 
-        } catch (\Exception $e){
-            Log::error('Error al registrar usuario (Admin): ' . $e->getMessage());
-            $Mensaje = "Hubo un error al registrar el usuario: " . $e->getMessage();
-            
-            return redirect()->back()
-                ->withInput()
+        } catch (\Exception $e) {
+            Log::error('Error al registrar usuario: ' . $e->getMessage());
+            return redirect()->back()->withInput()
                 ->with('sessionInsertado', 'false')
-                ->with('mensaje', $Mensaje);
+                ->with('mensaje', "Error al registrar: El correo ya podría estar en uso.");
         }
     }
     
-    /**
-     * Actualiza los datos de un usuario existente (CRUD UPDATE).
-     * Ruta: PUT/PATCH /gestionusuario/{correo}
-     * @param \Illuminate\Http\Request $request
-     * @param string $correo Correo del usuario a actualizar.
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function update(Request $request, string $correo)
     {
-        // 1. Validar los datos de entrada
-        $rules = [
+        // Regla: No permitir que un admin edite a OTRO admin (seguridad extra)
+        $usuarioAEditar = DB::table('persona')->where('correo', $correo)->first();
+        if ($usuarioAEditar->rol === 'Administrador' && Auth::user()->correo !== $correo) {
+            return redirect()->back()->with('mensaje', 'Acceso restringido: No puedes modificar a otros administradores.')
+                                     ->with('sessionInsertado', 'false');
+        }
+
+        $request->validate([
             'nombre' => 'required|string|max:255',
             'apellidoPa' => 'required|string|max:255',
             'apellidoMa' => 'required|string|max:255',
             'rol' => 'required|in:Administrador,Asesor,Estudiante',
             'telefono' => 'required|digits:10',
-            // La contraseña es opcional al actualizar, solo se valida si se proporciona
             'contrasennia' => 'nullable|min:8',
-        ];
-        
-        $request->validate($rules);
+        ]);
 
         $dataToUpdate = [
             'nombre' => $request->nombre,
@@ -114,66 +89,45 @@ class GestionUsuarioController extends Controller
             'telefono' => $request->telefono,
         ];
         
-        // Si se proporciona una nueva contraseña, la ciframos y la incluimos
+        // Solo actualizamos la contraseña si el usuario escribió algo en el campo
         if (!empty($request->contrasennia)) {
             $dataToUpdate['pass'] = Hash::make($request->contrasennia);
         }
 
-        $Mensaje = "";
-
         try {
-            // 2. Realizar la actualización
-            $updated = DB::connection('mysql')
-                ->table('persona')
-                ->where('correo', $correo) // Usamos el correo que viene del parámetro de la ruta
-                ->update($dataToUpdate);
-
-            $Mensaje = "Usuario con correo {$correo} actualizado exitosamente.";
-            
-            return redirect()->route('gestionusuario.index')
-                ->with('sessionInsertado', 'true') // Usamos 'sessionInsertado' para éxito general
-                ->with('mensaje', $Mensaje);
-
+            DB::table('persona')->where('correo', $correo)->update($dataToUpdate);
+            return redirect()->route('gestionusuario.index')->with('sessionInsertado', 'true')
+                ->with('mensaje', "Usuario actualizado correctamente.");
         } catch (\Exception $e) {
-            Log::error('Error al actualizar usuario: ' . $e->getMessage());
-            $Mensaje = "Hubo un error al actualizar el usuario: " . $e->getMessage();
-            
-            return redirect()->back()
-                ->withInput()
-                ->with('sessionInsertado', 'false')
-                ->with('mensaje', $Mensaje);
+            return redirect()->back()->with('sessionInsertado', 'false')
+                ->with('mensaje', "Error al actualizar los datos.");
         }
     }
     
-    /**
-     * Elimina un usuario (CRUD DELETE).
-     * @param string $correo Correo del usuario a eliminar (viene de la URL).
-     * @return \Illuminate\Http\RedirectResponse
-     */
     public function destroy(string $correo)
     {
         try {
-            // Eliminar el registro donde el correo coincide
-            $deleted = DB::connection('mysql')
-                ->table('persona')
-                ->where('correo', $correo)
-                ->delete();
-
-            if ($deleted) {
-                return redirect()->route('gestionusuario.index')
-                    ->with('mensaje', 'Usuario con correo ' . $correo . ' eliminado exitosamente.')
-                    ->with('sessionEliminado', 'true');
-            } else {
-                return redirect()->route('gestionusuario.index')
-                    ->with('mensaje', 'El usuario con correo ' . $correo . ' no fue encontrado para eliminar.')
-                    ->with('sessionEliminado', 'false');
+            // Regla: No puedes eliminar tu propia cuenta en sesión
+            if (Auth::user()->correo === $correo) {
+                return redirect()->back()->with('mensaje', 'Operación inválida: No puedes eliminar tu propia cuenta.')
+                                         ->with('sessionEliminado', 'false');
             }
 
-        } catch (\Exception $e) {
-            Log::error('Error al eliminar usuario: ' . $e->getMessage());
+            // Regla: No se pueden borrar otros administradores
+            $target = DB::table('persona')->where('correo', $correo)->first();
+            if ($target->rol === 'Administrador') {
+                return redirect()->back()->with('mensaje', 'Acción protegida: No se permite eliminar perfiles administrativos.')
+                                         ->with('sessionEliminado', 'false');
+            }
+
+            DB::table('persona')->where('correo', $correo)->delete();
             return redirect()->route('gestionusuario.index')
-                ->with('mensaje', 'Error al eliminar el usuario: ' . $e->getMessage())
-                ->with('sessionEliminado', 'false');
+                ->with('mensaje', 'Usuario eliminado exitosamente.')
+                ->with('sessionEliminado', 'true');
+
+        } catch (\Exception $e) {
+            return redirect()->back()->with('mensaje', 'Error al intentar eliminar el registro.')
+                             ->with('sessionEliminado', 'false');
         }
     }
 }
