@@ -11,7 +11,8 @@ use App\Http\Controllers\{
     BusquedaCursoController, 
     BibliotecaController, 
     CursoController,
-    PerfilController    
+    PerfilController,
+    EventoController    
 };
 
 // --- PÚBLICAS ---
@@ -82,6 +83,17 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.create');
     Route::get('/cursos/{id}/editar', [CursoController::class, 'edit'])->name('cursos.edit');
     Route::put('/cursos/{id}', [CursoController::class, 'update'])->name('cursos.update');
+    // Ruta para eliminar un curso
+    Route::delete('/cursos/{id}', [CursoController::class, 'destroy'])->name('cursos.destroy');
+
+    Route::get('/cursos/ver/{id}', [App\Http\Controllers\CursoController::class, 'show'])->name('cursos.show');
+    // routes/web.php
+    Route::get('/curso/{id}/eventos', [EventoController::class, 'index'])->name('curso.eventos');
+
+   // Ruta para que el alumno se inscriba a un curso
+    Route::post('/curso/{id}/inscribir', [CursoController::class, 'inscribir'])->name('cursos.inscribir');
+    // Ruta para que el alumno se salga del curso
+    Route::delete('/curso/{id}/salir', [CursoController::class, 'salir'])->name('cursos.salir');
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
     Route::get('/agenda', function () { return view('Agenda'); });

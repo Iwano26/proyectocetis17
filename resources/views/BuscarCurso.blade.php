@@ -131,18 +131,57 @@
 
                             <div class="mt-3">
                                 <div class="btn-group w-100 shadow-sm">
-                                    {{-- Solo Admin/Asesor edita --}}
-                                    @if(Auth::user()->rol !== 'Estudiante')
+
+                                    {{-- LÓGICA DE SEGURIDAD PARA EDICIÓN Y BORRADO --}}
+                                    @if(Auth::user()->rol === 'Administrador' || $curso->correo_persona === Auth::user()->correo)
+
+                                        {{-- Botón Eliminar con SweetAlert2 --}}
+                                        <form id="delete-form-{{ $curso->id_curso }}" action="{{ route('cursos.destroy', $curso->id_curso) }}" method="POST" style="display:inline;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="button" onclick="confirmarEliminacion({{ $curso->id_curso }})" class="btn btn-sm btn-danger">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+
+
+
+                                        {{-- Botón Editar --}}
                                         <a href="{{ route('cursos.edit', $curso->id_curso) }}" class="btn btn-outline-warning btn-sm fw-bold">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
+
+                                        
                                     @endif
-                                    
-                                    <a href="/vercurso" class="btn btn-outline-primary btn-sm fw-bold">VER</a>
-                                    
-                                    <button class="btn btn-danger btn-sm fw-bold {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
-                                        UNIRSE
-                                    </button>
+
+
+                                    {{-- 2. Botón VER (General) --}}
+                                   {{-- Botón VER (Siempre visible) --}}
+                                    <a href="{{ route('cursos.show', $curso->id_curso) }}" class="btn btn-outline-primary btn-sm fw-bold">VER</a>
+
+                                    {{-- Lógica para Estudiantes --}}
+                                    @if(Auth::user()->rol === 'Estudiante')
+                                        @if(in_array($curso->id_curso, $misInscripciones))
+                                            {{-- CASO: YA INSCRITO --}}
+                                            <a href="{{ route('cursos.show', $curso->id_curso) }}" class="btn-minimal-entrar fw-bold">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i> ENTRAR
+                                            </a>
+                                        @else
+                                            {{-- CASO: NO INSCRITO -> Formulario para Unirse --}}
+                                            <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST" style="display: contents;">
+                                                @csrf
+                                                <button type="submit" class="btn-minimal-unirse fw-bold {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
+                                                    <i class="bi bi-person-plus-fill me-1"></i> UNIRSE
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                    {{-- Lógica para Asesores o Administradores (Solo una vez y con el ELSEIF correcto) --}}
+                                    @elseif(Auth::user()->rol === 'Asesor' || Auth::user()->rol === 'Administrador')
+                                        <a href="{{ route('cursos.show', $curso->id_curso) }}" class="btn-minimal-entrar fw-bold {{ ($curso->estado != 'ACTIVO') ? 'disabled' : '' }}">
+                                            ENTRAR
+                                        </a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -157,5 +196,28 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+    function confirmarEliminacion(id) {
+        Swal.fire({
+            title: '¿Eliminar curso?',
+            text: "Esta acción borrará también los horarios e inscripciones. No se puede deshacer.",
+            icon: 'danger',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, eliminar todo',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Buscamos el formulario específico por ID y lo enviamos
+                document.getElementById('delete-form-' + id).submit();
+            }
+        })
+    }
+    </script>
 </body>
 </html>

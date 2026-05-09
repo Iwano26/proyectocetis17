@@ -104,60 +104,10 @@
                         ESTADO: {{ $curso->estado }}
                     </span>
                     <br>
-
-                    @if(Auth::user()->rol === 'Estudiante')
-                        @if($yaInscrito)
-                            {{-- ESTADO: YA UNIDO --}}
-                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded border mt-2">
-                                {{-- Botón Salir (Izquierda) --}}
-                                <form id="form-salir-curso" action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="button" onclick="confirmarSalida()" class="btn btn-link text-danger fw-bold p-0 text-decoration-none small">
-                                        <i class="bi bi-box-arrow-left"></i> SALIR DEL CURSO
-                                    </button>
-                                </form>
-
-                                <script>
-                                function confirmarSalida() {
-                                    Swal.fire({
-                                        title: '¿Estás seguro?',
-                                        text: "Ya no estarás inscrito en este curso y podrías perder tu lugar.",
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#d33', // Rojo para confirmar
-                                        cancelButtonColor: '#3085d6', // Azul para cancelar
-                                        confirmButtonText: 'Sí, salir del curso',
-                                        cancelButtonText: 'Cancelar',
-                                        reverseButtons: true
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            document.getElementById('form-salir-curso').submit();
-                                        }
-                                    })
-                                }
-                                </script>
-
-                                {{-- Texto de Confirmación (Derecha) --}}
-                                <span class="text-success fw-bold small">
-                                    <i class="bi bi-check-circle-fill"></i> YA TE UNISTE
-                                </span>
-                            </div>
-                        @else
-                            {{-- ACCIÓN: UNIRSE (Si no está inscrito) --}}
-                            <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
-                                    <i class="bi bi-person-plus-fill me-2"></i> UNIRSE AL CURSO
-                                </button>
-                            </form>
-                        @endif
-                    @else
-                        {{-- VISTA PARA ASESOR/ADMIN --}}
-                        <button class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
-                            <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
-                        </button>
-                    @endif
+                    {{-- Botón único de acción --}}
+                    <button class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
+                        <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
+                    </button>
                 </div>
             </div>
         </div>
@@ -167,10 +117,10 @@
             <div class="col-md-3">
                 <div class="nav flex-column opciones-curso">
                     {{-- Estas opciones las ven todos (Alumno, Asesor, Admin) --}}
-                    <a href="#" class="nav-link active shadow-sm">
+                    <a href="#" class="nav-link shadow-sm">
                         <i class="bi bi-info-circle me-2"></i> INFORMACIÓN
                     </a>
-                    <a href="{{ route('curso.eventos', $curso->id_curso) }}" class="nav-link shadow-sm">
+                    <a href="#" class="nav-link active shadow-sm">
                         <i class="bi bi-list-task me-2"></i> ACTIVIDADES
                     </a>
                     <a href="#" class="nav-link shadow-sm">
@@ -188,7 +138,7 @@
 
             {{-- Contenido Principal --}}
             <div class="col-md-9">
-                <h4 class="fw-bold mb-3">Detalles del Curso</h4>
+                <h4 class="fw-bold mb-3">Actividades del Curso</h4>
                 
                 {{-- Tarjeta de Descripción --}}
                 <div class="tarjeta-curso-interna shadow-sm mb-4">
@@ -207,70 +157,11 @@
                     </div>
                 </div>
 
-                <h4 class="fw-bold mb-3">Horarios de Atención</h4>
-                <div class="row">
-                    @forelse($curso->horarios as $horario)
-                        <div class="col-md-6 mb-3">
-                            <div class="d-flex align-items-center p-3 bg-white border rounded-3 shadow-sm">
-                                <div class="circulo-rojo-mini mb-0 me-3">
-                                    <i class="bi bi-clock-history fs-5"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-0 text-uppercase">{{ $horario->dia_semana }}</h6>
-                                    <span class="text-muted small">
-                                        {{ date('g:i A', strtotime($horario->hora_inicio)) }} - {{ date('g:i A', strtotime($horario->hora_fin)) }}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12">
-                            <div class="alert alert-light border">No hay sesiones programadas por el momento.</div>
-                        </div>
-                    @endforelse
-                </div>
             </div>
         </div>
     </div>
     @endsection
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- SweetAlert2 CSS & JS -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    @if(session('success'))
-    <script>
-        Swal.fire({
-            icon: 'success',
-            title: '¡Logrado!',
-            text: "{{ session('success') }}",
-            timer: 3000,
-            showConfirmButton: false
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-    <script>
-        Swal.fire({
-            icon: 'error',
-            title: 'Oops...',
-            text: "{{ session('error') }}",
-        });
-    </script>
-    @endif
-
-    @if(session('error'))
-        <script>
-            Swal.fire({
-                icon: 'error',
-                title: 'Acceso Denegado',
-                text: "{{ session('error') }}",
-                confirmButtonColor: '#3085d6'
-            });
-        </script>
-    @endif
-
-    
 </body>
 </html>

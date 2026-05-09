@@ -108,3 +108,48 @@ body {
     color: var(--cetis-rojo);
     font-size: 1.5rem;
 }
+
+/* Estilo Minimalista Azul (Para ENTRAR) */
+.btn-minimal-entrar {
+    background: green;
+    color: #ffffff;
+    border: 1px solid #004b10;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-minimal-entrar:hover {
+    background: #00791a;
+    color: white !important;
+}
+
+/* Estilo Minimalista Rojo (Para UNIRSE) */
+.btn-minimal-unirse {
+    background: transparent;
+    color: #009719;
+    border: 1px solid #009719;
+    padding: 5px 15px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.btn-minimal-unirse:hover:not(.disabled) {
+    background: #009719;
+    color: white !important;
+}
+
+/* Estado deshabilitado */
+.btn-minimal-unirse.disabled, .btn-minimal-entrar.disabled {
+    color: #6c757d;
+    border-color: #6c757d;
+    opacity: 0.5;
+    cursor: not-allowed;
+}

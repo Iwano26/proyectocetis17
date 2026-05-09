@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Curso;
 use App\Models\Horario;
+use App\Models\Inscripcion;
 
 class CursoController extends Controller
 {
@@ -26,40 +27,48 @@ class CursoController extends Controller
             $materia = $request->input('materia');
             $dia = $request->input('dia');
 
-            //$query = DB::table($this->tableName)->select('curso.*'); // Seleccionamos solo campos de curso para evitar conflictos con horarios
-            // En lugar de \App\Models\Curso::with...
             $query = Curso::query()->with('horarios');
-            
 
-            // Filtro por nombre o materia
+            // Filtros existentes
             if ($buscar) {
                 $query->where(function($q) use ($buscar) {
                     $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
-                      ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    ->orWhere('materia', 'LIKE', "%{$buscar}%");
                 });
             }
 
-            // Filtro por estado (Abierto/Cerrado)
             if ($estado) {
                 $query->where('estado', $estado);
             }
 
-            // Filtro por materia (Select)
             if ($materia) {
                 $query->where('materia', $materia);
             }
 
-            // Nota: El filtro por 'dia' requeriría un JOIN con la tabla horarios
             $cursos = $query->get();
 
-            return view('BuscarCurso', compact('cursos'));
+            // --- NUEVA LÓGICA DE INSCRIPCIONES ---
+            $misInscripciones = [];
+            
+            // Solo buscamos inscripciones si hay un usuario logueado y es Estudiante
+            if (Auth::check() && Auth::user()->rol === 'Estudiante') {
+                $misInscripciones = \App\Models\Inscripcion::where('correo_estudiante', Auth::user()->correo)
+                                    ->pluck('id_curso')
+                                    ->toArray();
+            }
+            // -------------------------------------
+
+            // Pasamos tanto los $cursos como las $misInscripciones a la vista
+            return view('BuscarCurso', compact('cursos', 'misInscripciones'));
 
         } catch (\Exception $e) {
             Log::error('Error en index de cursos: ' . $e->getMessage());
-            return view('BuscarCurso', ['cursos' => collect()])->with('mensaje', 'Error al cargar cursos.');
+            return view('BuscarCurso', [
+                'cursos' => collect(), 
+                'misInscripciones' => [] 
+            ])->with('mensaje', 'Error al cargar cursos.');
         }
     }
-
     public function create() {
         return view('CursosViews/crear');
     }
@@ -112,14 +121,22 @@ class CursoController extends Controller
      * Mostrar formulario de edición con horarios reales.
      */
     public function edit($id) {
-        // Buscamos el curso por id_curso
+        // 1. Buscamos el curso por id_curso
         $curso = DB::table($this->tableName)->where($this->primaryKey, $id)->first();
 
         if (!$curso) {
             return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
         }
 
-        // Obtenemos los horarios de la tabla correcta
+        // --- BLOQUE DE SEGURIDAD PARA ASESORES ---
+        // Si el usuario NO es Administrador Y el correo del curso NO coincide con su correo
+        if (auth()->user()->rol !== 'Administrador' && $curso->correo_persona !== auth()->user()->correo) {
+            return redirect()->route('cursos.index')
+                ->with('error', 'No tienes permiso para editar este curso porque no eres el creador.');
+        }
+        // -----------------------------------------
+
+        // 2. Obtenemos los horarios de la tabla correcta
         $curso->horarios = DB::table('curso_horarios')->where('id_curso', $id)->get();
 
         return view('CursosViews/editar', compact('curso'));
@@ -130,33 +147,43 @@ class CursoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        // 1. Quita el dd($request->all()); cuando estés listo para probar
-        
         try {
+            // 1. PRIMERO validamos la propiedad del curso antes de cualquier otra cosa
+            $curso = DB::table($this->tableName)->where('id_curso', $id)->first();
+
+            if (!$curso) {
+                return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+            }
+
+            // BLOQUE DE SEGURIDAD: Solo el dueño o el Admin pueden actualizar
+            if (auth()->user()->rol !== 'Administrador' && $curso->correo_persona !== auth()->user()->correo) {
+                return redirect()->route('cursos.index')
+                    ->with('error', 'No tienes permiso para actualizar este curso.');
+            }
+
             DB::beginTransaction();
 
-            // 2. Actualizar el curso (Verifica los nombres de tus columnas)
+            // 2. Actualizar el curso
             DB::table($this->tableName)
-                ->where('id_curso', $id) // <-- Asegúrate que sea id_curso
+                ->where('id_curso', $id)
                 ->update([
                     'nombre_curso'      => $request->nombre_curso,
                     'descripcion'       => $request->descripcion,
                     'materia'           => $request->materia,
                     'estado'            => $request->estado,
                     'acceso'            => $request->password_curso ?? '',
-                    'fecha_inicio'   => $request->fecha_inicio,
-                    'fecha_fin'      => $request->fecha_fin,
+                    'fecha_inicio'      => $request->fecha_inicio,
+                    'fecha_fin'         => $request->fecha_fin,
                 ]);
 
-            // 3. Gestionar Horarios (La técnica de "Borrar y Reinsertar")
-            // Es más fácil borrar los horarios viejos y meter los nuevos que intentar editarlos uno por uno
+            // 3. Gestionar Horarios (Borrar y Reinsertar)
             DB::table('curso_horarios')->where('id_curso', $id)->delete();
 
             if ($request->has('dia')) {
                 foreach ($request->dia as $key => $valorDia) {
                     DB::table('curso_horarios')->insert([
                         'id_curso'    => $id,
-                        'dia_semana'  => $valorDia, // Verifica si es 'dia' o 'dia_semana' en tu DB
+                        'dia_semana'  => $valorDia,
                         'hora_inicio' => $request->hora_inicio[$key],
                         'hora_fin'    => $request->hora_fin[$key],
                     ]);
@@ -168,27 +195,109 @@ class CursoController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return "Error al actualizar: " . $e->getMessage();
+            Log::error('Error en update de curso: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Error al actualizar: ' . $e->getMessage());
         }
     }
 
-    public function show($id) {
-        $curso = DB::table($this->tableName)->where($this->primaryKey, $id)->first();
+    public function show($id)
+    {
+        // 1. Buscamos el curso y lo unimos con la tabla 'persona'
+        $curso = DB::table($this->tableName)
+            ->join('persona', 'curso.correo_persona', '=', 'persona.correo') 
+            ->select(
+                'curso.*', 
+                DB::raw("CONCAT(persona.nombre, ' ', persona.apellidoPa, ' ', persona.apellidoMa) as nombre_asesor"),
+                'persona.rol as rol_persona'
+            )
+            ->where('curso.id_curso', $id)
+            ->first();
 
-        if (!$curso) return redirect()->route('cursos.index');
+        if (!$curso) {
+            return redirect()->route($this->indexRoute)->with('mensaje', 'Curso no encontrado');
+        }
 
-        // Adaptar nombres para la vista vercurso.blade.php
-        $curso->nombre = $curso->nombre_curso;
-        $curso->instructor = "Lic. Andrea García Pérez"; // O traerlo de tabla docentes
+        // 2. Traemos los horarios
+        $curso->horarios = DB::table('curso_horarios')->where('id_curso', $id)->get();
+
+        // --- NUEVA LÓGICA DE VERIFICACIÓN DE INSCRIPCIÓN ---
+        $yaInscrito = false;
         
-        // Obtener horarios reales para mostrarlos en la vista
-        $curso->sesiones = DB::table('horarios')->where('id_curso', $id)->get();
+        // Verificamos si el usuario está logueado y es estudiante
+        if (auth()->check() && auth()->user()->rol === 'Estudiante') {
+            $yaInscrito = DB::table('inscripcion')
+                ->where('id_curso', $id)
+                ->where('correo_estudiante', auth()->user()->correo)
+                ->exists(); // Devuelve true si encuentra el registro
+        }
+        // --------------------------------------------------
 
-        return view('CursosViews/vercurso', compact('curso'));
+        // 3. Retornamos la vista con ambas variables: curso y yaInscrito
+        return view('CursosViews/vercurso', compact('curso', 'yaInscrito'));
     }
 
     public function destroy($id) {
-        DB::table($this->tableName)->where($this->primaryKey, $id)->delete();
-        return redirect()->route('cursos.index')->with('mensaje', 'Curso eliminado.');
+        // 1. Buscamos el curso para verificar quién es el dueño
+        $curso = DB::table($this->tableName)->where($this->primaryKey, $id)->first();
+
+        if (!$curso) {
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado.');
+        }
+
+        // 2. BLOQUE DE SEGURIDAD (El candado)
+        if (auth()->user()->rol !== 'Administrador' && $curso->correo_persona !== auth()->user()->correo) {
+            return redirect()->route('cursos.index')
+                ->with('error', 'No tienes permiso para eliminar este curso.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 3. AGREGAR AQUÍ: Borrar horarios asociados primero
+            DB::table('curso_horarios')->where('id_curso', $id)->delete();
+
+            // 4. Borrar el curso
+            DB::table($this->tableName)->where($this->primaryKey, $id)->delete();
+
+            DB::commit();
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso y sus horarios eliminados correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('cursos.index')->with('error', 'Error al eliminar: ' . $e->getMessage());
+        }
+    }
+
+    public function inscribir(Request $request, $id)
+    {
+        // 1. Validamos que el usuario esté logueado (por seguridad)
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        // 2. Creamos el registro en la tabla inscripcion
+        Inscripcion::create([
+            'id_curso' => $id,
+            'correo_estudiante' => Auth::user()->correo, // El correo de la sesión actual
+            'fecha_inscripcion' => now()->format('Y-m-d'), // Fecha de hoy
+        ]);
+
+        // 3. Redirigimos de vuelta con un mensaje de éxito
+        return back()->with('success', '¡Felicidades! Te has unido al curso exitosamente.');
+    }
+
+    public function salir($id)
+    {
+        // Buscamos la inscripción del usuario logueado en este curso
+        $inscripcion = \App\Models\Inscripcion::where('id_curso', $id)
+                        ->where('correo_estudiante', Auth::user()->correo)
+                        ->first();
+
+        if ($inscripcion) {
+            $inscripcion->delete();
+            return redirect()->route('cursos.index')->with('success', 'Te has salido del curso correctamente.');
+        }
+
+        return back()->with('error', 'No se encontró tu inscripción.');
     }
 }
