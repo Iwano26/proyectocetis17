@@ -29,10 +29,8 @@ class Curso extends Model
     {
        return $this->belongsToMany(Usuario::class, 'persona', 'correo', 'correo_persona');
     }
-
     public function horarios() {
-        
-        return $this->hasMany(Horario::class, 'id_curso');
+    return $this->hasMany(Horario::class, 'id_curso', 'id_curso');
     }
 
 }

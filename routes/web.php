@@ -12,7 +12,9 @@ use App\Http\Controllers\{
     BibliotecaController, 
     CursoController,
     PerfilController,
-    EventoController    
+    EventoController,
+    ForoController,
+    ReportesController    
 };
 
 // --- PÚBLICAS ---
@@ -21,6 +23,7 @@ Route::get('/', function () {
 });
 
 Route::get('/login', [LoginController::class, 'showLogin'])->name('login');
+// Nota: Brandon, aquí registramos el login.post para la autenticación
 Route::post('/login', [LoginController::class, 'login'])->name('login.post');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
@@ -33,7 +36,6 @@ Route::prefix('/register')->group(function () {
 
 // --- RECUPERACIÓN DE CONTRASEÑA ---
 Route::get('/olvido-contrasennia',           [ResetPasswordController::class, 'showResetForm'])->name('password.request');
-// Cambiado de /resetpass a /password/email para mayor claridad, pero manteniendo tu lógica
 Route::post('/resetpass',                 [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/cambiarpass/{token}',        [ResetPasswordController::class, 'showResetFormWithToken'])->name('password.reset');
 Route::post('/actualizar-contrasennia',   [ResetPasswordController::class, 'resetPassword'])->name('password.update');
@@ -57,7 +59,6 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('gestioncurso', GestionCursoController::class);
 
     // --- SECCIÓN PROTEGIDA PARA ADMINISTRADORES ---
-    // Usamos Route::group para envolver el recurso con el middleware de lógica personalizada
     Route::group(['middleware' => function ($request, $next) {
         if (Auth::user()->rol !== 'Administrador') {
             return redirect('/principal')->with('mensaje', 'No tienes permisos de administrador.');
@@ -83,16 +84,25 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/cursos/crear', [CursoController::class, 'create'])->name('cursos.create');
     Route::get('/cursos/{id}/editar', [CursoController::class, 'edit'])->name('cursos.edit');
     Route::put('/cursos/{id}', [CursoController::class, 'update'])->name('cursos.update');
-    // Ruta para eliminar un curso
     Route::delete('/cursos/{id}', [CursoController::class, 'destroy'])->name('cursos.destroy');
 
     Route::get('/cursos/ver/{id}', [App\Http\Controllers\CursoController::class, 'show'])->name('cursos.show');
-    // routes/web.php
     Route::get('/curso/{id}/eventos', [EventoController::class, 'index'])->name('curso.eventos');
+
+    // Rutas para los Reportes de Asesoría
+    Route::get('/curso/{id}/reportes', [ReportesController::class, 'index'])->name('reportes.index');
+    Route::get('/curso/{id}/reportes/pdf', [ReportesController::class, 'generarPDF'])->name('reportes.pdf');
+
+    // Rutas del Foro Q&A
+    Route::prefix('curso/{id}/foro')->group(function () {
+        Route::get('/', [ForoController::class, 'index'])->name('foro.index');
+        Route::get('/pregunta/{id_pregunta}', [ForoController::class, 'show'])->name('foro.show');
+        Route::post('/pregunta', [ForoController::class, 'storePregunta'])->name('pregunta.store');
+        Route::post('/pregunta/{id_pregunta}/respuesta', [ForoController::class, 'storeRespuesta'])->name('respuesta.store');
+    });
 
    // Ruta para que el alumno se inscriba a un curso
     Route::post('/curso/{id}/inscribir', [CursoController::class, 'inscribir'])->name('cursos.inscribir');
-    // Ruta para que el alumno se salga del curso
     Route::delete('/curso/{id}/salir', [CursoController::class, 'salir'])->name('cursos.salir');
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });

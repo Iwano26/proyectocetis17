@@ -167,22 +167,22 @@
             <div class="col-md-3">
                 <div class="nav flex-column opciones-curso">
                     {{-- Estas opciones las ven todos (Alumno, Asesor, Admin) --}}
-                    <a href="#" class="nav-link active shadow-sm">
-                        <i class="bi bi-info-circle me-2"></i> INFORMACIÓN
-                    </a>
-                    <a href="{{ route('curso.eventos', $curso->id_curso) }}" class="nav-link shadow-sm">
-                        <i class="bi bi-list-task me-2"></i> ACTIVIDADES
-                    </a>
-                    <a href="#" class="nav-link shadow-sm">
-                        <i class="bi bi-chat-dots me-2"></i> FORO
-                    </a>
+                 <a href="#" class="nav-link active shadow-sm">
+            <i class="bi bi-info-circle me-2"></i> INFORMACIÓN
+        </a>
+        <a href="{{ route('curso.eventos', $curso->id_curso) }}" class="nav-link shadow-sm">
+            <i class="bi bi-list-task me-2"></i> ACTIVIDADES
+        </a>
+        <a href="{{ route('foro.index', $curso->id_curso) }}" class="nav-link shadow-sm">
+            <i class="bi bi-chat-dots me-2"></i> FORO
+        </a>
 
-                    {{-- Solo visible para Administrador O Asesor --}}
-                    @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
-                        <a href="#" class="nav-link shadow-sm border-danger">
-                            <i class="bi bi-file-earmark-text me-2 text-danger"></i> REPORTES
-                        </a>
-                    @endif
+        {{-- Solo visible para Administrador O Asesor --}}
+        @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
+            <a href="{{ route('reportes.index', $curso->id_curso) }}" class="nav-link shadow-sm border-danger">
+                <i class="bi bi-file-earmark-text me-2 text-danger"></i> REPORTES
+            </a>
+        @endif
                 </div>
             </div>
 

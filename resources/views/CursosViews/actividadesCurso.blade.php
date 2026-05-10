@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CETIS 17 | Curso Base de Datos</title>
+    <title>CETIS 17 | {{ $curso->nombre_curso }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     
     <style>
-        
         :root { 
             --cetis-rojo: #8C001A; 
             --cetis-primary: #8C001A;
@@ -18,26 +17,6 @@
             background-color: #f8f9fa; 
             font-family: 'Inter', sans-serif; 
         }
-
-        #menu-toggle-btn {
-            position: fixed; top: 15px; left: 20px; z-index: 1040; 
-            background-color: white; color: var(--cetis-rojo);
-            border: 2px solid var(--cetis-rojo); padding: 5px 12px;
-            border-radius: 8px; font-size: 1.5rem; cursor: pointer;
-            transition: all 0.3s;
-        }
-        #menu-toggle-btn:hover { background-color: var(--cetis-primary); color: white; }
-
-        .navbar {
-            background-color: white !important; border-bottom: 1px solid #dee2e6;
-            min-height: 70px; padding-left: 80px; 
-        }
-        .navbar-brand { color: var(--cetis-rojo) !important; font-weight: bold; }
-
-        .offcanvas-header { background-color: var(--cetis-primary); color: white; }
-        .offcanvas-header .btn-close { filter: invert(1); }
-        .offcanvas-body .nav-link { color: #333; font-weight: 500; padding: 12px 15px; border-radius: 8px; transition: all 0.2s; }
-        .offcanvas-body .nav-link:hover, .offcanvas-body .nav-link.active { background-color: var(--cetis-primary); color: white !important; }
 
         .tarjeta-curso-interna {
             background-color: white; 
@@ -56,17 +35,14 @@
             padding: 15px;
             text-align: left;
             background-color: white;
-        }
-        .opciones-curso .nav-link.active {
-            background-color: var(--cetis-rojo);
-            color: white;
-            border-color: var(--cetis-rojo);
+            transition: all 0.2s;
         }
 
-        .circulo-rojo-mini {
-            width: 45px; height: 45px; background-color: var(--cetis-rojo);
-            border-radius: 50%; display: flex; align-items: center; 
-            justify-content: center; color: white; margin-bottom: 15px;
+        /* Esta es la clase que hace que se vea rojo */
+        .opciones-curso .nav-link.active {
+            background-color: var(--cetis-rojo) !important;
+            color: white !important;
+            border-color: var(--cetis-rojo) !important;
         }
 
         .formato-horario {
@@ -83,13 +59,10 @@
 </head>
 <body>
 
-        @extends('layouts.app') {{-- Esto conecta con el esqueleto que hicimos arriba --}}
+    @extends('layouts.app')
 
-        @section('content')
-        
-        
-
-        <div class="container-fluid mt-0 px-4">
+    @section('content')
+    <div class="container-fluid mt-0 px-4">
         
         {{-- CABECERA DEL CURSO --}}
         <div class="tarjeta-curso-interna shadow-sm bg-white mb-4">
@@ -99,15 +72,36 @@
                     <p class="text-muted mb-0">Impartido por: <strong>{{ $curso->nombre_asesor }}</strong></p>
                     <small class="text-secondary"><i class="bi bi-book me-1"></i> Materia: {{ $curso->materia }}</small>
                 </div>
+                
                 <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                    <span class="badge {{ $curso->estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary' }} mb-2 shadow-sm">
-                        ESTADO: {{ $curso->estado }}
-                    </span>
-                    <br>
-                    {{-- Botón único de acción --}}
-                    <button class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
-                        <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
-                    </button>
+                    <div class="d-flex flex-column align-items-md-end">
+                        <span class="badge {{ $curso->estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary' }} mb-2 shadow-sm">
+                            ESTADO: {{ $curso->estado }}
+                        </span>
+
+                        @if(Auth::user()->rol === 'Estudiante')
+                            @if($yaInscrito)
+                                <form action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-outline-danger fw-bold px-4">
+                                        <i class="bi bi-box-arrow-left me-2"></i> SALIR DEL CURSO
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
+                                        <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
+                                    </button>
+                                </form>
+                            @endif
+                        @else
+                            <button class="btn btn-primary fw-bold px-4" disabled>
+                                <i class="bi bi-person-badge me-2"></i> MODO GESTIÓN
+                            </button>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -116,20 +110,20 @@
             {{-- Menú Lateral --}}
             <div class="col-md-3">
                 <div class="nav flex-column opciones-curso">
-                    {{-- Estas opciones las ven todos (Alumno, Asesor, Admin) --}}
-                    <a href="#" class="nav-link shadow-sm">
+                   <a href="{{ route('cursos.show', $curso->id_curso) }}" class="nav-link shadow-sm">
                         <i class="bi bi-info-circle me-2"></i> INFORMACIÓN
                     </a>
-                    <a href="#" class="nav-link active shadow-sm">
+                    {{-- Aquí agregamos la clase 'active' --}}
+                    <a href="{{ route('curso.eventos', $curso->id_curso) }}" class="nav-link shadow-sm active">
                         <i class="bi bi-list-task me-2"></i> ACTIVIDADES
                     </a>
-                    <a href="#" class="nav-link shadow-sm">
-                        <i class="bi bi-chat-dots me-2"></i> FORO
+                   <a href="{{ route('foro.index', $curso->id_curso) }}" class="nav-link shadow-sm">
+                    <i class="bi bi-chat-dots me-2"></i> FORO
                     </a>
+                
 
-                    {{-- Solo visible para Administrador O Asesor --}}
                     @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
-                        <a href="#" class="nav-link shadow-sm border-danger">
+                        <a href="{{ route('reportes.index', $curso->id_curso) }}" class="nav-link shadow-sm border-danger">
                             <i class="bi bi-file-earmark-text me-2 text-danger"></i> REPORTES
                         </a>
                     @endif
@@ -157,6 +151,26 @@
                     </div>
                 </div>
 
+                {{-- Listado de Actividades --}}
+                @forelse($eventos as $evento)
+                    <div class="card mb-3 shadow-sm border-0 border-start border-4 border-danger">
+                        <div class="card-body d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">{{ $evento->titulo }}</h6>
+                                <p class="text-muted mb-0 small">{{ $evento->descripcion }}</p>
+                                <span class="badge bg-light text-dark border mt-2">
+                                    <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
+                                </span>
+                            </div>
+                            <i class="bi bi-chevron-right text-muted"></i>
+                        </div>
+                    </div>
+                @empty
+                    <div class="text-center py-5">
+                        <i class="bi bi-folder2-open display-4 text-muted"></i>
+                        <p class="text-muted mt-2">No hay actividades publicadas para este curso.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
