@@ -2,54 +2,58 @@
     <i class="bi bi-list"></i>
 </button>
 
-<div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
-    <div class="offcanvas-header">
-        <h5 class="offcanvas-title fw-bold"> 
-            <i class="bi bi-person-circle me-2"></i> {{ Auth::user()->nombre }}    
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+<div class="offcanvas offcanvas-start offcanvas-cetis" tabindex="-1" id="sidebarMenu">
+
+    <div class="offcanvas-header-cetis">
+        <div class="sidebar-user">
+            <div class="sidebar-avatar"><i class="bi bi-person-fill"></i></div>
+            <div>
+                <div class="sidebar-nombre">{{ Auth::user()->nombre }}</div>
+                <div class="sidebar-rol">{{ Auth::user()->rol }}</div>
+            </div>
+        </div>
+        <button type="button" class="sidebar-close-btn" data-bs-dismiss="offcanvas">
+            <i class="bi bi-x-lg"></i>
+        </button>
     </div>
-    <div class="offcanvas-body p-4">
-        <div class="text-center mb-4">
-            <span class="badge rounded-pill bg-danger px-3 py-2">Rol: {{ Auth::user()->rol }}</span>
-        </div>
-        
-        <p class="text-muted small text-uppercase fw-bold mb-2">Módulos Disponibles</p>
-        <div class="nav flex-column nav-pills">
-            <a class="nav-link {{ request()->is('principal') ? 'active' : '' }}" href="/principal">
-                <i class="bi bi-house-door me-3"></i> Inicio
+
+    <div class="offcanvas-body-cetis">
+        <p class="sidebar-section-label">Módulos Disponibles</p>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link {{ request()->is('principal')  ? 'active' : '' }}" href="/principal">
+                <i class="bi bi-house-door-fill"></i> Inicio
             </a>
-            <a class="nav-link {{ request()->is('agenda') ? 'active' : '' }}" href="/agenda">
-                <i class="bi bi-calendar-event me-3"></i> Mi Agenda
+            <a class="sidebar-link {{ request()->is('agenda')     ? 'active' : '' }}" href="/agenda">
+                <i class="bi bi-calendar-event-fill"></i> Mi Agenda
             </a>
-            <a class="nav-link {{ request()->is('cursos*') ? 'active' : '' }}" href="{{ route('cursos.index') }}">
-                <i class="bi bi-journal-bookmark me-3"></i> Buscar Cursos
+            <a class="sidebar-link {{ request()->is('cursos*')    ? 'active' : '' }}" href="{{ route('cursos.index') }}">
+                <i class="bi bi-journal-bookmark-fill"></i> Buscar Cursos
             </a>
-            <a class="nav-link {{ request()->is('biblioteca*') ? 'active' : '' }}" href="/biblioteca">
-                <i class="bi bi-archive me-3"></i> Biblioteca Digital
+            <a class="sidebar-link {{ request()->is('biblioteca*') ? 'active' : '' }}" href="/biblioteca">
+                <i class="bi bi-archive-fill"></i> Biblioteca Digital
             </a>
-            <a class="nav-link {{ request()->is('perfil') ? 'active' : '' }}" href="/perfil">
-                <i class="bi bi-person me-3"></i> Mi perfil
+            <a class="sidebar-link {{ request()->is('perfil')     ? 'active' : '' }}" href="/perfil">
+                <i class="bi bi-person-badge-fill"></i> Mi Perfil
             </a>
-        </div>
+        </nav>
 
         @if(Auth::user()->rol === 'Administrador')
-            <hr class="my-4">
-            <p class="text-danger small text-uppercase fw-bold mb-2">Administración</p>
-            <div class="nav flex-column nav-pills">
-                <a class="nav-link {{ request()->is('gestionusuario') ? 'active' : '' }}" href="/gestionusuario">
-                    <i class="bi bi-people me-3"></i> Usuarios
+            <hr class="sidebar-divider">
+            <p class="sidebar-section-label danger">Administración</p>
+            <nav class="sidebar-nav">
+                <a class="sidebar-link {{ request()->is('gestionusuario') ? 'active' : '' }}" href="/gestionusuario">
+                    <i class="bi bi-people-fill"></i> Usuarios
                 </a>
-            </div>
+            </nav>
         @endif
-        
-        <div class="mt-auto pt-5">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-outline-danger w-100 fw-bold">
-                    <i class="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-                </button>
-            </form>
-        </div>
+    </div>
+
+    <div class="offcanvas-footer-cetis">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="sidebar-logout-btn">
+                <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+            </button>
+        </form>
     </div>
 </div>
