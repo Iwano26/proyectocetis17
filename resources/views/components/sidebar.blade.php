@@ -1,55 +1,62 @@
-<button id="menu-toggle-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu" title="Abrir Menú">
-    <i class="bi bi-list"></i>
-</button>
-
-<div class="offcanvas offcanvas-start offcanvas-cetis" tabindex="-1" id="sidebarMenu">
-
+<div class="offcanvas offcanvas-start offcanvas-cetis" tabindex="-1" id="sidebarCetis" aria-labelledby="sidebarCetisLabel">
+    
     <div class="offcanvas-header-cetis">
         <div class="sidebar-user">
-            <div class="sidebar-avatar"><i class="bi bi-person-fill"></i></div>
+            <div class="sidebar-avatar">
+                <i class="bi bi-person-circle"></i>
+            </div>
             <div>
                 <div class="sidebar-nombre">{{ Auth::user()->nombre }}</div>
-                <div class="sidebar-rol">{{ Auth::user()->rol }}</div>
+                <div class="sidebar-rol">Panel Académico</div>
             </div>
         </div>
-        <button type="button" class="sidebar-close-btn" data-bs-dismiss="offcanvas">
+        <button type="button" class="sidebar-close-btn" data-bs-dismiss="offcanvas" aria-label="Close">
             <i class="bi bi-x-lg"></i>
         </button>
     </div>
 
     <div class="offcanvas-body-cetis">
-        <p class="sidebar-section-label">Módulos Disponibles</p>
+        
+        <div class="sidebar-section-label">Navegación</div>
         <nav class="sidebar-nav">
-            <a class="sidebar-link {{ request()->is('principal')  ? 'active' : '' }}" href="/principal">
+            <a href="/home" class="sidebar-link active">
                 <i class="bi bi-house-door-fill"></i> Inicio
             </a>
-            <a class="sidebar-link {{ request()->is('agenda')     ? 'active' : '' }}" href="/agenda">
+            <a href="/agenda" class="sidebar-link">
                 <i class="bi bi-calendar-event-fill"></i> Mi Agenda
             </a>
-            <a class="sidebar-link {{ request()->is('cursos*')    ? 'active' : '' }}" href="{{ route('cursos.index') }}">
-                <i class="bi bi-journal-bookmark-fill"></i> Buscar Cursos
+            <a href="/buscarcurso" class="sidebar-link">
+                <i class="bi bi-journal-bookmark-fill"></i> Cursos Disponibles
             </a>
-            <a class="sidebar-link {{ request()->is('biblioteca*') ? 'active' : '' }}" href="/biblioteca">
+            <a href="/biblioteca" class="sidebar-link">
                 <i class="bi bi-archive-fill"></i> Biblioteca Digital
-            </a>
-            <a class="sidebar-link {{ request()->is('perfil')     ? 'active' : '' }}" href="/perfil">
-                <i class="bi bi-person-badge-fill"></i> Mi Perfil
             </a>
         </nav>
 
-        @if(Auth::user()->rol === 'Administrador')
-            <hr class="sidebar-divider">
-            <p class="sidebar-section-label danger">Administración</p>
-            <nav class="sidebar-nav">
-                <a class="sidebar-link {{ request()->is('gestionusuario') ? 'active' : '' }}" href="/gestionusuario">
-                    <i class="bi bi-people-fill"></i> Usuarios
-                </a>
-            </nav>
-        @endif
+        <hr class="sidebar-divider">
+
+        <div class="sidebar-section-label">Usuario</div>
+        <nav class="sidebar-nav">
+            <a href="/perfil" class="sidebar-link">
+                <i class="bi bi-person-badge-fill"></i> Mi Perfil
+            </a>
+            <a href="/historial" class="sidebar-link">
+                <i class="bi bi-clock-history"></i> Historial Académico
+            </a>
+        </nav>
+
+        <hr class="sidebar-divider">
+        
+        <div class="sidebar-section-label danger">Soporte</div>
+        <nav class="sidebar-nav">
+            <a href="/ayuda" class="sidebar-link">
+                <i class="bi bi-question-circle-fill"></i> Manual de Ayuda
+            </a>
+        </nav>
     </div>
 
     <div class="offcanvas-footer-cetis">
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('logout') }}" method="POST" class="w-100">
             @csrf
             <button type="submit" class="sidebar-logout-btn">
                 <i class="bi bi-box-arrow-right"></i> Cerrar Sesión

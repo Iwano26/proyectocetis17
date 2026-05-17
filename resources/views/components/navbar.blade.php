@@ -1,14 +1,19 @@
 {{-- ===== NAVBAR ===== --}}
 <nav class="navbar-cetis">
-    <div class="container d-flex align-items-center justify-content-between">
+    {{-- Cambiamos 'container' por 'container-fluid' e incluimos un padding horizontal (px-3 o px-4) para controlar el despegue exacto del borde --}}
+    <div class="container-fluid d-flex align-items-center justify-content-between px-4">
 
-        {{-- Espacio para el botón hamburguesa --}}
-        <div style="width: 56px;"></div>
+        {{-- Contenedor del botón hamburguesa alineado perfectamente a la izquierda --}}
+        <div style="width: 56px; display: flex; align-items: center; justify-content: flex-start;">
+            <button id="menu-toggle-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarCetis" aria-controls="sidebarCetis" style="border: none; background: none; padding: 0;">
+                <i class="bi bi-list" style="font-size: 1.8rem; color: var(--cetis-texto); cursor: pointer;"></i>
+            </button>
+        </div>
 
         {{-- Brand --}}
         <a href="/principal" class="navbar-brand-cetis">
-            <div class="brand-logo">C17</div>
-            <span class="brand-text">Sistema de <span>Asesorías</span></span>
+            <div class="brand-logo"></div>
+            <span class="brand-text">Sistema de <span>asesorías</span></span>
         </a>
 
         {{-- Nav derecha --}}

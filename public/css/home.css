@@ -1,0 +1,114 @@
+:root {
+    --cetis-rojo: #8C001A;
+    --cetis-rojo-oscuro: #6b0014;
+    --cetis-rojo-claro: #b0001f;
+    --cetis-gris: #f4f5f7;
+    --cetis-texto: #1a1a2e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    font-family: 'Georgia', 'Times New Roman', serif;
+    
+    /* ── NUEVO FONDO MODERNO ESTILO GRID ACADÉMICO ── */
+    background-color: #fcfbfa;
+    background-image: 
+        linear-gradient(rgba(140, 0, 26, 0.015) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, rgba(140, 0, 26, 0.015) 1.5px, transparent 1.5px);
+    background-size: 30px 30px; /* Tamaño de la cuadrícula sutil */
+    
+    color: var(--cetis-texto);
+}
+
+/* ===== HERO ===== */
+.hero-cetis {
+    background: var(--cetis-rojo);
+    /* Fondo con texturas geométricas cruzadas de ingeniería */
+    background-image: 
+        radial-gradient(circle at 15% 25%, rgba(255, 255, 255, 0.07) 0%, transparent 35%),
+        radial-gradient(circle at 85% 75%, rgba(0, 0, 0, 0.15) 0%, transparent 45%),
+        repeating-linear-gradient(30deg, rgba(255,255,255,0.01) 0px, rgba(255,255,255,0.01) 1px, transparent 1px, transparent 8px);
+    color: white;
+    padding: 100px 0 90px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.05);
+}
+.hero-cetis::before {
+    content: ''; position: absolute; top: -50px; right: -30px; width: 380px; height: 380px;
+    border: 2px dashed rgba(255,255,255,0.12); border-radius: 50%;
+    animation: rotation 140s linear infinite;
+}
+.hero-cetis::after {
+    content: ''; position: absolute; bottom: -60px; left: -60px; width: 300px; height: 300px;
+    border: 45px solid rgba(255,255,255,0.03); border-radius: 50%;
+}
+
+@keyframes rotation {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.hero-eyebrow { font-size: 0.85rem; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; opacity: 0.85; margin-bottom: 14px; font-family: 'Georgia', serif; }
+.hero-titulo { font-size: clamp(2.2rem, 5.5vw, 3.6rem); font-weight: 700; line-height: 1.15; margin-bottom: 18px; font-family: 'Georgia', serif; }
+.hero-titulo span { color: rgba(255,255,255,0.8); font-style: italic; font-weight: 400; }
+.hero-subtitulo { font-size: 1.1rem; opacity: 0.85; max-width: 550px; margin: 0 auto 36px; line-height: 1.6; }
+
+/* Botones del Hero */
+.btn-hero-blanco {
+    background: #ffffff; color: var(--cetis-rojo); font-weight: 700; padding: 14px 32px; border-radius: 8px;
+    border: none; font-size: 1rem; text-decoration: none; transition: all 0.2s; box-shadow: 0 4px 14px rgba(0,0,0,0.15); font-family: 'Georgia', serif;
+}
+.btn-hero-blanco:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,0,0,0.22); color: var(--cetis-rojo-oscuro); }
+.btn-hero-outline {
+    background: transparent; color: white; font-weight: 700; padding: 14px 32px; border-radius: 8px;
+    border: 2px solid rgba(255,255,255,0.7); font-size: 1rem; text-decoration: none; transition: all 0.2s; font-family: 'Georgia', serif;
+}
+.btn-hero-outline:hover { background: rgba(255,255,255,0.15); border-color: white; color: white; transform: translateY(-2px); }
+
+/* Stats bar */
+.stats-bar { background: white; border-bottom: 1px solid #eee; padding: 20px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.stat-item { text-align: center; padding: 0 20px; border-right: 1px solid #eee; }
+.stat-item:last-child { border-right: none; }
+.stat-numero { font-size: 1.6rem; font-weight: 800; color: var(--cetis-rojo); font-family: 'Georgia', serif; line-height: 1; }
+.stat-label { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; font-weight: 600; }
+
+/* ===== ACCESOS RÁPIDOS ===== */
+.section-titulo { font-size: 1.8rem; font-weight: 700; color: var(--cetis-texto); font-family: 'Georgia', serif; margin-bottom: 8px; text-align: center; }
+.section-subtitulo { color: #777; font-size: 0.95rem; margin-bottom: 40px; text-align: center; }
+
+/* Tarjetas refinadas con bordes más limpios y sombras que resaltan sobre el fondo grid */
+.acceso-card {
+    background: #ffffff; 
+    border: 1px solid rgba(140, 0, 26, 0.08); 
+    border-radius: 16px; 
+    padding: 32px 26px; 
+    text-decoration: none;
+    color: inherit; 
+    display: block; 
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+    height: 100%; 
+    position: relative; 
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(140, 0, 26, 0.02);
+}
+.acceso-card::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--cetis-rojo); transform: scaleY(0); transition: transform 0.25s; border-radius: 0 2px 2px 0; }
+.acceso-card:hover { transform: translateY(-6px); box-shadow: 0 20px 38px rgba(140,0,26,0.07); border-color: rgba(140,0,26,0.2); color: inherit; }
+.acceso-card:hover::before { transform: scaleY(1); }
+.acceso-icono { width: 56px; height: 56px; background: #fff0f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--cetis-rojo); margin-bottom: 20px; transition: background 0.25s; }
+.acceso-card:hover .acceso-icono { background: var(--cetis-rojo); color: white; }
+.acceso-titulo { font-size: 1.15rem; font-weight: 700; margin-bottom: 8px; font-family: 'Georgia', serif; color: var(--cetis-texto); }
+.acceso-desc { font-size: 0.9rem; color: #666; line-height: 1.5; margin: 0; }
+.acceso-arrow { position: absolute; top: 32px; right: 24px; color: #ccc; font-size: 1rem; transition: all 0.25s; }
+.acceso-card:hover .acceso-arrow { color: var(--cetis-rojo); transform: translateX(4px); }
+
+/* ===== BANNER INSTITUCIONAL ===== */
+.banner-institucional { background: linear-gradient(135deg, var(--cetis-texto) 0%, #2d1b1b 100%); color: white; border-radius: 14px; padding: 40px 45px; display: flex; align-items: center; justify-content: space-between; gap: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+.banner-badge { display: inline-block; background: var(--cetis-rojo); color: white; font-size: 0.7rem; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 4px; margin-bottom: 10px; }
+.banner-titulo { font-size: 1.4rem; font-weight: 700; margin-bottom: 6px; font-family: 'Georgia', serif; }
+.banner-subtitulo { font-size: 0.95rem; opacity: 0.7; margin: 0; }
+
+/* ===== FOOTER ===== */
+.footer-cetis { background: var(--cetis-texto); color: rgba(255,255,255,0.55); padding: 32px 0; margin-top: 80px; font-size: 0.875rem; text-align: center; border-top: 4px solid var(--cetis-rojo); }
+.footer-cetis strong { color: white; }
