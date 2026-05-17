@@ -14,7 +14,8 @@ use App\Http\Controllers\{
     PerfilController,
     EventoController,
     ForoController,
-    ReportesController    
+    ReportesController,
+    AsesoriaController
 };
 
 // --- PÚBLICAS ---
@@ -104,6 +105,15 @@ Route::middleware(['auth'])->group(function () {
    // Ruta para que el alumno se inscriba a un curso
     Route::post('/curso/{id}/inscribir', [CursoController::class, 'inscribir'])->name('cursos.inscribir');
     Route::delete('/curso/{id}/salir', [CursoController::class, 'salir'])->name('cursos.salir');
+
+    //Rutas de asesorías
+    // Ruta para mostrar el formulario de creación (Pasa el id del curso)
+    Route::get('/curso/{id_curso}/asesoria/create', [AsesoriaController::class, 'create'])->name('asesorias.create');
+
+    // Ruta para guardar los datos en la BD (Procesa el formulario)
+    Route::post('/curso/{id_curso}/asesoria/store', [AsesoriaController::class, 'store'])->name('asesorias.store');
+
+
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
     Route::get('/agenda', function () { return view('Agenda'); });

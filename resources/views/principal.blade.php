@@ -4,18 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Asesorías | CETIS 17</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
-</head>
-<body>  
-    
-    <x-sidebar />
-    
-    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
         <div class="container">
             <a class="navbar-brand fw-bold">
                 <img src="https://placehold.co/32x32/8C001A/ffffff?text=C17" alt="Logo" class="d-inline-block align-text-top rounded-full me-2">
@@ -31,13 +20,23 @@
                     @if(Auth::user()->rol === 'Administrador')
                         <li class="nav-item"><a class="nav-link" href="/gestioncurso">Cursos</a></li>
                         <li class="nav-item"><a class="nav-link" href="/gestionusuario">Usuarios</a></li>
-                    @endif
+                    @endif  
                 </ul>
             </div>
         </div>
     </nav>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
+</head>
+<body>  
+        @extends('layouts.app')
+        @section('content')
 
-    <header class="hero-section text-center">
+    <div>
+    <nav class="hero-section text-center">
         <div class="container">
             <h1 class="display-3 fw-bolder mb-3">¡Bienvenido, {{ Auth::user()->nombre }}!</h1>
             <p class="lead mb-5 opacity-75">Plataforma de Refuerzo Académico CETIS 17</p>
@@ -46,7 +45,7 @@
                 <a href="/biblioteca" class="btn btn-outline-light btn-lg fw-bold shadow-lg">Ver Biblioteca</a>
             </div>
         </div>
-    </header>
+    </nav>
 
    <section id="funcionalidades" class="py-5 mt-4">
         <div class="container">
@@ -110,6 +109,7 @@
             <p class="mb-0">&copy; 2026 CETIS 17 | DGETI.</p>
         </div>
     </footer>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

@@ -132,7 +132,25 @@
 
             {{-- Contenido Principal --}}
             <div class="col-md-9">
-                <h4 class="fw-bold mb-3">Actividades del Curso</h4>
+                {{-- Contenedor con título y botón alineados a los extremos --}}
+                {{-- Contenedor con título y botón alineados a los extremos --}}
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="fw-bold mb-0">Actividades del Curso</h4>
+                    
+                    {{-- Candado estricto por Roles: Solo Administrador o Asesor pueden crear --}}
+                    @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
+                        <div class="d-flex gap-2">
+                            {{-- Botón Directo para la Asesoría --}}
+                            <a href="{{ route('asesorias.create', $curso->id_curso) }}" class="btn btn-danger fw-bold shadow-sm">
+                                <i class="bi bi-calendar-event-fill me-1"></i> + Crear Asesoría
+                            </a>
+                            {{-- Botón para el Examen (Si quieres agregarlo después) --}}
+                            {{-- <a href="{{ route('examenes.create', $curso->id_curso) }}" class="btn btn-danger fw-bold shadow-sm">
+                                <i class="bi bi-file-earmark-check me-1"></i> + Crear Examen
+                            </a> --}}
+                        </div>
+                    @endif
+                </div>
                 
                 {{-- Tarjeta de Descripción --}}
                 <div class="tarjeta-curso-interna shadow-sm mb-4">
@@ -156,13 +174,22 @@
                     <div class="card mb-3 shadow-sm border-0 border-start border-4 border-danger">
                         <div class="card-body d-flex justify-content-between align-items-center">
                             <div>
-                                <h6 class="fw-bold mb-1">{{ $evento->titulo }}</h6>
-                                <p class="text-muted mb-0 small">{{ $evento->descripcion }}</p>
-                                <span class="badge bg-light text-dark border mt-2">
-                                    <i class="bi bi-calendar-event me-1"></i> {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
+                                {{-- Cambiamos el nombre de la columna a 'nombre_evento' según tu base de datos --}}
+                                <h6 class="fw-bold mb-1">{{ $evento->nombre_evento }}</h6>
+                                
+                                {{-- Mostramos una pequeña etiqueta dependiendo del tipo de evento --}}
+                                <span class="badge bg-secondary mb-2 text-uppercase" style="font-size: 0.75rem;">
+                                    {{ $evento->tipo }}
+                                </span>
+                                
+                                <span class="badge bg-light text-dark border ms-2">
+                                    <i class="bi bi-calendar-event me-1"></i> Publicado: {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
                                 </span>
                             </div>
-                            <i class="bi bi-chevron-right text-muted"></i>
+                            {{-- Botón para ir a ver el detalle de la asesoría o contestar el examen --}}
+                            <a href="/evento/{{ $evento->id_evento }}" class="btn btn-light btn-sm rounded-circle shadow-sm">
+                                <i class="bi bi-chevron-right text-danger fw-bold"></i>
+                            </a>
                         </div>
                     </div>
                 @empty

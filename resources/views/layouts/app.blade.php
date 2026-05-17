@@ -23,7 +23,6 @@
     </style>
 </head>
 <body>
-
     <!-- Llamamos a los componentes que ya creaste -->
     @include('components.sidebar')
     @include('components.navbar')
