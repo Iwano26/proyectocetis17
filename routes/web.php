@@ -113,7 +113,26 @@ Route::middleware(['auth'])->group(function () {
     // Ruta para guardar los datos en la BD (Procesa el formulario)
     Route::post('/curso/{id_curso}/asesoria/store', [AsesoriaController::class, 'store'])->name('asesorias.store');
 
+    // RUTA PARA ELIMINAR: Borra el evento (y por cascada borra la asesoría y asistencias)
+    Route::delete('/evento/{id_evento}/eliminar', [AsesoriaController::class, 'destroy'])->name('eventos.destroy');
 
+    // RUTAS PARA EDICIÓN:
+    // 1. Muestra la pantalla con los datos llenos para editar
+    Route::get('/evento/{id_evento}/editar-asesoria', [AsesoriaController::class, 'edit'])->name('asesorias.edit');
+    // 2. Procesa la actualización en la Base de Datos
+    Route::put('/evento/{id_evento}/update', [AsesoriaController::class, 'update'])->name('asesorias.update');
+
+    // RUTA PARA UNIRSE A LA ASESORÍA: El alumno se inscribe a la asesoría (tabla asistencia_asesoria)
+    Route::post('/asesoria/{id_evento}/unirse', [AsesoriaController::class, 'unirse'])->name('asesorias.unirse');
+
+    // RUTA PARA VER LA LISTA DE ASISTENCIA: Muestra quiénes se unieron a la asesoría
+    Route::get('/evento/{id_evento}/asistencia', [AsesoriaController::class, 'listaAsistencia'])->name('asesorias.lista');
+
+    // RUTA PARA CANCELAR ASISTENCIA: El alumno cancela su asistencia a la asesoría
+    Route::delete('/asesoria/{id_evento}/cancelar', [AsesoriaController::class, 'cancelarAsistencia'])->name('asesorias.cancelar');
+
+    // RUTA PARA AGREGAR MANUALMENTE A UN ESTUDIANTE: El asesor agrega a un estudiante a la asesoría
+    Route::post('/asesoria/{id_asesoria}/agregar-manualmente', [AsesoriaController::class, 'agregarManualmente'])->name('asesorias.agregarManualmente');
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
     Route::get('/agenda', function () { return view('Agenda'); });

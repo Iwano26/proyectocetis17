@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Curso;
 use App\Models\Horario;
 use App\Models\Inscripcion;
+use App\Models\Evento;
 
 class CursoController extends Controller
 {
@@ -232,8 +233,36 @@ class CursoController extends Controller
         }
         // --------------------------------------------------
 
-        // 3. Retornamos la vista con ambas variables: curso y yaInscrito
-        return view('CursosViews/vercurso', compact('curso', 'yaInscrito'));
+        // --- NUEVA CONSULTA DE EVENTOS CON ASISTENCIAS Y ESTADOS ---
+        // Traemos todos los eventos amarrados a este curso y calculamos los datos en caliente
+       $correoUsuario = auth()->check() ? auth()->user()->correo : '';
+
+    $eventos = DB::table('evento')
+        ->leftJoin('asesoria', 'evento.id_evento', '=', 'asesoria.id_evento')
+        ->select(
+            'evento.id_evento',
+            'evento.id_curso',
+            'evento.nombre_evento',
+            'evento.fecha',
+            'evento.hora',
+            'evento.tipo',
+            'asesoria.id_asesoria',
+            'asesoria.lugar as ases_lugar',
+            'asesoria.fecha_asesoria as ases_fecha',
+            'asesoria.hora_inicio as ases_inicio',
+            'asesoria.hora_fin as ases_fin',
+            'asesoria.estado as ases_estado',
+            DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria) as total_asistentes'),
+            DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria AND aa.correo_persona = "' . $correoUsuario . '") as ya_inscrito')
+        )
+        ->where('evento.id_curso', $id)
+        ->orderBy('evento.id_evento', 'desc')
+        ->get();
+        // ------------------------------------------------------------
+
+        // 3. Retornamos la vista incluyendo ahora los 'eventos' en el compact
+        return view('CursosViews/actividadesCurso', compact('curso', 'yaInscrito', 'eventos'));
+
     }
 
     public function destroy($id) {
