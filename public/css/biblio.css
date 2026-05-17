@@ -1,107 +1,80 @@
-/* Variables Globales */
+/* Variables del Sistema */
 :root {
     --cetis-rojo: #8C001A;
-    --cetis-primary: #8C001A;
-    --cetis-secondary: #004A77;
-    --cetis-light: #f8f9fa;
+    --cetis-rojo-hover: #6a0013;
 }
 
-/* Estilos Generales */
-body {
-    font-family: 'Inter', sans-serif;
-    background-color: var(--cetis-light);
-}
-
-.navbar-brand, .text-cetis {
-    color: var(--cetis-primary) !important;
-    font-weight: bold;
-}
-
-/* Botón Menú Flotante */
-#menu-toggle-btn {
-    position: fixed;
-    top: 15px;
-    left: 20px;
-    z-index: 1040;
-    background-color: white;
-    color: var(--cetis-rojo);
-    border: 2px solid var(--cetis-rojo);
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 1.5rem;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-#menu-toggle-btn:hover {
-    background-color: var(--cetis-primary);
-    color: white;
-}
-
-/* Barra Superior (Navbar) */
-.navbar {
-    background-color: white !important;
-    border-bottom: 1px solid #dee2e6;
-    min-height: 70px;
-    padding-left: 80px;
-}
-
-/* Offcanvas (Sidebar) */
-.offcanvas-header {
-    background-color: var(--cetis-primary);
-    color: white;
-}
-
-.offcanvas-header .btn-close {
-    filter: invert(1);
-}
-
-.offcanvas-body .nav-link {
-    color: #333;
-    font-weight: 500;
-    padding: 12px 15px;
-    border-radius: 8px;
-    transition: all 0.2s;
-}
-
-.offcanvas-body .nav-link:hover, 
-.offcanvas-body .nav-link.active {
-    background-color: var(--cetis-primary);
-    color: white !important;
-}
-
-/* Sección de Biblioteca y Filtros */
-.seccion-filtros {
-    background-color: #eee;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 25px;
-}
-
+/* Tarjetas de archivos (Borde izquierdo rojo institucional y bordes grises sutiles) */
 .tarjeta-archivo {
-    background-color: white;
-    border: 2px solid var(--cetis-rojo);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 15px;
-    transition: transform 0.3s;
+    border: 1px solid #dee2e6 !important;
+    border-left: 4px solid var(--cetis-rojo) !important;
+    border-radius: 8px !important;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
-
 .tarjeta-archivo:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
 }
 
+/* Contenedor del Icono PDF */
 .icono-archivo {
-    width: 55px;
-    height: 55px;
-    background-color: #eee;
-    border-radius: 8px;
-    margin-right: 20px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
+    width: 48px;
+    height: 48px;
+    background-color: #fff0f2;
+    border-radius: 6px;
     color: var(--cetis-rojo);
+    font-size: 1.4rem;
+}
+
+/* Forzar Fondo Blanco Limpio a los Filtros */
+.seccion-filtros {
+    background-color: #ffffff !important;
+    border-color: #e9ecef !important;
+}
+
+/* Inputs y Selects */
+.custom-input {
+    font-size: 1rem !important;
+    border-radius: 6px 0 0 6px !important;
+}
+.custom-select {
+    padding: 8px 12px;
+    font-size: 0.9rem;
+}
+
+/* Unificación de los botones con los estilos de la vista Curso */
+.btn-custom-danger {
+    background-color: var(--cetis-rojo) !important;
+    border-color: var(--cetis-rojo) !important;
+}
+.btn-custom-danger:hover {
+    background-color: var(--cetis-rojo-hover) !important;
+}
+.btn-custom-action {
+    color: var(--cetis-rojo);
+    border-color: var(--cetis-rojo);
+}
+.btn-custom-action:hover {
+    background-color: var(--cetis-rojo);
+    color: white;
+}
+
+/* Botones de acción del archivo */
+.btn-action {
+    font-size: 0.85rem !important;
+    padding: 6px 16px;
+    border-radius: 4px;
+}
+.btn-ver {
+    background-color: #0dcaf0 !important;
+    border-color: #0dcaf0 !important;
+}
+.btn-entrar {
+    background-color: #198754 !important;
+    border-color: #198754 !important;
+}
+.btn-filter-apply {
+    background-color: #212529;
+    padding: 8px;
+    font-size: 0.9rem;
 }

@@ -1,0 +1,148 @@
+/* Estructura Base Obligatoria para Bootstrap 5 */
+.offcanvas-cetis {
+    width: 290px !important;
+    background-color: #ffffff !important;
+    border-right: 2px solid rgba(140, 0, 26, 0.15) !important;
+    box-shadow: 4px 0 25px rgba(0, 0, 0, 0.08) !important;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Forzar que actúen como Header y Body nativos */
+.offcanvas-header-cetis {
+    padding: 24px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.offcanvas-body-cetis {
+    flex-grow: 1;
+    padding: 24px 16px !important;
+    overflow-y: auto;
+}
+
+.offcanvas-footer-cetis {
+    padding: 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.06);
+    background-color: #f8f9fa;
+}
+
+/* Diseño de Elementos de Usuario */
+.sidebar-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.sidebar-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #8C001A;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+}
+
+/* CORREGIDO: Ahora usa exactamente la misma fuente Serif Premium de Bienvenida */
+.sidebar-nombre {
+    font-family: 'Playfair Display', 'Georgia', serif !important;
+    font-weight: 800;
+    color: #1a1a2e;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    -webkit-font-smoothing: antialiased;
+}
+
+.sidebar-rol {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.sidebar-close-btn {
+    background: transparent;
+    border: none;
+    color: #a0a0a0;
+    font-size: 1.2rem;
+    transition: color 0.2s;
+    cursor: pointer;
+}
+.sidebar-close-btn:hover {
+    color: #8C001A;
+}
+
+/* Enlaces y Navegación */
+.sidebar-section-label {
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: #a0a0a0;
+    letter-spacing: 0.8px;
+    margin-bottom: 10px;
+    padding-left: 12px;
+}
+.sidebar-section-label.danger { color: #8C001A; }
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-link {
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    color: #495057;
+    text-decoration: none;
+    font-size: 0.92rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+.sidebar-link i { font-size: 1.1rem; color: #6c757d; }
+
+.sidebar-link:hover {
+    background-color: #fff0f2;
+    color: #8C001A;
+}
+.sidebar-link:hover i { color: #8C001A; }
+
+.sidebar-link.active {
+    background-color: #8C001A !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 4px 12px rgba(140, 0, 26, 0.15);
+}
+.sidebar-link.active i { color: white !important; }
+
+.sidebar-divider { margin: 20px 12px; opacity: 0.08; }
+
+.sidebar-logout-btn {
+    font-family: 'Poppins', sans-serif;
+    width: 100%;
+    background: transparent;
+    border: 2px solid #dc3545;
+    color: #dc3545;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.sidebar-logout-btn:hover { background-color: #dc3545; color: white; }
