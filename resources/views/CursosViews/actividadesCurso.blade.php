@@ -97,9 +97,7 @@
                                 </form>
                             @endif
                         @else
-                            <button class="btn btn-primary fw-bold px-4" disabled>
-                                <i class="bi bi-person-badge me-2"></i> MODO GESTIÓN
-                            </button>
+                            
                         @endif
                     </div>
                 </div>
@@ -145,9 +143,9 @@
                                 <i class="bi bi-calendar-event-fill me-1"></i> + Crear Asesoría
                             </a>
                             {{-- Botón para el Examen (Si quieres agregarlo después) --}}
-                            {{-- <a href="{{ route('examenes.create', $curso->id_curso) }}" class="btn btn-danger fw-bold shadow-sm">
+                            <a href="{{ route('examenes.create', $curso->id_curso) }}" class="btn btn-danger fw-bold shadow-sm">
                                 <i class="bi bi-file-earmark-check me-1"></i> + Crear Examen
-                            </a> --}}
+                            </a>
                         </div>
                     @endif
                 </div>
@@ -232,9 +230,11 @@
                         {{-- Lado Derecho: Botones --}}
                         <div class="d-flex align-items-center gap-2">
                             @if(Auth::user()->rol === 'Estudiante')
+
                                 @if($evento->tipo === 'asesoria')
                                     @if(($evento->ya_inscrito ?? 0) > 0)
-                                        <form action="{{ route('asesorias.cancelar', $evento->id_evento) }}" method="POST" class="m-0"
+                                        <form action="{{ route('asesorias.cancelar', $evento->id_evento) }}" 
+                                            method="POST" class="m-0"
                                             onsubmit="return confirm('¿Seguro que deseas cancelar tu asistencia?');">
                                             @csrf
                                             @method('DELETE')
@@ -244,41 +244,60 @@
                                             </button>
                                         </form>
                                     @else
-                                        @if(($evento->ya_inscrito ?? 0) > 0)
-                                            <form action="{{ route('asesorias.cancelar', $evento->id_evento) }}" method="POST" class="m-0"
-                                                onsubmit="return confirm('¿Seguro que deseas cancelar tu asistencia?');">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-success fw-bold px-3"
-                                                    @if(in_array($evento->ases_estado ?? '', ['TERMINADA', 'CANCELADA', 'EN_CURSO'])) disabled @endif>
-                                                    <i class="bi bi-check-circle-fill me-1"></i> Registrado
-                                                </button>
-                                            </form>
-                                        @else
-                                            <form action="{{ route('asesorias.unirse', $evento->id_evento) }}" method="POST" class="m-0">
-                                                @csrf
-                                                @php
-                                                    $desactivar = in_array($evento->ases_estado ?? '', ['TERMINADA', 'CANCELADA', 'EN_CURSO'])
-                                                            || ($evento->bloquear_inscripcion ?? false);
-                                                @endphp
-                                                <button type="submit"
-                                                    class="btn btn-sm fw-bold px-3 shadow-sm {{ $desactivar ? 'btn-secondary' : 'btn-outline-danger' }}"
-                                                    @if($desactivar) disabled @endif
-                                                    title="{{ ($evento->bloquear_inscripcion ?? false) ? 'Inscripción cerrada: menos de 1 hora para el inicio sin asistentes confirmados' : '' }}">
-                                                    <i class="bi bi-box-arrow-in-right me-1"></i>
-                                                    {{ ($evento->bloquear_inscripcion ?? false) ? 'Cerrado' : 'Unirse' }}
-                                                </button>
-                                            </form>
+                                        <form action="{{ route('asesorias.unirse', $evento->id_evento) }}" method="POST" class="m-0">
+                                            @csrf
+                                            @php
+                                                $desactivar = in_array($evento->ases_estado ?? '', ['TERMINADA', 'CANCELADA', 'EN_CURSO'])
+                                                        || ($evento->bloquear_inscripcion ?? false);
+                                            @endphp
+                                            <button type="submit"
+                                                class="btn btn-sm fw-bold px-3 shadow-sm {{ $desactivar ? 'btn-secondary' : 'btn-outline-danger' }}"
+                                                @if($desactivar) disabled @endif
+                                                title="{{ ($evento->bloquear_inscripcion ?? false) ? 'Inscripción cerrada: menos de 1 hora para el inicio sin asistentes confirmados' : '' }}">
+                                                <i class="bi bi-box-arrow-in-right me-1"></i>
+                                                {{ ($evento->bloquear_inscripcion ?? false) ? 'Cerrado' : 'Unirse' }}
+                                            </button>
+                                        </form>
+                                    @endif
+                                @endif
+
+                                @if($evento->tipo === 'cuestionario')
+                                    @php
+                                        $cuestionario = DB::table('cuestionario')
+                                            ->where('id_evento', $evento->id_evento)
+                                            ->first();
+                                        $configEx = $cuestionario
+                                            ? DB::table('configuracion_examen')
+                                                ->where('id_cuestionario', $cuestionario->id_cuestionario)
+                                                ->first()
+                                            : null;
+                                    @endphp
+                                    @if($cuestionario && $configEx)
+                                        @if($configEx->estado === 'ACTIVO')
+                                            <a href="{{ route('examen.inicio', $cuestionario->id_cuestionario) }}"
+                                            class="btn btn-sm btn-danger fw-bold px-3 shadow-sm">
+                                                <i class="bi bi-pencil-square me-1"></i> Iniciar Examen
+                                            </a>
+                                        @elseif($configEx->estado === 'PENDIENTE')
+                                            <button class="btn btn-sm btn-warning fw-bold px-3" disabled>
+                                                <i class="bi bi-clock me-1"></i> Próximamente
+                                            </button>
+                                        @elseif($configEx->estado === 'CERRADO')
+                                            <a href="{{ route('examen.misResultados', $cuestionario->id_cuestionario) }}"
+                                            class="btn btn-sm btn-outline-dark fw-bold px-3">
+                                                <i class="bi bi-bar-chart-fill me-1"></i> Ver Mis Resultados
+                                            </a>
                                         @endif
                                     @endif
                                 @endif
 
                             @elseif(Auth::user()->rol === 'Asesor' || Auth::user()->rol === 'Administrador')
+
                                 @if($evento->tipo === 'asesoria')
-                                    <button type="button" 
-                                        class="btn btn-sm btn-dark fw-bold px-2 shadow-sm" 
+                                    <button type="button"
+                                        class="btn btn-sm btn-dark fw-bold px-2 shadow-sm"
                                         title="Lista de Asistencia"
-                                        data-bs-toggle="modal" 
+                                        data-bs-toggle="modal"
                                         data-bs-target="#modalLista{{ $evento->id_evento }}">
                                         <i class="bi bi-card-checklist"></i>
                                         <span class="d-none d-md-inline ms-1">Lista</span>
@@ -288,6 +307,22 @@
                                         <i class="bi bi-pencil-square"></i>
                                     </a>
                                 @endif
+
+                                @if($evento->tipo === 'cuestionario')
+                                    @php
+                                        $cuestionario = DB::table('cuestionario')
+                                            ->where('id_evento', $evento->id_evento)
+                                            ->first();
+                                    @endphp
+                                    @if($cuestionario)
+                                        <a href="{{ route('examenes.resultados', $cuestionario->id_cuestionario) }}"
+                                        class="btn btn-sm btn-dark fw-bold px-2 shadow-sm" title="Ver Resultados">
+                                            <i class="bi bi-bar-chart-fill"></i>
+                                            <span class="d-none d-md-inline ms-1">Resultados</span>
+                                        </a>
+                                    @endif
+                                @endif
+
                                 <form action="/evento/{{ $evento->id_evento }}/eliminar" method="POST" class="m-0"
                                     onsubmit="return confirm('¿Seguro que deseas eliminar esta actividad?');">
                                     @csrf
@@ -296,6 +331,7 @@
                                         <i class="bi bi-trash3-fill"></i>
                                     </button>
                                 </form>
+
                             @endif
 
                             <button type="button" class="btn btn-light btn-sm rounded-circle shadow-sm"
@@ -417,162 +453,166 @@
 
 
                 {{-- ======= MODAL LISTA DE ASISTENCIA ======= --}}
-                <div class="modal fade" id="modalLista{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered modal-lg">
-                        <div class="modal-content border-0 shadow">
+                    @if($evento->tipo === 'asesoria')   {{-- ← AGREGAR --}}
+                    <div class="modal fade" id="modalLista{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content border-0 shadow">
 
-                            <div class="modal-header bg-dark text-white py-3">
-                                <h5 class="modal-title fw-bold">
-                                    <i class="bi bi-card-checklist text-danger me-2"></i>
-                                    Lista de Asistencia — {{ $evento->nombre_evento }}
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                            </div>
+                                <div class="modal-header bg-dark text-white py-3">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-card-checklist text-danger me-2"></i>
+                                        Lista de Asistencia — {{ $evento->nombre_evento }}
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
 
-                            <div class="modal-body p-4">
+                                <div class="modal-body p-4">
 
-                                @php
-                                    // Alumnos ya en la lista
-                                    $asistentes = DB::table('asistencia_asesoria')
-                                        ->join('persona', 'asistencia_asesoria.correo_persona', '=', 'persona.correo')
-                                        ->where('asistencia_asesoria.id_asesoria', $evento->id_asesoria)
-                                        ->select(
-                                            'persona.nombre',
-                                            'persona.apellidoPa',
-                                            'persona.apellidoMa',
-                                            'persona.correo',
-                                            'asistencia_asesoria.asistio',
-                                            'asistencia_asesoria.id_asistencia'
-                                        )
-                                        ->get();
+                                    @php
+                                        // Alumnos ya en la lista
+                                        $asistentes = DB::table('asistencia_asesoria')
+                                            ->join('persona', 'asistencia_asesoria.correo_persona', '=', 'persona.correo')
+                                            ->where('asistencia_asesoria.id_asesoria', $evento->id_asesoria)
+                                            ->select(
+                                                'persona.nombre',
+                                                'persona.apellidoPa',
+                                                'persona.apellidoMa',
+                                                'persona.correo',
+                                                'asistencia_asesoria.asistio',
+                                                'asistencia_asesoria.id_asistencia'
+                                            )
+                                            ->get();
 
-                                    // Alumnos inscritos al curso que NO están ya en la lista
-                                    $correosEnLista = $asistentes->pluck('correo')->toArray();
+                                        // Alumnos inscritos al curso que NO están ya en la lista
+                                        $correosEnLista = $asistentes->pluck('correo')->toArray();
 
-                                    $alumnosDisponibles = DB::table('inscripcion')
-                                        ->join('persona', 'inscripcion.correo_estudiante', '=', 'persona.correo')
-                                        ->where('inscripcion.id_curso', $curso->id_curso)
-                                        ->whereNotIn('inscripcion.correo_estudiante', $correosEnLista)
-                                        ->select(
-                                            'persona.nombre',
-                                            'persona.apellidoPa',
-                                            'persona.apellidoMa',
-                                            'persona.correo'
-                                        )
-                                        ->get();
-                                @endphp
+                                        $alumnosDisponibles = DB::table('inscripcion')
+                                            ->join('persona', 'inscripcion.correo_estudiante', '=', 'persona.correo')
+                                            ->where('inscripcion.id_curso', $curso->id_curso)
+                                            ->whereNotIn('inscripcion.correo_estudiante', $correosEnLista)
+                                            ->select(
+                                                'persona.nombre',
+                                                'persona.apellidoPa',
+                                                'persona.apellidoMa',
+                                                'persona.correo'
+                                            )
+                                            ->get();
+                                    @endphp
 
-                                {{-- Botón agregar alumno --}}
-                                @if($alumnosDisponibles->isNotEmpty())
-                                    <div class="d-flex justify-content-end mb-3">
-                                        <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#modalAgregarAlumno{{ $evento->id_evento }}">
-                                            <i class="bi bi-person-plus-fill me-1"></i> Agregar Alumno
-                                        </button>
-                                    </div>
-                                @endif
+                                    {{-- Botón agregar alumno --}}
+                                    @if($alumnosDisponibles->isNotEmpty())
+                                        <div class="d-flex justify-content-end mb-3">
+                                            <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm"
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#modalAgregarAlumno{{ $evento->id_evento }}">
+                                                <i class="bi bi-person-plus-fill me-1"></i> Agregar Alumno
+                                            </button>
+                                        </div>
+                                    @endif
 
-                                @if($asistentes->isEmpty())
-                                    <div class="text-center py-4">
-                                        <i class="bi bi-people display-4 text-muted"></i>
-                                        <p class="text-muted mt-2">Ningún estudiante se ha registrado aún.</p>
-                                    </div>
-                                @else
-                                    <p class="text-muted mb-3">
-                                        <i class="bi bi-people-fill text-danger me-1"></i>
-                                        <strong>{{ $asistentes->count() }}</strong> estudiante(s) registrado(s)
-                                    </p>
-                                    <div class="table-responsive">
-                                        <table class="table table-hover align-middle mb-0">
-                                            <thead class="table-dark">
-                                                <tr>
-                                                    <th>#</th>
-                                                    <th>Nombre Completo</th>
-                                                    <th>Correo</th>
-                                                    <th class="text-center">Estado</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach($asistentes as $i => $asistente)
+                                    @if($asistentes->isEmpty())
+                                        <div class="text-center py-4">
+                                            <i class="bi bi-people display-4 text-muted"></i>
+                                            <p class="text-muted mt-2">Ningún estudiante se ha registrado aún.</p>
+                                        </div>
+                                    @else
+                                        <p class="text-muted mb-3">
+                                            <i class="bi bi-people-fill text-danger me-1"></i>
+                                            <strong>{{ $asistentes->count() }}</strong> estudiante(s) registrado(s)
+                                        </p>
+                                        <div class="table-responsive">
+                                            <table class="table table-hover align-middle mb-0">
+                                                <thead class="table-dark">
                                                     <tr>
-                                                        <td class="text-muted fw-bold">{{ $i + 1 }}</td>
-                                                        <td class="fw-semibold">
-                                                            {{ $asistente->nombre }}
-                                                            {{ $asistente->apellidoPa }}
-                                                            {{ $asistente->apellidoMa }}
-                                                        </td>
-                                                        <td class="text-muted" style="font-size: 0.85rem;">
-                                                            {{ $asistente->correo }}
-                                                        </td>
-                                                        <td class="text-center">
-                                                            <span class="badge
-                                                                @if($asistente->asistio == 'ASISTIO') bg-success
-                                                                @elseif($asistente->asistio == 'FALTO') bg-danger
-                                                                @else bg-warning text-dark
-                                                                @endif">
-                                                                {{ $asistente->asistio }}
-                                                            </span>
-                                                        </td>
+                                                        <th>#</th>
+                                                        <th>Nombre Completo</th>
+                                                        <th>Correo</th>
+                                                        <th class="text-center">Estado</th>
                                                     </tr>
-                                                @endforeach
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                @endif
+                                                </thead>
+                                                <tbody>
+                                                    @foreach($asistentes as $i => $asistente)
+                                                        <tr>
+                                                            <td class="text-muted fw-bold">{{ $i + 1 }}</td>
+                                                            <td class="fw-semibold">
+                                                                {{ $asistente->nombre }}
+                                                                {{ $asistente->apellidoPa }}
+                                                                {{ $asistente->apellidoMa }}
+                                                            </td>
+                                                            <td class="text-muted" style="font-size: 0.85rem;">
+                                                                {{ $asistente->correo }}
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <span class="badge
+                                                                    @if($asistente->asistio == 'ASISTIO') bg-success
+                                                                    @elseif($asistente->asistio == 'FALTO') bg-danger
+                                                                    @else bg-warning text-dark
+                                                                    @endif">
+                                                                    {{ $asistente->asistio }}
+                                                                </span>
+                                                            </td>
+                                                        </tr>
+                                                    @endforeach
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    @endif
+
+                                </div>
+
+                                <div class="modal-footer bg-light py-2">
+                                    <button type="button" class="btn btn-secondary btn-sm fw-bold px-3"
+                                            data-bs-dismiss="modal">Cerrar</button>
+                                </div>
 
                             </div>
-
-                            <div class="modal-footer bg-light py-2">
-                                <button type="button" class="btn btn-secondary btn-sm fw-bold px-3"
-                                        data-bs-dismiss="modal">Cerrar</button>
-                            </div>
-
                         </div>
                     </div>
-                </div>
+                @endif  {{-- ← Y ESTO --}}
                 {{-- ======= FIN MODAL LISTA ======= --}}
 
                 {{-- ======= MODAL AGREGAR ALUMNO ======= --}}
-                <div class="modal fade" id="modalAgregarAlumno{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content border-0 shadow">
+                @if($evento->tipo === 'asesoria')   {{-- ← AGREGAR ESTO --}}
+                    <div class="modal fade" id="modalAgregarAlumno{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
 
-                            <div class="modal-header bg-dark text-white py-3">
-                                <h5 class="modal-title fw-bold">
-                                    <i class="bi bi-person-plus-fill text-danger me-2"></i> Agregar Alumno a Lista
-                                </h5>
-                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                <div class="modal-header bg-dark text-white py-3">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-person-plus-fill text-danger me-2"></i> Agregar Alumno a Lista
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+
+                                <div class="modal-body p-4">
+                                    <form action="{{ route('asesorias.agregarManualmente', $evento->id_asesoria) }}" method="POST">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold text-secondary">Selecciona el Alumno</label>
+                                            <select name="correo_persona" class="form-select border-2" required>
+                                                <option value="" disabled selected>-- Elige un alumno --</option>
+                                                @foreach($alumnosDisponibles as $alumno)
+                                                    <option value="{{ $alumno->correo }}">
+                                                        {{ $alumno->nombre }} {{ $alumno->apellidoPa }} {{ $alumno->apellidoMa }}
+                                                        — {{ $alumno->correo }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-light border fw-bold px-3"
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
+                                                <i class="bi bi-person-check-fill me-1"></i> Agregar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
                             </div>
-
-                            <div class="modal-body p-4">
-                                <form action="{{ route('asesorias.agregarManualmente', $evento->id_asesoria) }}" method="POST">
-                                    @csrf
-                                    <div class="mb-3">
-                                        <label class="form-label fw-bold text-secondary">Selecciona el Alumno</label>
-                                        <select name="correo_persona" class="form-select border-2" required>
-                                            <option value="" disabled selected>-- Elige un alumno --</option>
-                                            @foreach($alumnosDisponibles as $alumno)
-                                                <option value="{{ $alumno->correo }}">
-                                                    {{ $alumno->nombre }} {{ $alumno->apellidoPa }} {{ $alumno->apellidoMa }}
-                                                    — {{ $alumno->correo }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="d-flex justify-content-end gap-2">
-                                        <button type="button" class="btn btn-light border fw-bold px-3"
-                                                data-bs-dismiss="modal">Cancelar</button>
-                                        <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
-                                            <i class="bi bi-person-check-fill me-1"></i> Agregar
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-
                         </div>
                     </div>
-                </div>
+                @endif {{-- ← AGREGAR ESTO --}}
                 {{-- ======= FIN MODAL AGREGAR ALUMNO ======= --}}
                 {{-- ======= FIN MODAL ======= --}}
 

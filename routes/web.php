@@ -15,7 +15,10 @@ use App\Http\Controllers\{
     EventoController,
     ForoController,
     ReportesController,
-    AsesoriaController
+    AsesoriaController,
+    ExamenController,
+    RespuestaExamenController,
+    AgendaController
 };
 
 // --- PÚBLICAS ---
@@ -134,6 +137,29 @@ Route::middleware(['auth'])->group(function () {
     // RUTA PARA AGREGAR MANUALMENTE A UN ESTUDIANTE: El asesor agrega a un estudiante a la asesoría
     Route::post('/asesoria/{id_asesoria}/agregar-manualmente', [AsesoriaController::class, 'agregarManualmente'])->name('asesorias.agregarManualmente');
 
+
+    //Examenes
+    // ===== EXÁMENES =====
+
+    // ASESOR: Crear examen
+    Route::get('/curso/{id_curso}/examen/create', [ExamenController::class, 'create'])->name('examenes.create');
+    Route::post('/curso/{id_curso}/examen/store', [ExamenController::class, 'store'])->name('examenes.store');
+
+    // ASESOR: Resultados y revisión
+    Route::get('/examen/{id_cuestionario}/resultados', [ExamenController::class, 'resultados'])->name('examenes.resultados');
+    Route::get('/intento/{id_intento}/ver', [ExamenController::class, 'verIntento'])->name('examenes.verIntento');
+    Route::post('/respuesta/{id_respuesta}/revisar', [ExamenController::class, 'revisarRespuesta'])->name('examenes.revisarRespuesta');
+
+    // ALUMNO: Flujo del examen
+    Route::get('/examen/{id_cuestionario}/inicio', [RespuestaExamenController::class, 'inicio'])->name('examen.inicio');
+    Route::post('/examen/{id_cuestionario}/iniciar', [RespuestaExamenController::class, 'iniciarIntento'])->name('examen.iniciar');
+    Route::get('/intento/{id_intento}/responder', [RespuestaExamenController::class, 'responder'])->name('examen.responder');
+    Route::post('/intento/{id_intento}/guardar', [RespuestaExamenController::class, 'guardar'])->name('examen.guardar');
+    Route::get('/examen/{id_cuestionario}/mis-resultados', [RespuestaExamenController::class, 'misResultados'])->name('examen.misResultados');
+    Route::get('/intento/{id_intento}/mi-intento', [RespuestaExamenController::class, 'verMiIntento'])->name('examen.verMiIntento');
+
+
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
-    Route::get('/agenda', function () { return view('Agenda'); });
+
+    Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
 });

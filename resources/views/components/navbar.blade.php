@@ -11,7 +11,7 @@
         {{-- Logotipo y Texto Brand --}}
         <a href="/principal" class="navbar-brand-cetis">
             <img src="{{ asset('img/cetis.png') }}" alt="Logo CETIS 17" width="35" height="35" class="d-inline-block align-top">
-            <span class="brand-text">Sistema de <span>asesorías</span></span>
+            <span class="brand-text">Sistema de <span>Asesorías</span></span>
         </a>
 
         {{-- Enlaces Derechos y Dropdown de Perfil --}}
