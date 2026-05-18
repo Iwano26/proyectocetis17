@@ -261,8 +261,7 @@ class CursoController extends Controller
         // ------------------------------------------------------------
 
         // 3. Retornamos la vista incluyendo ahora los 'eventos' en el compact
-        return view('CursosViews/actividadesCurso', compact('curso', 'yaInscrito', 'eventos'));
-
+        return view('CursosViews/vercurso', compact('curso', 'yaInscrito', 'eventos'));
     }
 
     public function destroy($id) {
