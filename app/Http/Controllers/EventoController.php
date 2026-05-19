@@ -97,26 +97,36 @@ class EventoController extends Controller
         $correoUsuario = Auth::check() ? Auth::user()->correo : '';
 
         $eventos = DB::table('evento')
-            ->leftJoin('asesoria', 'evento.id_evento', '=', 'asesoria.id_evento')
-            ->select(
-                'evento.id_evento',
-                'evento.id_curso',
-                'evento.nombre_evento',
-                'evento.fecha',
-                'evento.hora',
-                'evento.tipo',
-                'asesoria.id_asesoria',
-                'asesoria.lugar as ases_lugar',
-                'asesoria.fecha_asesoria as ases_fecha',
-                'asesoria.hora_inicio as ases_inicio',
-                'asesoria.hora_fin as ases_fin',
-                'asesoria.estado as ases_estado',
-                DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria) as total_asistentes'),
-                DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria AND aa.correo_persona = "' . $correoUsuario . '") as ya_inscrito')
-            )
-            ->where('evento.id_curso', $id)
-            ->orderBy('evento.id_evento', 'desc')
-            ->get();
+        ->leftJoin('asesoria', 'evento.id_evento', '=', 'asesoria.id_evento')
+        ->leftJoin('cuestionario', 'evento.id_evento', '=', 'cuestionario.id_evento')
+        ->leftJoin('configuracion_examen', 'cuestionario.id_cuestionario', '=', 'configuracion_examen.id_cuestionario')
+        ->select(
+            'evento.id_evento',
+            'evento.id_curso',
+            'evento.nombre_evento',
+            'evento.fecha',
+            'evento.hora',
+            'evento.tipo',
+            'asesoria.id_asesoria',
+            'asesoria.lugar as ases_lugar',
+            'asesoria.fecha_asesoria as ases_fecha',
+            'asesoria.hora_inicio as ases_inicio',
+            'asesoria.hora_fin as ases_fin',
+            'asesoria.estado as ases_estado',
+            'cuestionario.id_cuestionario',
+            'cuestionario.nombre_cuestionario',
+            'configuracion_examen.id_config',
+            'configuracion_examen.fecha_examen as ex_fecha',
+            'configuracion_examen.hora_inicio as ex_inicio',
+            'configuracion_examen.hora_fin as ex_fin',
+            'configuracion_examen.oportunidades as ex_oportunidades',
+            'configuracion_examen.estado as ex_estado',
+            DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria) as total_asistentes'),
+            DB::raw('(SELECT COUNT(*) FROM asistencia_asesoria aa WHERE aa.id_asesoria = asesoria.id_asesoria AND aa.correo_persona = "' . $correoUsuario . '") as ya_inscrito')
+        )
+        ->where('evento.id_curso', $id)
+        ->orderBy('evento.id_evento', 'desc')
+        ->get();
 
         // =============================================
         // 6. Marcar bloqueo de inscripción en asesorías

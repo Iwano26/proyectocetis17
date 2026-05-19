@@ -59,13 +59,118 @@
 </head>
 <body>
 
+    <script>
+    // =============================================
+    // SWEETALERT: Mensajes de sesión (éxito/error)
+    // =============================================
+    @if(session('success'))
+        Swal.fire({
+            icon: 'success',
+            title: '¡Listo!',
+            text: '{{ session('success') }}',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Aceptar',
+            timer: 3000,
+            timerProgressBar: true,
+        });
+    @endif
+
+    @if(session('error'))
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: '{{ session('error') }}',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Aceptar',
+        });
+    @endif
+
+    @if(session('info'))
+        Swal.fire({
+            icon: 'info',
+            title: 'Información',
+            text: '{{ session('info') }}',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Aceptar',
+        });
+    @endif
+
+    // =============================================
+    // SWEETALERT: Confirmar eliminar actividad
+    // =============================================
+    document.querySelectorAll('.form-eliminar-evento').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Eliminar actividad?',
+                text: 'Esta acción no se puede deshacer.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#8C001A',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // =============================================
+    // SWEETALERT: Confirmar salir del curso
+    // =============================================
+    document.querySelectorAll('.form-salir-curso').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Salir del curso?',
+                text: 'Perderás tu inscripción y deberás volver a unirte.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#8C001A',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, salir',
+                cancelButtonText: 'Cancelar',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+
+    // =============================================
+    // SWEETALERT: Confirmar cancelar asistencia
+    // =============================================
+    document.querySelectorAll('.form-cancelar-asistencia').forEach(function(form) {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            Swal.fire({
+                title: '¿Cancelar asistencia?',
+                text: 'Se eliminará tu registro en esta asesoría.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#8C001A',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Sí, cancelar',
+                cancelButtonText: 'No',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            });
+        });
+    });
+    </script>
     @extends('layouts.app')
 
     @section('content')
     <div class="container-fluid mt-0 px-4">
         
         {{-- CABECERA DEL CURSO --}}
-        <div class="tarjeta-curso-interna shadow-sm bg-white mb-4">
+        <div class="tarjeta-curso-interna shadow-sm bg-white mb-4 mt-4">
             <div class="row align-items-center">
                 <div class="col-md-7">
                     <h2 class="fw-bold m-0 text-uppercase">{{ $curso->nombre_curso }}</h2>
@@ -81,7 +186,7 @@
 
                         @if(Auth::user()->rol === 'Estudiante')
                             @if($yaInscrito)
-                                <form action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST" class="d-inline">
+                                <form action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST" class="d-inline form-salir-curso">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-outline-danger fw-bold px-4">
@@ -168,7 +273,7 @@
                 </div>
 
             {{-- Listado de Actividades --}}
-            @forelse($eventos as $evento)
+                @forelse($eventos as $evento)
 
                 @php
                     $borde = match($evento->ases_estado ?? 'DISPONIBLE') {
@@ -176,334 +281,374 @@
                         'TERMINADA' => 'border-dark',
                         default     => 'border-danger',
                     };
+
+                    if ($evento->tipo === 'cuestionario') {
+                        $borde = match($evento->ex_estado ?? 'PENDIENTE') {
+                            'ACTIVO'  => 'border-success',
+                            'CERRADO' => 'border-dark',
+                            default   => 'border-warning'
+                        };
+                    }
+
                     $badgeColor = match($evento->ases_estado ?? 'DISPONIBLE') {
                         'DISPONIBLE' => 'bg-success',
                         'EN_CURSO'   => 'bg-warning text-dark',
                         'TERMINADA'  => 'bg-dark',
                         default      => 'bg-secondary'
                     };
+
+                    $exBadge = match($evento->ex_estado ?? 'PENDIENTE') {
+                        'ACTIVO'  => 'bg-success',
+                        'CERRADO' => 'bg-dark',
+                        default   => 'bg-warning text-dark'
+                    };
                 @endphp
 
-                <div class="card mb-3 shadow-sm border-0 border-start border-4 {{ $borde }}">
-                    <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <div class="card mb-3 shadow-sm border-0 border-start border-4 {{ $borde }}"
+                    style="border-radius: 12px; overflow: hidden;">
+                    <div class="card-body py-3 px-4">
+                        <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
 
-                        {{-- Lado Izquierdo --}}
-                        <div class="flex-grow-1">
-                            <div class="d-flex align-items-center gap-2 mb-1">
-                                <h6 class="fw-bold mb-0 text-dark">{{ $evento->nombre_evento }}</h6>
-                                @if($evento->tipo === 'asesoria')
-                                    <span class="badge {{ $badgeColor }} text-uppercase" style="font-size: 0.7rem;">
-                                        {{ $evento->ases_estado ?? 'DISPONIBLE' }}
-                                    </span>
-                                @endif
-                            </div>
-
-                            <div class="d-flex flex-wrap gap-2 align-items-center">
-                                <span class="badge bg-secondary text-uppercase" style="font-size: 0.75rem;">
-                                    {{ $evento->tipo }}
-                                </span>
-                                <span class="badge bg-light text-dark border">
-                                    <i class="bi bi-calendar-event me-1"></i>
-                                    Publicado: {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
-                                </span>
-                                @if($evento->tipo === 'asesoria' && $evento->ases_lugar)
-                                    <span class="badge bg-light text-dark border">
-                                        <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                        {{ $evento->ases_lugar }}
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- Bloque Central: Contador --}}
-                        @if($evento->tipo === 'asesoria')
-                            <div class="text-center px-4 border-start border-end d-none d-sm-block">
-                                <span class="d-block text-muted small text-uppercase fw-bold" style="font-size: 0.65rem;">
-                                    Asistencias Confirmadas
-                                </span>
-                                <span class="badge bg-danger rounded-pill fs-6 px-3 py-1 fw-bold shadow-sm mt-1">
-                                    <i class="bi bi-people-fill me-1"></i> {{ $evento->total_asistentes ?? 0 }}
-                                </span>
-                            </div>
-                        @endif
-
-                        {{-- Lado Derecho: Botones --}}
-                        <div class="d-flex align-items-center gap-2">
-                            @if(Auth::user()->rol === 'Estudiante')
-
-                                @if($evento->tipo === 'asesoria')
-                                    @if(($evento->ya_inscrito ?? 0) > 0)
-                                        <form action="{{ route('asesorias.cancelar', $evento->id_evento) }}" 
-                                            method="POST" class="m-0"
-                                            onsubmit="return confirm('¿Seguro que deseas cancelar tu asistencia?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-success fw-bold px-3"
-                                                @if(in_array($evento->ases_estado ?? '', ['TERMINADA', 'CANCELADA', 'EN_CURSO'])) disabled @endif>
-                                                <i class="bi bi-check-circle-fill me-1"></i> Registrado
-                                            </button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('asesorias.unirse', $evento->id_evento) }}" method="POST" class="m-0">
-                                            @csrf
-                                            @php
-                                                $desactivar = in_array($evento->ases_estado ?? '', ['TERMINADA', 'CANCELADA', 'EN_CURSO'])
-                                                        || ($evento->bloquear_inscripcion ?? false);
-                                            @endphp
-                                            <button type="submit"
-                                                class="btn btn-sm fw-bold px-3 shadow-sm {{ $desactivar ? 'btn-secondary' : 'btn-outline-danger' }}"
-                                                @if($desactivar) disabled @endif
-                                                title="{{ ($evento->bloquear_inscripcion ?? false) ? 'Inscripción cerrada: menos de 1 hora para el inicio sin asistentes confirmados' : '' }}">
-                                                <i class="bi bi-box-arrow-in-right me-1"></i>
-                                                {{ ($evento->bloquear_inscripcion ?? false) ? 'Cerrado' : 'Unirse' }}
-                                            </button>
-                                        </form>
+                            {{-- LADO IZQUIERDO --}}
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                                    @if($evento->tipo === 'asesoria')
+                                        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded fw-bold text-white"
+                                            style="background:#8C001A; font-size:0.72rem; letter-spacing:0.5px;">
+                                            <i class="bi bi-person-video3"></i> ASESORÍA
+                                        </span>
+                                        <span class="badge {{ $badgeColor }} text-uppercase" style="font-size:0.72rem;">
+                                            {{ $evento->ases_estado ?? 'DISPONIBLE' }}
+                                        </span>
                                     @endif
-                                @endif
+                                    @if($evento->tipo === 'cuestionario')
+                                        <span class="d-inline-flex align-items-center gap-1 px-2 py-1 rounded fw-bold text-white"
+                                            style="background:#1a3a5c; font-size:0.72rem; letter-spacing:0.5px;">
+                                            <i class="bi bi-file-earmark-check"></i> EXAMEN
+                                        </span>
+                                        <span class="badge {{ $exBadge }} text-uppercase" style="font-size:0.72rem;">
+                                            {{ $evento->ex_estado ?? 'PENDIENTE' }}
+                                        </span>
+                                    @endif
+                                </div>
 
-                                @if($evento->tipo === 'cuestionario')
-                                    @php
-                                        $cuestionario = DB::table('cuestionario')
-                                            ->where('id_evento', $evento->id_evento)
-                                            ->first();
-                                        $configEx = $cuestionario
-                                            ? DB::table('configuracion_examen')
-                                                ->where('id_cuestionario', $cuestionario->id_cuestionario)
-                                                ->first()
-                                            : null;
-                                    @endphp
-                                    @if($cuestionario && $configEx)
-                                        @if($configEx->estado === 'ACTIVO')
-                                            <a href="{{ route('examen.inicio', $cuestionario->id_cuestionario) }}"
-                                            class="btn btn-sm btn-danger fw-bold px-3 shadow-sm">
+                                <h5 class="fw-bold mb-1 text-dark" style="font-size:1.1rem; line-height:1.3;">
+                                    {{ $evento->nombre_evento }}
+                                </h5>
+
+                                <div class="d-flex flex-wrap gap-2 align-items-center mt-1">
+                                    <span style="font-size:0.8rem; color:#888;">
+                                        <i class="bi bi-calendar3 me-1"></i>
+                                        Publicado: {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
+                                    </span>
+                                    @if($evento->tipo === 'asesoria' && $evento->ases_lugar)
+                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
+                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                            {{ $evento->ases_lugar }}
+                                        </span>
+                                    @endif
+                                    @if($evento->tipo === 'asesoria' && $evento->ases_fecha)
+                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
+                                            <i class="bi bi-clock me-1 text-danger"></i>
+                                            {{ \Carbon\Carbon::parse($evento->ases_fecha)->format('d/m/Y') }}
+                                            {{ \Carbon\Carbon::parse($evento->ases_inicio)->format('h:i A') }} —
+                                            {{ \Carbon\Carbon::parse($evento->ases_fin)->format('h:i A') }}
+                                        </span>
+                                    @endif
+                                    @if($evento->tipo === 'cuestionario' && $evento->ex_fecha)
+                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
+                                            <i class="bi bi-calendar-event me-1" style="color:#1a3a5c;"></i>
+                                            {{ \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') }}
+                                            {{ \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') }} —
+                                            {{ \Carbon\Carbon::parse($evento->ex_fin)->format('h:i A') }}
+                                        </span>
+                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
+                                            <i class="bi bi-arrow-repeat me-1" style="color:#1a3a5c;"></i>
+                                            {{ $evento->ex_oportunidades ?? 1 }} intento(s)
+                                        </span>
+                                    @endif
+                                </div>
+                            </div>
+
+                            {{-- CONTADOR ASISTENCIAS --}}
+                            @if($evento->tipo === 'asesoria')
+                                <div class="text-center px-4 border-start border-end d-none d-md-block">
+                                    <span class="d-block text-muted fw-bold text-uppercase mb-1"
+                                        style="font-size:0.65rem; letter-spacing:0.5px;">Asistencias</span>
+                                    <span class="badge bg-danger rounded-pill px-3 py-2 fw-bold shadow-sm"
+                                        style="font-size:1rem;">
+                                        <i class="bi bi-people-fill me-1"></i>{{ $evento->total_asistentes ?? 0 }}
+                                    </span>
+                                </div>
+                            @endif
+
+                            {{-- BOTONES --}}
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+
+                                @if(Auth::user()->rol === 'Estudiante')
+
+                                    @if($evento->tipo === 'asesoria')
+                                        @if(($evento->ya_inscrito ?? 0) > 0)
+                                            <form action="{{ route('asesorias.cancelar', $evento->id_evento) }}"
+                                                method="POST" class="m-0 form-cancelar-asistencia">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="btn btn-success fw-bold px-3"
+                                                    style="font-size:0.85rem;"
+                                                    @if(in_array($evento->ases_estado ?? '', ['TERMINADA','CANCELADA','EN_CURSO'])) disabled @endif>
+                                                    <i class="bi bi-check-circle-fill me-1"></i> Registrado
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('asesorias.unirse', $evento->id_evento) }}"
+                                                method="POST" class="m-0">
+                                                @csrf
+                                                @php
+                                                    $desactivar = in_array($evento->ases_estado ?? '', ['TERMINADA','CANCELADA','EN_CURSO'])
+                                                            || ($evento->bloquear_inscripcion ?? false);
+                                                @endphp
+                                                <button type="submit"
+                                                    class="btn fw-bold px-3 {{ $desactivar ? 'btn-secondary' : 'btn-outline-danger' }}"
+                                                    style="font-size:0.85rem;"
+                                                    @if($desactivar) disabled @endif
+                                                    title="{{ ($evento->bloquear_inscripcion ?? false) ? 'Inscripción cerrada: menos de 1 hora sin asistentes' : '' }}">
+                                                    <i class="bi bi-box-arrow-in-right me-1"></i>
+                                                    {{ ($evento->bloquear_inscripcion ?? false) ? 'Cerrado' : 'Unirse' }}
+                                                </button>
+                                            </form>
+                                        @endif
+                                    @endif
+
+                                    @if($evento->tipo === 'cuestionario')
+                                        @if(($evento->ex_estado ?? '') === 'ACTIVO')
+                                            <a href="{{ route('examen.inicio', $evento->id_cuestionario) }}"
+                                            class="btn btn-danger fw-bold px-3" style="font-size:0.85rem;">
                                                 <i class="bi bi-pencil-square me-1"></i> Iniciar Examen
                                             </a>
-                                        @elseif($configEx->estado === 'PENDIENTE')
-                                            <button class="btn btn-sm btn-warning fw-bold px-3" disabled>
-                                                <i class="bi bi-clock me-1"></i> Próximamente
+                                        @elseif(($evento->ex_estado ?? '') === 'PENDIENTE')
+                                            <button class="btn btn-warning fw-bold px-3" style="font-size:0.85rem;" disabled>
+                                                <i class="bi bi-clock me-1"></i>
+                                                {{ $evento->ex_fecha ? \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') : '' }}
+                                                {{ $evento->ex_inicio ? \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') : '' }}
                                             </button>
-                                        @elseif($configEx->estado === 'CERRADO')
-                                            <a href="{{ route('examen.misResultados', $cuestionario->id_cuestionario) }}"
-                                            class="btn btn-sm btn-outline-dark fw-bold px-3">
-                                                <i class="bi bi-bar-chart-fill me-1"></i> Ver Mis Resultados
+                                        @elseif(($evento->ex_estado ?? '') === 'CERRADO')
+                                            <a href="{{ route('examen.misResultados', $evento->id_cuestionario) }}"
+                                            class="btn btn-outline-dark fw-bold px-3" style="font-size:0.85rem;">
+                                                <i class="bi bi-bar-chart-fill me-1"></i> Mis Resultados
                                             </a>
                                         @endif
                                     @endif
-                                @endif
 
-                            @elseif(Auth::user()->rol === 'Asesor' || Auth::user()->rol === 'Administrador')
+                                @elseif(Auth::user()->rol === 'Asesor' || Auth::user()->rol === 'Administrador')
 
-                                @if($evento->tipo === 'asesoria')
-                                    <button type="button"
-                                        class="btn btn-sm btn-dark fw-bold px-2 shadow-sm"
-                                        title="Lista de Asistencia"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#modalLista{{ $evento->id_evento }}">
-                                        <i class="bi bi-card-checklist"></i>
-                                        <span class="d-none d-md-inline ms-1">Lista</span>
-                                    </button>
-                                    <a href="/evento/{{ $evento->id_evento }}/editar-asesoria"
-                                    class="btn btn-sm btn-outline-primary fw-bold px-2 shadow-sm" title="Editar Asesoría">
-                                        <i class="bi bi-pencil-square"></i>
-                                    </a>
-                                @endif
-
-                                @if($evento->tipo === 'cuestionario')
-                                    @php
-                                        $cuestionario = DB::table('cuestionario')
-                                            ->where('id_evento', $evento->id_evento)
-                                            ->first();
-                                    @endphp
-                                    @if($cuestionario)
-                                        <a href="{{ route('examenes.resultados', $cuestionario->id_cuestionario) }}"
-                                        class="btn btn-sm btn-dark fw-bold px-2 shadow-sm" title="Ver Resultados">
-                                            <i class="bi bi-bar-chart-fill"></i>
-                                            <span class="d-none d-md-inline ms-1">Resultados</span>
+                                    @if($evento->tipo === 'asesoria')
+                                        <button type="button"
+                                            class="btn btn-dark fw-bold px-3"
+                                            style="font-size:0.85rem;"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#modalLista{{ $evento->id_evento }}">
+                                            <i class="bi bi-card-checklist me-1"></i>
+                                            <span class="d-none d-md-inline">Lista</span>
+                                        </button>
+                                        <a href="/evento/{{ $evento->id_evento }}/editar-asesoria"
+                                        class="btn btn-outline-primary fw-bold px-2"
+                                        style="font-size:0.85rem;" title="Editar">
+                                            <i class="bi bi-pencil-square"></i>
                                         </a>
                                     @endif
+
+                                    @if($evento->tipo === 'cuestionario' && $evento->id_cuestionario)
+                                        <a href="{{ route('examenes.resultados', $evento->id_cuestionario) }}"
+                                        class="btn btn-dark fw-bold px-3" style="font-size:0.85rem;">
+                                            <i class="bi bi-bar-chart-fill me-1"></i>
+                                            <span class="d-none d-md-inline">Resultados</span>
+                                        </a>
+                                        <a href="{{ route('examenes.editarConfig', $evento->id_cuestionario) }}"
+                                        class="btn btn-outline-primary fw-bold px-2"
+                                        style="font-size:0.85rem;" title="Editar Examen">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                    @endif
+
+                                    <form action="/evento/{{ $evento->id_evento }}/eliminar"
+                                        method="POST" class="m-0 form-eliminar-evento">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger fw-bold px-2"
+                                                style="font-size:0.85rem;" title="Eliminar">
+                                            <i class="bi bi-trash3-fill"></i>
+                                        </button>
+                                    </form>
+
                                 @endif
 
-                                <form action="/evento/{{ $evento->id_evento }}/eliminar" method="POST" class="m-0"
-                                    onsubmit="return confirm('¿Seguro que deseas eliminar esta actividad?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2 shadow-sm" title="Eliminar">
-                                        <i class="bi bi-trash3-fill"></i>
-                                    </button>
-                                </form>
+                                <button type="button"
+                                    class="btn btn-light rounded-circle shadow-sm"
+                                    style="width:38px; height:38px; padding:0;"
+                                    data-bs-toggle="modal"
+                                    data-bs-target="#modalAsesoria{{ $evento->id_evento }}">
+                                    <i class="bi bi-chevron-right text-danger fw-bold"></i>
+                                </button>
 
-                            @endif
-
-                            <button type="button" class="btn btn-light btn-sm rounded-circle shadow-sm"
-                                data-bs-toggle="modal" data-bs-target="#modalAsesoria{{ $evento->id_evento }}">
-                                <i class="bi bi-chevron-right text-danger fw-bold"></i>
-                            </button>
+                            </div>
                         </div>
-
                     </div>
                 </div>
 
-                {{-- ======= MODAL ======= --}}
+                {{-- ======= MODAL DETALLES ======= --}}
                 <div class="modal fade" id="modalAsesoria{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
                     <div class="modal-dialog modal-dialog-centered">
                         <div class="modal-content border-0 shadow">
-
                             <div class="modal-header bg-dark text-white py-3">
                                 <h5 class="modal-title fw-bold">
-                                    <i class="bi bi-info-circle-fill text-danger me-2"></i> Detalles de la Actividad
+                                    <i class="bi bi-info-circle-fill text-danger me-2"></i> Detalles
                                 </h5>
                                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                             </div>
-
                             <div class="modal-body p-4">
-
-                                {{-- Título --}}
                                 <div class="mb-3">
-                                    <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">
-                                        Tema de la Asesoría
+                                    <small class="text-muted text-uppercase fw-bold d-block" style="font-size:0.72rem;">
+                                        {{ $evento->tipo === 'asesoria' ? 'Tema de la Asesoría' : 'Título del Examen' }}
                                     </small>
                                     <h5 class="fw-bold text-dark mb-0">{{ $evento->nombre_evento }}</h5>
                                 </div>
-
-                                {{-- Tipo y Estado --}}
                                 <div class="row g-3 mb-3">
                                     <div class="col-6">
-                                        <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">
-                                            Tipo
-                                        </small>
-                                        <span class="badge bg-secondary text-uppercase mt-1">{{ $evento->tipo }}</span>
+                                        <small class="text-muted text-uppercase fw-bold d-block" style="font-size:0.72rem;">Tipo</small>
+                                        @if($evento->tipo === 'asesoria')
+                                            <span class="badge text-white fw-bold mt-1" style="background:#8C001A;">
+                                                <i class="bi bi-person-video3 me-1"></i> Asesoría
+                                            </span>
+                                        @else
+                                            <span class="badge text-white fw-bold mt-1" style="background:#1a3a5c;">
+                                                <i class="bi bi-file-earmark-check me-1"></i> Examen
+                                            </span>
+                                        @endif
                                     </div>
                                     <div class="col-6">
-                                        <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">
-                                            Estado
-                                        </small>
-                                        <span class="badge {{ $badgeColor }} text-uppercase mt-1">
-                                            {{ $evento->ases_estado ?? 'DISPONIBLE' }}
-                                        </span>
+                                        <small class="text-muted text-uppercase fw-bold d-block" style="font-size:0.72rem;">Estado</small>
+                                        @if($evento->tipo === 'asesoria')
+                                            <span class="badge {{ $badgeColor }} text-uppercase mt-1">
+                                                {{ $evento->ases_estado ?? 'DISPONIBLE' }}
+                                            </span>
+                                        @else
+                                            <span class="badge {{ $exBadge }} text-uppercase mt-1">
+                                                {{ $evento->ex_estado ?? 'PENDIENTE' }}
+                                            </span>
+                                        @endif
                                     </div>
                                 </div>
-
                                 <hr class="opacity-25">
-
                                 @if($evento->tipo === 'asesoria')
-
-                                    {{-- Lugar --}}
                                     <div class="mb-3">
-                                        <small class="text-muted text-uppercase d-block fw-bold" style="font-size: 0.75rem;">
+                                        <small class="text-muted text-uppercase fw-bold d-block" style="font-size:0.72rem;">
                                             <i class="bi bi-geo-alt-fill text-danger me-1"></i> Lugar / Salón
                                         </small>
-                                        <p class="text-dark fw-semibold mb-0 bg-light p-2 rounded border mt-1">
+                                        <p class="fw-semibold mb-0 bg-light p-2 rounded border mt-1">
                                             {{ $evento->ases_lugar ?? 'No especificado' }}
                                         </p>
                                     </div>
-
-                                    {{-- Fecha y Horas --}}
                                     <div class="row text-center bg-light rounded py-3 g-0 border">
                                         <div class="col-4 border-end">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">
-                                                Fecha
-                                            </small>
-                                            <span class="fw-bold text-dark" style="font-size: 0.95rem;">
-                                                {{ $evento->ases_fecha
-                                                    ? \Carbon\Carbon::parse($evento->ases_fecha)->format('d/m/Y')
-                                                    : 'N/A' }}
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fecha</small>
+                                            <span class="fw-bold text-dark">
+                                                {{ $evento->ases_fecha ? \Carbon\Carbon::parse($evento->ases_fecha)->format('d/m/Y') : 'N/A' }}
                                             </span>
                                         </div>
                                         <div class="col-4 border-end">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">
-                                                Inicio
-                                            </small>
-                                            <span class="fw-bold text-success" style="font-size: 0.95rem;">
-                                                {{ $evento->ases_inicio
-                                                    ? \Carbon\Carbon::parse($evento->ases_inicio)->format('h:i A')
-                                                    : 'N/A' }}
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Inicio</small>
+                                            <span class="fw-bold text-success">
+                                                {{ $evento->ases_inicio ? \Carbon\Carbon::parse($evento->ases_inicio)->format('h:i A') : 'N/A' }}
                                             </span>
                                         </div>
                                         <div class="col-4">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size: 0.7rem;">
-                                                Fin
-                                            </small>
-                                            <span class="fw-bold text-danger" style="font-size: 0.95rem;">
-                                                {{ $evento->ases_fin
-                                                    ? \Carbon\Carbon::parse($evento->ases_fin)->format('h:i A')
-                                                    : 'N/A' }}
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fin</small>
+                                            <span class="fw-bold text-danger">
+                                                {{ $evento->ases_fin ? \Carbon\Carbon::parse($evento->ases_fin)->format('h:i A') : 'N/A' }}
                                             </span>
                                         </div>
                                     </div>
-
                                 @endif
-
+                                @if($evento->tipo === 'cuestionario')
+                                    <div class="row text-center bg-light rounded py-3 g-0 border mb-3">
+                                        <div class="col-4 border-end">
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fecha</small>
+                                            <span class="fw-bold text-dark">
+                                                {{ $evento->ex_fecha ? \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') : 'N/A' }}
+                                            </span>
+                                        </div>
+                                        <div class="col-4 border-end">
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Inicio</small>
+                                            <span class="fw-bold text-success">
+                                                {{ $evento->ex_inicio ? \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') : 'N/A' }}
+                                            </span>
+                                        </div>
+                                        <div class="col-4">
+                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fin</small>
+                                            <span class="fw-bold text-danger">
+                                                {{ $evento->ex_fin ? \Carbon\Carbon::parse($evento->ex_fin)->format('h:i A') : 'N/A' }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi bi-arrow-repeat text-muted"></i>
+                                        <span class="text-muted" style="font-size:0.85rem;">
+                                            Intentos permitidos: <strong>{{ $evento->ex_oportunidades ?? 1 }}</strong>
+                                        </span>
+                                    </div>
+                                @endif
                                 <hr class="opacity-25">
-
-                                <div class="text-muted" style="font-size: 0.75rem;">
+                                <div class="text-muted" style="font-size:0.75rem;">
                                     <i class="bi bi-clock me-1"></i>
                                     Registrado el {{ \Carbon\Carbon::parse($evento->fecha)->format('d/m/Y') }}
                                 </div>
-
                             </div>
-
                             <div class="modal-footer bg-light py-2">
                                 <button type="button" class="btn btn-secondary btn-sm fw-bold px-3"
                                         data-bs-dismiss="modal">Cerrar</button>
                             </div>
-
                         </div>
                     </div>
                 </div>
 
-
-                {{-- ======= MODAL LISTA DE ASISTENCIA ======= --}}
-                    @if($evento->tipo === 'asesoria')   {{-- ← AGREGAR --}}
+                {{-- ======= MODALES LISTA (solo asesoría) ======= --}}
+                @if($evento->tipo === 'asesoria')
                     <div class="modal fade" id="modalLista{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered modal-lg">
                             <div class="modal-content border-0 shadow">
-
                                 <div class="modal-header bg-dark text-white py-3">
                                     <h5 class="modal-title fw-bold">
                                         <i class="bi bi-card-checklist text-danger me-2"></i>
-                                        Lista de Asistencia — {{ $evento->nombre_evento }}
+                                        Lista — {{ $evento->nombre_evento }}
                                     </h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
-
                                 <div class="modal-body p-4">
-
                                     @php
-                                        // Alumnos ya en la lista
                                         $asistentes = DB::table('asistencia_asesoria')
                                             ->join('persona', 'asistencia_asesoria.correo_persona', '=', 'persona.correo')
                                             ->where('asistencia_asesoria.id_asesoria', $evento->id_asesoria)
                                             ->select(
-                                                'persona.nombre',
-                                                'persona.apellidoPa',
-                                                'persona.apellidoMa',
-                                                'persona.correo',
-                                                'asistencia_asesoria.asistio',
+                                                'persona.nombre', 'persona.apellidoPa', 'persona.apellidoMa',
+                                                'persona.correo', 'asistencia_asesoria.asistio',
                                                 'asistencia_asesoria.id_asistencia'
                                             )
                                             ->get();
 
-                                        // Alumnos inscritos al curso que NO están ya en la lista
                                         $correosEnLista = $asistentes->pluck('correo')->toArray();
 
                                         $alumnosDisponibles = DB::table('inscripcion')
                                             ->join('persona', 'inscripcion.correo_estudiante', '=', 'persona.correo')
                                             ->where('inscripcion.id_curso', $curso->id_curso)
                                             ->whereNotIn('inscripcion.correo_estudiante', $correosEnLista)
-                                            ->select(
-                                                'persona.nombre',
-                                                'persona.apellidoPa',
-                                                'persona.apellidoMa',
-                                                'persona.correo'
-                                            )
+                                            ->select('persona.nombre', 'persona.apellidoPa', 'persona.apellidoMa', 'persona.correo')
                                             ->get();
                                     @endphp
 
-                                    {{-- Botón agregar alumno --}}
                                     @if($alumnosDisponibles->isNotEmpty())
                                         <div class="d-flex justify-content-end mb-3">
                                             <button type="button" class="btn btn-sm btn-danger fw-bold shadow-sm"
-                                                data-bs-toggle="modal" 
+                                                data-bs-toggle="modal"
                                                 data-bs-target="#modalAgregarAlumno{{ $evento->id_evento }}">
                                                 <i class="bi bi-person-plus-fill me-1"></i> Agregar Alumno
                                             </button>
@@ -518,14 +663,14 @@
                                     @else
                                         <p class="text-muted mb-3">
                                             <i class="bi bi-people-fill text-danger me-1"></i>
-                                            <strong>{{ $asistentes->count() }}</strong> estudiante(s) registrado(s)
+                                            <strong>{{ $asistentes->count() }}</strong> estudiante(s)
                                         </p>
                                         <div class="table-responsive">
                                             <table class="table table-hover align-middle mb-0">
                                                 <thead class="table-dark">
                                                     <tr>
                                                         <th>#</th>
-                                                        <th>Nombre Completo</th>
+                                                        <th>Nombre</th>
                                                         <th>Correo</th>
                                                         <th class="text-center">Estado</th>
                                                     </tr>
@@ -535,19 +680,14 @@
                                                         <tr>
                                                             <td class="text-muted fw-bold">{{ $i + 1 }}</td>
                                                             <td class="fw-semibold">
-                                                                {{ $asistente->nombre }}
-                                                                {{ $asistente->apellidoPa }}
-                                                                {{ $asistente->apellidoMa }}
+                                                                {{ $asistente->nombre }} {{ $asistente->apellidoPa }} {{ $asistente->apellidoMa }}
                                                             </td>
-                                                            <td class="text-muted" style="font-size: 0.85rem;">
-                                                                {{ $asistente->correo }}
-                                                            </td>
+                                                            <td class="text-muted" style="font-size:0.85rem;">{{ $asistente->correo }}</td>
                                                             <td class="text-center">
                                                                 <span class="badge
                                                                     @if($asistente->asistio == 'ASISTIO') bg-success
                                                                     @elseif($asistente->asistio == 'FALTO') bg-danger
-                                                                    @else bg-warning text-dark
-                                                                    @endif">
+                                                                    @else bg-warning text-dark @endif">
                                                                     {{ $asistente->asistio }}
                                                                 </span>
                                                             </td>
@@ -557,33 +697,25 @@
                                             </table>
                                         </div>
                                     @endif
-
                                 </div>
-
                                 <div class="modal-footer bg-light py-2">
                                     <button type="button" class="btn btn-secondary btn-sm fw-bold px-3"
                                             data-bs-dismiss="modal">Cerrar</button>
                                 </div>
-
                             </div>
                         </div>
                     </div>
-                @endif  {{-- ← Y ESTO --}}
-                {{-- ======= FIN MODAL LISTA ======= --}}
 
-                {{-- ======= MODAL AGREGAR ALUMNO ======= --}}
-                @if($evento->tipo === 'asesoria')   {{-- ← AGREGAR ESTO --}}
+                    {{-- Modal agregar alumno --}}
                     <div class="modal fade" id="modalAgregarAlumno{{ $evento->id_evento }}" tabindex="-1" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content border-0 shadow">
-
                                 <div class="modal-header bg-dark text-white py-3">
                                     <h5 class="modal-title fw-bold">
-                                        <i class="bi bi-person-plus-fill text-danger me-2"></i> Agregar Alumno a Lista
+                                        <i class="bi bi-person-plus-fill text-danger me-2"></i> Agregar Alumno
                                     </h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                                 </div>
-
                                 <div class="modal-body p-4">
                                     <form action="{{ route('asesorias.agregarManualmente', $evento->id_asesoria) }}" method="POST">
                                         @csrf
@@ -608,13 +740,10 @@
                                         </div>
                                     </form>
                                 </div>
-
                             </div>
                         </div>
                     </div>
-                @endif {{-- ← AGREGAR ESTO --}}
-                {{-- ======= FIN MODAL AGREGAR ALUMNO ======= --}}
-                {{-- ======= FIN MODAL ======= --}}
+                @endif
 
             @empty
                 <div class="text-center py-5">
@@ -622,6 +751,100 @@
                     <p class="text-muted mt-2">No hay actividades publicadas para este curso.</p>
                 </div>
             @endforelse
+
+            {{-- ======= SWEETALERT ======= --}}
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            <script>
+            // Mensajes de sesión
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Listo!',
+                    text: @json(session('success')),
+                    confirmButtonColor: '#8C001A',
+                    confirmButtonText: 'Aceptar',
+                    timer: 3000,
+                    timerProgressBar: true,
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: @json(session('error')),
+                    confirmButtonColor: '#8C001A',
+                    confirmButtonText: 'Aceptar',
+                });
+            @endif
+
+            @if(session('info'))
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Información',
+                    text: @json(session('info')),
+                    confirmButtonColor: '#8C001A',
+                    confirmButtonText: 'Aceptar',
+                });
+            @endif
+
+            // Confirmar eliminar
+            document.querySelectorAll('.form-eliminar-evento').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Eliminar actividad?',
+                        text: 'Esta acción no se puede deshacer.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#8C001A',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: '<i class="bi bi-trash3-fill me-1"></i> Sí, eliminar',
+                        cancelButtonText: 'Cancelar',
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                });
+            });
+
+            // Confirmar cancelar asistencia
+            document.querySelectorAll('.form-cancelar-asistencia').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Cancelar asistencia?',
+                        text: 'Se eliminará tu registro en esta asesoría.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#8C001A',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, cancelar',
+                        cancelButtonText: 'No',
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                });
+            });
+
+            // Confirmar salir del curso
+            document.querySelectorAll('.form-salir-curso').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Salir del curso?',
+                        text: 'Perderás tu inscripción y deberás volver a unirte.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#8C001A',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, salir',
+                        cancelButtonText: 'Cancelar',
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                });
+            });
+            </script>
 
             </div>
         </div>

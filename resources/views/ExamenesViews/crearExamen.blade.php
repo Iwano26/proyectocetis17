@@ -153,15 +153,17 @@
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label fw-bold text-secondary">Hora Inicio</label>
-                                <input type="time" name="hora_inicio"
-                                    class="form-control border-2"
-                                    value="{{ old('hora_inicio') }}" required>
+                                <input type="time" name="hora_fin"
+                                id="hora_fin"
+                                class="form-control border-2"
+                                value="{{ old('hora_fin') }}" required>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label fw-bold text-secondary">Hora Fin</label>
-                                <input type="time" name="hora_fin"
-                                    class="form-control border-2"
-                                    value="{{ old('hora_fin') }}" required>
+                                <input type="time" name="hora_inicio"
+                                id="hora_inicio"
+                                class="form-control border-2"
+                                value="{{ old('hora_inicio') }}" required>
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label fw-bold text-secondary">Intentos</label>
@@ -387,6 +389,62 @@ document.getElementById('formExamen').addEventListener('submit', function(e) {
         alert('Debes agregar al menos una pregunta.');
     }
 });
+
+// Validar que hora_fin sea mayor a hora_inicio
+document.getElementById('hora_inicio').addEventListener('change', function() {
+    const horaFin = document.getElementById('hora_fin');
+    horaFin.min = this.value;
+
+    // Si ya tenía un valor menor, lo limpiamos
+    if (horaFin.value && horaFin.value <= this.value) {
+        horaFin.value = '';
+    }
+});
+
+// Validar al enviar el formulario
+document.getElementById('formExamen').addEventListener('submit', function(e) {
+    const preguntas = document.querySelectorAll('.pregunta-card');
+    if (preguntas.length === 0) {
+        e.preventDefault();
+        alert('Debes agregar al menos una pregunta.');
+        return;
+    }
+
+    const inicio = document.getElementById('hora_inicio').value;
+    const fin = document.getElementById('hora_fin').value;
+
+    if (inicio && fin && fin <= inicio) {
+        e.preventDefault();
+        alert('La hora de fin debe ser mayor a la hora de inicio.');
+        document.getElementById('hora_fin').focus();
+    }
+});
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+@if(session('success'))
+    Swal.fire({
+        icon: 'success',
+        title: '¡Listo!',
+        text: '{{ session('success') }}',
+        confirmButtonColor: '#8C001A',
+        confirmButtonText: 'Aceptar',
+        timer: 3000,
+        timerProgressBar: true,
+    });
+@endif
+
+@if(session('error'))
+    Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: '{{ session('error') }}',
+        confirmButtonColor: '#8C001A',
+        confirmButtonText: 'Aceptar',
+    });
+@endif
 </script>
 
 @endsection

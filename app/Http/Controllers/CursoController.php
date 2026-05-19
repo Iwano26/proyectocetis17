@@ -20,56 +20,100 @@ class CursoController extends Controller
     /**
      * Muestra la lista de cursos con filtros de búsqueda.
      */
-    public function index(Request $request) 
+    public function index(Request $request)
     {
         try {
-            $buscar = $request->input('buscar');
-            $estado = $request->input('estado');
+            $buscar  = $request->input('buscar');
             $materia = $request->input('materia');
-            $dia = $request->input('dia');
+            $dia     = $request->input('dia');
+            $rol     = Auth::user()->rol;
+            $correo  = Auth::user()->correo;
 
-            $query = Curso::query()->with('horarios');
+            // ── MIS CURSOS ────────────────────────────────────────────────────────
+            if ($rol === 'Estudiante') {
+                // Cursos donde está inscrito
+                $misIds = \App\Models\Inscripcion::where('correo_estudiante', $correo)
+                            ->pluck('id_curso')->toArray();
 
-            // Filtros existentes
-            if ($buscar) {
-                $query->where(function($q) use ($buscar) {
-                    $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
-                    ->orWhere('materia', 'LIKE', "%{$buscar}%");
-                });
+                $misCursos = Curso::query()->with('horarios')
+                    ->whereIn('id_curso', $misIds)
+                    ->whereIn('estado', ['ACTIVO', 'COMPLETADO'])
+                    ->when($buscar, fn($q) => $q->where(function($q) use ($buscar) {
+                        $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
+                        ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    }))
+                    ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
+                    ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->get();
+
+                // Otros cursos ACTIVOS donde NO está inscrito
+                $otrosCursos = Curso::query()->with('horarios')
+                    ->whereNotIn('id_curso', $misIds)
+                    ->where('estado', 'ACTIVO')
+                    ->when($buscar, fn($q) => $q->where(function($q) use ($buscar) {
+                        $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
+                        ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    }))
+                    ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
+                    ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->get();
+
+            } elseif ($rol === 'Asesor') {
+                // Mis cursos: los que yo creé (todos los estados)
+                $misCursos = Curso::query()->with('horarios')
+                    ->where('correo_persona', $correo)
+                    ->when($buscar, fn($q) => $q->where(function($q) use ($buscar) {
+                        $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
+                        ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    }))
+                    ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
+                    ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->get();
+
+                // Otros cursos: ACTIVO y COMPLETADO de otros asesores
+                $otrosCursos = Curso::query()->with('horarios')
+                    ->where('correo_persona', '!=', $correo)
+                    ->whereIn('estado', ['ACTIVO', 'COMPLETADO'])
+                    ->when($buscar, fn($q) => $q->where(function($q) use ($buscar) {
+                        $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
+                        ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    }))
+                    ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
+                    ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->get();
+
+            } else {
+                // Administrador ve todo
+                $misCursos = collect();
+                $otrosCursos = Curso::query()->with('horarios')
+                    ->when($buscar, fn($q) => $q->where(function($q) use ($buscar) {
+                        $q->where('nombre_curso', 'LIKE', "%{$buscar}%")
+                        ->orWhere('materia', 'LIKE', "%{$buscar}%");
+                    }))
+                    ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
+                    ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->get();
             }
 
-            if ($estado) {
-                $query->where('estado', $estado);
-            }
-
-            if ($materia) {
-                $query->where('materia', $materia);
-            }
-
-            $cursos = $query->get();
-
-            // --- NUEVA LÓGICA DE INSCRIPCIONES ---
+            // Inscripciones del estudiante para saber botones
             $misInscripciones = [];
-            
-            // Solo buscamos inscripciones si hay un usuario logueado y es Estudiante
-            if (Auth::check() && Auth::user()->rol === 'Estudiante') {
-                $misInscripciones = \App\Models\Inscripcion::where('correo_estudiante', Auth::user()->correo)
-                                    ->pluck('id_curso')
-                                    ->toArray();
+            if ($rol === 'Estudiante') {
+                $misInscripciones = \App\Models\Inscripcion::where('correo_estudiante', $correo)
+                    ->pluck('id_curso')->toArray();
             }
-            // -------------------------------------
 
-            // Pasamos tanto los $cursos como las $misInscripciones a la vista
-            return view('BuscarCurso', compact('cursos', 'misInscripciones'));
+            return view('BuscarCurso', compact('misCursos', 'otrosCursos', 'misInscripciones'));
 
         } catch (\Exception $e) {
-            Log::error('Error en index de cursos: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Error en index de cursos: ' . $e->getMessage());
             return view('BuscarCurso', [
-                'cursos' => collect(), 
-                'misInscripciones' => [] 
+                'misCursos'       => collect(),
+                'otrosCursos'     => collect(),
+                'misInscripciones' => []
             ])->with('mensaje', 'Error al cargar cursos.');
         }
     }
+
     public function create() {
         return view('CursosViews/crear');
     }
@@ -298,20 +342,33 @@ class CursoController extends Controller
 
     public function inscribir(Request $request, $id)
     {
-        // 1. Validamos que el usuario esté logueado (por seguridad)
         if (!Auth::check()) {
             return redirect()->route('login');
         }
 
-        // 2. Creamos el registro en la tabla inscripcion
+        // Buscar el curso
+        $curso = DB::table('curso')->where('id_curso', $id)->first();
+
+        if (!$curso) {
+            return back()->with('error', 'Curso no encontrado.');
+        }
+
+        // Verificar clave si el curso la tiene
+        if (!empty($curso->acceso)) {
+            $claveIngresada = $request->input('clave_acceso');
+            if ($claveIngresada !== $curso->acceso) {
+                return back()->with('error_clave_' . $id, 'Clave incorrecta. Intenta de nuevo.');
+            }
+        }
+
+        // Inscribir
         Inscripcion::create([
-            'id_curso' => $id,
-            'correo_estudiante' => Auth::user()->correo, // El correo de la sesión actual
-            'fecha_inscripcion' => now()->format('Y-m-d'), // Fecha de hoy
+            'id_curso'          => $id,
+            'correo_estudiante' => Auth::user()->correo,
+            'fecha_inscripcion' => now()->format('Y-m-d'),
         ]);
 
-        // 3. Redirigimos de vuelta con un mensaje de éxito
-        return back()->with('success', '¡Felicidades! Te has unido al curso exitosamente.');
+        return back()->with('success', '¡Te has unido al curso exitosamente!');
     }
 
     public function salir($id)

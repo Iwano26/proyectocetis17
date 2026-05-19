@@ -216,4 +216,60 @@ class ExamenController extends Controller
             ->whereRaw('fecha_examen < CURDATE()')
             ->update(['estado' => 'CERRADO']);
     }
+
+    public function editarConfig($id_cuestionario)
+    {
+        $cuestionario = Cuestionario::with('configuracion')->findOrFail($id_cuestionario);
+        $config = $cuestionario->configuracion;
+
+        if (!$config) {
+            return back()->with('error', 'Este examen no tiene configuración.');
+        }
+
+        $idCurso = DB::table('evento')
+            ->where('id_evento', $cuestionario->id_evento)
+            ->value('id_curso');
+
+        return view('ExamenesViews.editarConfig', compact('cuestionario', 'config', 'idCurso'));
+    }
+
+    public function actualizarConfig(Request $request, $id_cuestionario)
+    {
+        $request->validate([
+            'fecha_examen'  => 'required|date',
+            'hora_inicio'   => 'required',
+            'hora_fin'      => 'required|after:hora_inicio',
+            'oportunidades' => 'required|integer|min:1|max:5',
+            'estado'        => 'required|in:PENDIENTE,ACTIVO,CERRADO',
+        ]);
+
+        DB::table('configuracion_examen')
+            ->where('id_cuestionario', $id_cuestionario)
+            ->update([
+                'fecha_examen'  => $request->fecha_examen,
+                'hora_inicio'   => $request->hora_inicio,
+                'hora_fin'      => $request->hora_fin,
+                'oportunidades' => $request->oportunidades,
+                'estado'        => $request->estado,
+            ]);
+
+        // También actualizamos el nombre del evento si cambió
+        if ($request->filled('nombre_cuestionario')) {
+            $cuestionario = Cuestionario::findOrFail($id_cuestionario);
+            DB::table('evento')
+                ->where('id_evento', $cuestionario->id_evento)
+                ->update(['nombre_evento' => $request->nombre_cuestionario]);
+            DB::table('cuestionario')
+                ->where('id_cuestionario', $id_cuestionario)
+                ->update(['nombre_cuestionario' => $request->nombre_cuestionario]);
+        }
+
+        $cuestionario = Cuestionario::findOrFail($id_cuestionario);
+        $idCurso = DB::table('evento')
+            ->where('id_evento', $cuestionario->id_evento)
+            ->value('id_curso');
+
+        return redirect('/curso/' . $idCurso . '/eventos')
+            ->with('success', '¡Configuración actualizada con éxito!');
+    }
 }

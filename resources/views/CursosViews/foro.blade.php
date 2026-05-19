@@ -1,143 +1,189 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foro - {{ $curso->nombre_curso }}</title>
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-    
-    <style>
-        :root { 
-            --cetis-rojo: #8C001A; 
-            --cetis-gris: #f8f9fa;
-        }
-        body { 
-            background-color: #f4f4f4; 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        .navbar-cetis {
-            background-color: var(--cetis-rojo);
-            color: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        /* Estilo de la navegación lateral */
-        .nav-link {
-            color: #555;
-            font-weight: 600;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            padding: 12px 20px;
-            background: white;
-            transition: all 0.3s;
-            border: 1px solid transparent;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-        }
-        .nav-link:hover {
-            background-color: #eee;
-            color: var(--cetis-rojo);
-        }
-        .nav-link.active {
-            background-color: var(--cetis-rojo) !important;
-            color: white !important;
-        }
-        /* Tarjetas de preguntas */
-        .card-pregunta {
-            border: none;
-            border-radius: 15px;
-            transition: transform 0.2s;
-        }
-        .card-pregunta:hover {
-            transform: scale(1.01);
-        }
-        .btn-cetis {
-            background-color: var(--cetis-rojo);
-            color: white;
-            font-weight: bold;
-            border-radius: 8px;
-            padding: 10px 20px;
-        }
-        .btn-cetis:hover {
-            background-color: #6d0014;
-            color: white;
-        }
-        .avatar-foro {
-            width: 45px;
-            height: 45px;
-            background-color: #e9ecef;
-            color: var(--cetis-rojo);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            font-weight: bold;
-            border: 2px solid #dee2e6;
-        }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
 
-<nav class="navbar navbar-cetis mb-4">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1 text-white text-uppercase">Plataforma Académica CETIS 17</span>
+@section('content')
+
+<style>
+    :root { 
+        --cetis-rojo: #8C001A; 
+        --cetis-primary: #8C001A;
+    }
+    body { 
+        background-color: #f8f9fa; 
+    }
+
+    /* CABECERA CON ESTILO INSTITUCIONAL IDÉNTICO */
+    .tarjeta-curso-interna {
+        background-color: white; 
+        border: 2px solid var(--cetis-rojo);
+        border-radius: 12px; 
+        padding: 20px; 
+        margin-bottom: 15px;
+    }
+
+    /* MENÚ LATERAL CON LAS MISMAS PROPIEDADES */
+    .opciones-curso .nav-link {
+        color: #333;
+        font-weight: 700;
+        border: 1px solid #dee2e6;
+        margin-bottom: 8px;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: left;
+        background-color: white;
+    }
+    .opciones-curso .nav-link.active {
+        background-color: var(--cetis-rojo);
+        color: white;
+        border-color: var(--cetis-rojo);
+    }
+
+    /* TARJETAS DE PREGUNTAS EN EL FORO */
+    .card-pregunta {
+        border: none;
+        border-radius: 12px;
+        background-color: white;
+    }
+
+    /* AVATAR DE USUARIOS */
+    .avatar-foro {
+        width: 45px;
+        height: 45px;
+        background-color: #e9ecef;
+        color: var(--cetis-rojo);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        font-weight: bold;
+        border: 2px solid #dee2e6;
+    }
+
+    /* BOTÓN INSTITUCIONAL */
+    .btn-cetis {
+        background-color: var(--cetis-rojo);
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+        padding: 10px 20px;
+    }
+    .btn-cetis:hover {
+        background-color: #6d0014;
+        color: white;
+    }
+</style>
+
+<div class="container-fluid mt-0 px-4">
+        
+    {{-- CABECERA DEL CURSO --}}
+    <div class="tarjeta-curso-interna shadow-sm bg-white mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-7">
+                <h2 class="fw-bold m-0 text-uppercase">{{ $curso->nombre_curso }}</h2>
+                <p class="text-muted mb-0">Impartido por: <strong>{{ $curso->nombre_asesor }}</strong></p>
+                <small class="text-secondary"><i class="bi bi-book me-1"></i> Materia: {{ $curso->materia }}</small>
+            </div>
+            <div class="col-md-5 text-md-end mt-3 mt-md-0">
+                <span class="badge {{ $curso->estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary' }} mb-2 shadow-sm">
+                    ESTADO: {{ $curso->estado }}
+                </span>
+                <br>
+
+                @if(Auth::user()->rol === 'Estudiante')
+                    @if($yaInscrito)
+                        {{-- ESTADO: YA UNIDO --}}
+                        <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded border mt-2">
+                            <form id="form-salir-curso" action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" onclick="confirmarSalida()" class="btn btn-link text-danger fw-bold p-0 text-decoration-none small">
+                                    <i class="bi bi-box-arrow-left"></i> SALIR DEL CURSO
+                                </button>
+                            </form>
+
+                            <script>
+                            function confirmarSalida() {
+                                Swal.fire({
+                                    title: '¿Estás seguro?',
+                                    text: "Ya no estarás inscrito en este curso y podrías perder tu lugar.",
+                                    icon: 'warning',
+                                    showCancelButton: true,
+                                    confirmButtonColor: '#8C001A', 
+                                    cancelButtonColor: '#6c757d', 
+                                    confirmButtonText: 'Sí, salir del curso',
+                                    cancelButtonText: 'Cancelar',
+                                    reverseButtons: true
+                                }).then((result) => {
+                                    if (result.isConfirmed) {
+                                        document.getElementById('form-salir-curso').submit();
+                                    }
+                                })
+                            }
+                            </script>
+
+                            <span class="text-success fw-bold small">
+                                <i class="bi bi-check-circle-fill"></i> YA TE UNISTE
+                            </span>
+                        </div>
+                    @else
+                        {{-- ACCIÓN: UNIRSE (Si no está inscrito) --}}
+                        <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST">
+                            @csrf
+                            <button type="submit" class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
+                                <i class="bi bi-person-plus-fill me-2"></i> UNIRSE AL CURSO
+                            </button>
+                        </form>
+                    @endif
+                @else
+                    {{-- VISTA PARA ASESOR/ADMIN --}}
+                    <button class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
+                        <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
+                    </button>
+                @endif
+            </div>
+        </div>
     </div>
-</nav>
 
-<div class="container-fluid px-4">
     <div class="row">
-        <!-- BARRA LATERAL DE NAVEGACIÓN -->
+        {{-- Menú Lateral --}}
         <div class="col-md-3">
-            <div class="sticky-top" style="top: 20px;">
+            <div class="nav flex-column opciones-curso">
                 <a href="{{ route('cursos.show', $curso->id_curso) }}" class="nav-link shadow-sm">
                     <i class="bi bi-info-circle me-2"></i> INFORMACIÓN
                 </a>
-                
                 <a href="{{ route('curso.eventos', $curso->id_curso) }}" class="nav-link shadow-sm">
                     <i class="bi bi-list-task me-2"></i> ACTIVIDADES
                 </a>
-
-                {{-- Enlace del Foro con clase Active --}}
-                <a href="{{ route('foro.index', $curso->id_curso) }}" class="nav-link shadow-sm active">
+                <a href="{{ route('foro.index', $curso->id_curso) }}" class="nav-link active shadow-sm">
                     <i class="bi bi-chat-dots me-2"></i> FORO
                 </a>
-                 @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
-                        <a href="#" class="nav-link shadow-sm border-danger">
-                            <i class="bi bi-file-earmark-text me-2 text-danger"></i> REPORTES
-                        </a>
-                    @endif
-                <hr>
-                <a href="{{ route('principal') }}" class="btn btn-outline-secondary w-100 fw-bold">
-                    <i class="bi bi-arrow-left"></i> VOLVER AL MENÚ
-                </a>
+
+                @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
+                    <a href="{{ route('reportes.index', $curso->id_curso) }}" class="nav-link shadow-sm border-danger">
+                        <i class="bi bi-file-earmark-text me-2 text-danger"></i> REPORTES
+                    </a>
+                @endif
             </div>
         </div>
 
-        <!-- CONTENIDO PRINCIPAL -->
+        {{-- Contenido Principal --}}
         <div class="col-md-9">
-            <!-- Banner del Curso -->
-            <div class="card mb-4 shadow-sm border-0" style="border-left: 8px solid var(--cetis-rojo) !important; border-radius: 12px;">
-                <div class="card-body p-4 d-flex justify-content-between align-items-center">
+
+            {{-- Banner Interno del Foro --}}
+            <div class="tarjeta-curso-interna shadow-sm bg-white mb-4">
+                <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
-                        <h1 class="fw-bold text-dark mb-1">{{ $foro->nombre_foro }}</h1>
-                        <p class="text-muted mb-0"><i class="bi bi-book me-1"></i> Curso: {{ $curso->nombre_curso }}</p>
+                        <h4 class="fw-bold text-dark mb-1">{{ $foro->nombre_foro }}</h4>
+                        <p class="text-muted mb-0 small">
+                            <i class="bi bi-chat-square-text me-1"></i> Foro de Consultas y Dudas
+                        </p>
                     </div>
-                    <button class="btn btn-cetis shadow-sm" data-bs-toggle="modal" data-bs-target="#modalPregunta">
-                        <i class="bi bi-plus-circle me-2"></i> HACER UNA PREGUNTA
+                    <button class="btn btn-cetis shadow-sm d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#modalPregunta">
+                        <i class="bi bi-plus-circle"></i> HACER UNA PREGUNTA
                     </button>
                 </div>
             </div>
 
-            @if(session('success'))
-                <div class="alert alert-success border-0 shadow-sm mb-4">
-                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
-                </div>
-            @endif
-
-            <!-- Listado de Preguntas -->
+            {{-- Listado de Preguntas --}}
             <div class="row">
                 @forelse($preguntas as $pregunta)
                     <div class="col-12 mb-3">
@@ -149,19 +195,27 @@
                                             {{ strtoupper(substr($pregunta->autor->nombre ?? $pregunta->correo_persona, 0, 1)) }}
                                         </div>
                                         <div class="ms-3">
-                                            <h6 class="mb-0 fw-bold">{{ $pregunta->autor->nombre ?? $pregunta->correo_persona }}</h6>
-                                            <small class="text-muted">Publicado el {{ \Carbon\Carbon::parse($pregunta->fecha_pregunta)->format('d/m/Y H:i') }}</small>
+                                            <h6 class="mb-0 fw-bold">
+                                                {{ $pregunta->autor->nombre ?? $pregunta->correo_persona }}
+                                            </h6>
+                                            <small class="text-muted">
+                                                Publicado el {{ \Carbon\Carbon::parse($pregunta->fecha_pregunta)->format('d/m/Y H:i') }}
+                                            </small>
                                         </div>
                                     </div>
                                     <span class="badge rounded-pill bg-light text-dark border px-3 py-2">
-                                        <i class="bi bi-chat-right-text me-1"></i> {{ $pregunta->respuestas_count }} respuestas
+                                        <i class="bi bi-chat-right-text me-1"></i>
+                                        {{ $pregunta->respuestas_count }} respuestas
                                     </span>
                                 </div>
-                                
-                                <h5 class="card-title fw-bold text-dark mb-3">{{ $pregunta->texto_pregunta }}</h5>
-                                
+
+                                <h5 class="card-title fw-bold text-dark mb-3">
+                                    {{ $pregunta->texto_pregunta }}
+                                </h5>
+
                                 <div class="d-flex justify-content-end">
-                                    <a href="{{ route('foro.show', [$curso->id_curso, $pregunta->id_pregunta_foro]) }}" class="btn btn-outline-danger btn-sm fw-bold px-4 rounded-pill">
+                                    <a href="{{ route('foro.show', [$curso->id_curso, $pregunta->id_pregunta_foro]) }}"
+                                       class="btn btn-outline-danger btn-sm fw-bold px-4 rounded-pill">
                                         Ver conversación <i class="bi bi-arrow-right ms-1"></i>
                                     </a>
                                 </div>
@@ -170,42 +224,74 @@
                     </div>
                 @empty
                     <div class="col-12">
-                        <div class="text-center py-5 bg-white rounded shadow-sm">
-                            <i class="bi bi-chat-square-dots text-light display-1"></i>
-                            <h4 class="mt-3 text-muted">Aún no hay preguntas en este foro</h4>
+                        <div class="text-center py-5 bg-white rounded shadow-sm border">
+                            <i class="bi bi-chat-square-dots text-muted display-2 d-block mb-3"></i>
+                            <h4 class="mt-3 text-muted fw-bold">Aún no hay preguntas en este foro</h4>
                             <p class="text-muted">¡Sé el primero en plantear una duda!</p>
                         </div>
                     </div>
                 @endforelse
             </div>
+
         </div>
     </div>
 </div>
 
-<!-- MODAL PARA NUEVA PREGUNTA -->
+{{-- MODAL NUEVA PREGUNTA --}}
 <div class="modal fade" id="modalPregunta" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <form action="{{ route('pregunta.store', $curso->id_curso) }}" method="POST" class="modal-content border-0">
             @csrf
             <div class="modal-header bg-dark text-white border-0">
-                <h5 class="modal-title fw-bold"><i class="bi bi-pencil-square me-2"></i>Nueva Consulta</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-pencil-square me-2"></i> Nueva Consulta
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
                 <div class="mb-3">
                     <label class="form-label fw-bold">¿Cuál es tu duda?</label>
-                    <textarea name="texto_pregunta" class="form-control border-0 bg-light" rows="4" placeholder="Escribe aquí tu pregunta detalladamente..." required style="resize: none;"></textarea>
+                    <textarea name="texto_pregunta"
+                        class="form-control border-0 bg-light"
+                        rows="4"
+                        placeholder="Escribe aquí tu pregunta detalladamente..."
+                        required
+                        style="resize: none;"></textarea>
                 </div>
             </div>
             <div class="modal-footer border-0 bg-light">
-                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">CANCELAR</button>
-                <button type="submit" class="btn btn-cetis fw-bold px-4">PUBLICAR PREGUNTA</button>
+                <button type="button" class="btn btn-secondary fw-bold" data-bs-dismiss="modal">
+                    CANCELAR
+                </button>
+                <button type="submit" class="btn btn-cetis fw-bold px-4">
+                    PUBLICAR PREGUNTA
+                </button>
             </div>
         </form>
     </div>
 </div>
 
-<!-- Bootstrap Bundle JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{{-- Alertas del Servidor mapeadas con SweetAlert2 --}}
+@if(session('success'))
+<script>
+    Swal.fire({
+        icon: 'success',
+        title: '¡Logrado!',
+        text: "{{ session('success') }}",
+        timer: 3000,
+        showConfirmButton: false
+    });
+</script>
+@endif
+
+@if(session('error'))
+<script>
+    Swal.fire({
+        icon: 'error',
+        title: 'Oops...',
+        text: "{{ session('error') }}",
+    });
+</script>
+@endif
+
+@endsection

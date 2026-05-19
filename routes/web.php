@@ -158,6 +158,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/examen/{id_cuestionario}/mis-resultados', [RespuestaExamenController::class, 'misResultados'])->name('examen.misResultados');
     Route::get('/intento/{id_intento}/mi-intento', [RespuestaExamenController::class, 'verMiIntento'])->name('examen.verMiIntento');
 
+    Route::get('/examen/{id_cuestionario}/editar-config', [ExamenController::class, 'editarConfig'])->name('examenes.editarConfig');
+    Route::put('/examen/{id_cuestionario}/actualizar-config', [ExamenController::class, 'actualizarConfig'])->name('examenes.actualizarConfig');
+
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
 
