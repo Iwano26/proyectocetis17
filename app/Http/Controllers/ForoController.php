@@ -8,6 +8,7 @@ use App\Models\PreguntaForo;
 use App\Models\RespuestaForo;
 use App\Models\Curso;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ForoController extends Controller
@@ -31,7 +32,17 @@ class ForoController extends Controller
             ->orderBy('fecha_pregunta', 'desc')
             ->get();
 
-        return view('CursosViews.foro', compact('curso', 'foro', 'preguntas'));
+        // ── AGREGAR ESTO ──────────────────────────────────────────────────────
+        $yaInscrito = false;
+        if (Auth::check() && Auth::user()->rol === 'Estudiante') {
+            $yaInscrito = \Illuminate\Support\Facades\DB::table('inscripcion')
+                ->where('id_curso', $id)
+                ->where('correo_estudiante', Auth::user()->correo)
+                ->exists();
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
+        return view('CursosViews.foro', compact('curso', 'foro', 'preguntas', 'yaInscrito'));
     }
 
     public function storePregunta(Request $request, $id)
@@ -54,7 +65,17 @@ class ForoController extends Controller
         $curso = Curso::findOrFail($id);
         $pregunta = PreguntaForo::with(['autor', 'respuestas.autor'])->findOrFail($id_pregunta);
 
-        return view('CursosViews.foro_detalle', compact('curso', 'pregunta'));
+        // ── AGREGAR ESTO ──────────────────────────────────────────────────────
+        $yaInscrito = false;
+        if (Auth::check() && Auth::user()->rol === 'Estudiante') {
+            $yaInscrito = \Illuminate\Support\Facades\DB::table('inscripcion')
+                ->where('id_curso', $id)
+                ->where('correo_estudiante', Auth::user()->correo)
+                ->exists();
+        }
+        // ─────────────────────────────────────────────────────────────────────
+
+        return view('CursosViews.foro_detalle', compact('curso', 'pregunta', 'yaInscrito'));
     }
 
     // ESTE ES EL MÉTODO QUE TE FALTABA

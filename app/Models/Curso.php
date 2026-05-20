@@ -22,7 +22,7 @@ class Curso extends Model
         'materia',
         'fecha_fin',
         'horas_disponibles',
-        'estado'.
+        'estado',
         'acceso'
 
     ];

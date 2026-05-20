@@ -137,7 +137,7 @@ class CursoController extends Controller
                 'materia'           => $request->materia,
                 'horas_disponibles' => $request->horas_disponibles,
                 'estado'            => $request->estado,
-                'acceso'            => $request->password_curso ?? '', // Si es null, manda cadena vacía
+                'acceso'            => $request->acceso ?? '', // Si es null, manda cadena vacía
             ]);
 
             // 2. Insertar horarios (asegúrate que el nombre de la tabla sea curso_horarios)

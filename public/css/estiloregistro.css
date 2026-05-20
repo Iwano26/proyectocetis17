@@ -1,161 +1,237 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body, html {
     height: 100%;
 }
 
-/* 🏞️ Estilo del Fondo: Centrado y con Imagen */
+/* ── FONDO ─────────────────────────────────────────────────────────────── */
 .fondo {
     background: url("../img/cetisss.jpg") no-repeat center center/cover;
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 30px 20px;
+    position: relative;
 }
 
-/* 📦 Caja Principal: Login, Registro o Recuperación */
-.register-box { 
+/* Overlay oscuro sobre la imagen */
+.fondo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+/* ── CAJA PRINCIPAL ────────────────────────────────────────────────────── */
+.register-box {
     background-color: white;
-    border-radius: 20px;
-    padding: 40px 30px;
+    border-radius: 16px;
+    padding: 40px 36px;
     width: 100%;
-    max-width: 450px; /* Ancho cómodo para formularios de registro */
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    text-align: center;
+    max-width: 480px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+    border-top: 5px solid #8C001A;
 }
 
-/* 🖼️ Logo */
+/* ── LOGO ──────────────────────────────────────────────────────────────── */
 .logo img {
     width: 80px;
     height: 80px;
     object-fit: contain;
     border-radius: 50%;
-    margin-bottom: 15px;
-    border: 3px solid #A71F21; /* Color institucional */
+    margin-bottom: 12px;
+    border: 3px solid #8C001A;
+    box-shadow: 0 4px 12px rgba(140, 0, 26, 0.2);
 }
 
-/* ✍️ Títulos y Mensajes */
+/* ── TÍTULO ────────────────────────────────────────────────────────────── */
 .register-box h2 {
-    color: #A71F21; /* Color institucional */
-    margin-bottom: 5px;
-    font-size: 28px; 
+    color: #8C001A;
+    margin-bottom: 4px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.3px;
 }
 
-.box-msg {
-    color: #666;
-    margin-bottom: 25px;
+.register-box .subtitulo {
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 24px;
 }
 
+/* ── SEPARADOR ─────────────────────────────────────────────────────────── */
+.separator {
+    border: 0;
+    border-top: 1px solid #f0f0f0;
+    margin: 20px 0;
+}
+
+/* ── FORMULARIO ────────────────────────────────────────────────────────── */
 form {
     display: flex;
     flex-direction: column;
     align-items: stretch;
 }
 
-.separator {
-    border: 0;
-    border-top: 1px solid #eee;
-    margin: 20px 0;
-}
-
-/* 🏷️ Etiquetas */
+/* ── ETIQUETAS ─────────────────────────────────────────────────────────── */
 label {
     text-align: left;
-    font-size: 14px;
-    color: #333;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #444;
     margin: 10px 0 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
 }
 
-/* 📥 Campos de Entrada */
-input[type="text"], 
-input[type="email"], 
+/* ── INPUTS ────────────────────────────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
 input[type="password"] {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 0.9rem;
     outline: none;
-    margin-bottom: 5px; 
-    width: 100%; 
+    margin-bottom: 4px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fafafa;
+    color: #1a1a2e;
 }
 
-input[type="text"]:focus, 
-input[type="email"]:focus, 
+input[type="text"]:focus,
+input[type="email"]:focus,
 input[type="password"]:focus {
-    border-color: #A71F21; /* Resaltado de enfoque */
+    border-color: #8C001A;
+    box-shadow: 0 0 0 3px rgba(140, 0, 26, 0.08);
+    background-color: white;
 }
 
-/* 📝 Grupo de Checkbox (Usado en el Registro) */
+/* Input con error */
+input.input-error {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
+}
+
+input.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+/* ── BOTÓN PRINCIPAL ───────────────────────────────────────────────────── */
+button[type="submit"],
+button#enviarFormulario {
+    padding: 13px;
+    background-color: #8C001A;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    width: 100%;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(140, 0, 26, 0.25);
+}
+
+button[type="submit"]:hover,
+button#enviarFormulario:hover {
+    background-color: #6b0014;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(140, 0, 26, 0.3);
+}
+
+button[type="submit"]:active,
+button#enviarFormulario:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(140, 0, 26, 0.2);
+}
+
+/* ── CHECKBOX GROUP ────────────────────────────────────────────────────── */
 .checkbox-group {
     display: flex;
     align-items: center;
     margin: 15px 0 20px 0;
-    font-size: 13px;
+    font-size: 0.8rem;
     text-align: left;
 }
 
 .checkbox-group input[type="checkbox"] {
     margin-right: 8px;
+    accent-color: #8C001A;
+    width: 16px;
+    height: 16px;
 }
 
 .checkbox-group label {
     margin: 0;
-    line-height: 1.2;
+    line-height: 1.3;
+    font-size: 0.8rem;
+    text-transform: none;
+    letter-spacing: 0;
 }
 
 .checkbox-group a {
-    color: #A71F21; 
+    color: #8C001A;
     text-decoration: none;
+    font-weight: 600;
 }
 
-/* 🟢 Botón de Acción */
-button {
-    padding: 12px;
-    background-color: #A71F21; /* Color institucional */
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    width: 100%;
-}
-
-button:hover {
-    background-color: #891a1c; /* Color más oscuro para hover */
-}
-
-/* 🔗 Enlaces Inferiores */
+/* ── ENLACES INFERIORES ────────────────────────────────────────────────── */
 .links {
     margin-top: 20px;
-    font-size: 14px;
+    font-size: 0.85rem;
     text-align: center;
-    /* Usado solo para el login, en registro/recuperación solo hay 1 link */
-    display: flex; 
-    justify-content: space-between; 
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    flex-wrap: wrap;
 }
 
 .links a {
-    color: #A71F21; 
+    color: #8C001A;
     text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
 }
 
 .links a:hover {
+    color: #6b0014;
     text-decoration: underline;
 }
 
-/* 🚨 Mensajes de Error de Validación */
+/* ── ERRORES DE VALIDACIÓN ─────────────────────────────────────────────── */
 .error-message {
-    color: #dc3545; 
-    font-size: 12px;
-    margin-top: -5px; 
-    margin-bottom: 10px;
-    display: block; 
+    color: #dc3545;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    display: block;
     text-align: left;
+    padding-left: 2px;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media (max-width: 500px) {
+    .register-box {
+        padding: 30px 20px;
+        border-radius: 12px;
+    }
+
+    .register-box h2 {
+        font-size: 1.4rem;
+    }
 }

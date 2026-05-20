@@ -1,122 +1,201 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body, html {
     height: 100%;
+    min-height: 100vh;
+    overflow: hidden;
 }
 
+/* ── FONDO ─────────────────────────────────────────────────────────────── */
 .fondo {
     background: url("../img/cetisss.jpg") no-repeat center center/cover;
+    min-height: 100vh;
     height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 30px 20px;
+    position: fixed;
+    inset: 0;
+    overflow-y: auto;
 }
 
+.fondo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+/* ── CAJA LOGIN ────────────────────────────────────────────────────────── */
 .login-box {
     background-color: white;
-    border-radius: 20px;
-    padding: 40px 30px;
+    border-radius: 16px;
+    padding: 44px 40px;
     width: 100%;
-    max-width: 400px;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+    max-width: 420px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+    border-top: 5px solid #8C001A;
     text-align: center;
 }
 
+/* ── LOGO ──────────────────────────────────────────────────────────────── */
 .logo img {
     width: 80px;
     height: 80px;
     object-fit: contain;
     border-radius: 50%;
-    margin-bottom: 15px;
-    border: 3px solid #A71F21;
+    margin-bottom: 12px;
+    border: 3px solid #8C001A;
+    box-shadow: 0 4px 12px rgba(140, 0, 26, 0.2);
 }
 
+/* ── TÍTULO ────────────────────────────────────────────────────────────── */
 .login-box h2 {
-    color: #A71F21;
-    margin-bottom: 25px;
-    font-size: 24px;
+    color: #8C001A;
+    font-size: 1.6rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+    letter-spacing: -0.3px;
 }
 
+.subtitulo {
+    color: #888;
+    font-size: 0.82rem;
+    margin-bottom: 28px;
+}
+
+/* ── FORMULARIO ────────────────────────────────────────────────────────── */
 form {
     display: flex;
     flex-direction: column;
     align-items: stretch;
-}
-
-label {
     text-align: left;
-    font-size: 14px;
-    color: #333;
-    margin: 10px 0 5px;
 }
 
-input[type="text"], input[type="password"] {
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+/* ── ETIQUETAS ─────────────────────────────────────────────────────────── */
+label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #444;
+    margin: 12px 0 5px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+/* ── INPUTS ────────────────────────────────────────────────────────────── */
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1.5px solid #e0e0e0;
+    font-size: 0.9rem;
     outline: none;
+    margin-bottom: 4px;
+    width: 100%;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fafafa;
+    color: #1a1a2e;
 }
 
-input[type="text"]:focus, input[type="password"]:focus {
-    border-color: #A71F21;
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus {
+    border-color: #8C001A;
+    box-shadow: 0 0 0 3px rgba(140, 0, 26, 0.08);
+    background-color: white;
 }
 
-.checkbox {
-    display: flex;
-    align-items: center;
-    margin: 15px 0;
-    font-size: 13px;
+input.input-error {
+    border-color: #dc3545 !important;
+    background-color: #fff8f8;
 }
 
-.checkbox input {
-    margin-right: 8px;
+input.input-error:focus {
+    box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
 }
 
-button {
-    padding: 12px;
-    background-color: #A71F21;
+/* ── BOTÓN ─────────────────────────────────────────────────────────────── */
+button[type="submit"] {
+    padding: 13px;
+    background-color: #8C001A;
     color: white;
     border: none;
-    border-radius: 10px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+    width: 100%;
+    margin-top: 20px;
+    letter-spacing: 0.5px;
+    box-shadow: 0 4px 14px rgba(140, 0, 26, 0.25);
 }
 
-button:hover {
-    background-color: #891a1c;
+button[type="submit"]:hover {
+    background-color: #6b0014;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(140, 0, 26, 0.3);
 }
 
+button[type="submit"]:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(140, 0, 26, 0.2);
+}
+
+/* ── ENLACES ───────────────────────────────────────────────────────────── */
 .links {
     margin-top: 20px;
-    font-size: 14px;
+    font-size: 0.82rem;
     display: flex;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
 .links a {
-    color: #A71F21;
+    color: #8C001A;
     text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
 }
 
 .links a:hover {
+    color: #6b0014;
     text-decoration: underline;
 }
 
-.credit {
-    font-size: 12px;
-    margin-top: 25px;
-    color: #999;
+/* ── ERRORES ───────────────────────────────────────────────────────────── */
+.error-message {
+    color: #dc3545;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-top: 2px;
+    margin-bottom: 6px;
+    display: block;
+    text-align: left;
+    padding-left: 2px;
 }
 
-.credit a {
-    color: #666;
-    text-decoration: none;
+/* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 32px 20px;
+    }
+
+    .links {
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+    }
 }

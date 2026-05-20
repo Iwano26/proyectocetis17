@@ -82,9 +82,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('cursos.show', $curso->id_curso) }}"
-                       class="btn btn-outline-primary btn-sm fw-bold px-3 btn-accion"
-                       style="font-size: 0.8rem; border-radius: 0;">VER</a>
+                   
 
                     @if(Auth::user()->rol === 'Estudiante')
                         @if(in_array($curso->id_curso, $misInscripciones))
@@ -122,12 +120,23 @@
                             </button>
                         @endif
                     @else
+                    {{-- Asesor o Admin --}}
+                    @if(Auth::user()->rol === 'Administrador' || $curso->correo_persona === Auth::user()->correo)
+                        {{-- Es su propio curso: puede entrar y gestionar --}}
                         <a href="{{ route('cursos.show', $curso->id_curso) }}"
-                           class="btn btn-danger btn-sm fw-bold px-3 btn-accion"
-                           style="background-color: #8C001A; border: none; font-size: 0.8rem; border-radius: 0;">
-                            ENTRAR
+                        class="btn btn-danger btn-sm fw-bold px-3 btn-accion"
+                        style="background-color: #8C001A; border: none; font-size: 0.8rem; border-radius: 0;">
+                            <i class="bi bi-gear-fill me-1"></i> GESTIONAR
+                        </a>
+                    @else
+                        {{-- Curso de otro asesor: solo puede ver --}}
+                        <a href="{{ route('cursos.show', $curso->id_curso) }}"
+                        class="btn btn-outline-secondary btn-sm fw-bold px-3 btn-accion"
+                        style="font-size: 0.8rem; border-radius: 0;">
+                            <i class="bi bi-eye me-1"></i> VER
                         </a>
                     @endif
+                @endif
 
                 </div>
 

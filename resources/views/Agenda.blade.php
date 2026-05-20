@@ -223,6 +223,31 @@
         transition: filter 0.15s, transform 0.15s;
         text-decoration: none;
     }
+
+    .card-titulo {
+        font-size: 1.05rem !important;
+    }
+
+    .card-meta {
+        font-size: 0.88rem !important;
+    }
+
+    .card-tipo {
+        font-size: 0.78rem !important;
+    }
+
+    .estado-badge {
+        font-size: 0.75rem !important;
+    }
+
+    .btn-accion {
+        font-size: 0.85rem !important;
+        padding: 0.5rem 1rem !important;
+    }
+
+    .card-curso-tag {
+        font-size: 0.8rem !important;
+    }
     .btn-accion:hover { filter: brightness(0.92); transform: scale(0.98); }
     .btn-accion:disabled { opacity: 0.5; cursor: not-allowed; transform: none; filter: none; }
 
@@ -233,54 +258,177 @@
     .btn-pronto    { background: #dbeafe; color: #1e40af; }
 
     /* ── CALENDARIO ── */
+    /* ── CALENDARIO ── */
     .calendario-card {
         background: #fff;
         border-radius: var(--radius);
         box-shadow: var(--card-shadow);
         padding: 1.5rem;
         margin-bottom: 2rem;
+        border: 1.5px solid #f0f0f0;
+    }
+
+    /* Toolbar */
+    #calendar .fc-toolbar {
+        margin-bottom: 1.2rem !important;
+        flex-wrap: wrap;
+        gap: 0.5rem;
     }
 
     #calendar .fc-toolbar-title {
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 1.1rem;
+        font-size: 1.15rem !important;
         font-weight: 700;
+        color: var(--texto);
     }
+
+    /* Botones navegación */
+    #calendar .fc-button {
+        border-radius: 8px !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        padding: 0.35rem 0.75rem !important;
+        transition: all 0.2s !important;
+        text-transform: capitalize !important;
+    }
+
     #calendar .fc-button-primary {
         background: var(--texto) !important;
         border-color: var(--texto) !important;
-        border-radius: 8px !important;
-        font-size: 0.8rem;
-        font-weight: 600;
     }
-    #calendar .fc-button-primary:not(:disabled):hover {
-        background: var(--rojo) !important;
-        border-color: var(--rojo) !important;
+
+    #calendar .fc-button-primary:hover {
+        background: #8C001A !important;
+        border-color: #8C001A !important;
     }
+
+    #calendar .fc-button-primary:not(:disabled).fc-button-active {
+        background: #8C001A !important;
+        border-color: #8C001A !important;
+    }
+
+    /* Cabecera días de semana */
+    #calendar .fc-col-header {
+        background: #f8f9fa;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    #calendar .fc-col-header-cell {
+        padding: 8px 0 !important;
+        border: none !important;
+    }
+
+    #calendar .fc-col-header-cell-cushion {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.75rem !important;
+        font-weight: 700 !important;
+        color: #8C001A !important;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-decoration: none !important;
+    }
+
+    /* Celdas de días */
+    #calendar .fc-daygrid-day {
+        transition: background 0.15s;
+    }
+
+    #calendar .fc-daygrid-day:hover {
+        background: #fafafa !important;
+    }
+
+    #calendar .fc-daygrid-day-number {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
+        color: var(--texto) !important;
+        text-decoration: none !important;
+        padding: 6px 8px !important;
+    }
+
+    /* Día de hoy */
+    #calendar .fc-day-today {
+        background: #fff8f8 !important;
+    }
+
+    #calendar .fc-day-today .fc-daygrid-day-number {
+        background: #8C001A !important;
+        color: #fff !important;
+        border-radius: 999px;
+        width: 28px;
+        height: 28px;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        padding: 0 !important;
+    }
+
+    /* Eventos */
     #calendar .fc-event {
         border: none !important;
         border-radius: 6px !important;
-        font-size: 0.75rem;
-        font-weight: 600;
-        padding: 2px 5px;
+        font-size: 0.72rem !important;
+        font-weight: 600 !important;
+        padding: 2px 6px !important;
+        margin-bottom: 2px !important;
+        cursor: pointer;
+        transition: filter 0.15s, transform 0.15s !important;
     }
-    #calendar .fc-daygrid-day-number,
-    #calendar .fc-col-header-cell-cushion {
+
+    #calendar .fc-event:hover {
+        filter: brightness(0.88) !important;
+        transform: scale(1.02) !important;
+    }
+
+    #calendar .fc-event-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* Más eventos link */
+    #calendar .fc-daygrid-more-link {
+        font-size: 0.72rem !important;
+        font-weight: 700 !important;
+        color: #8C001A !important;
+        background: #fff0f2 !important;
+        border-radius: 4px;
+        padding: 1px 5px !important;
+    }
+
+    #calendar .fc-daygrid-more-link:hover {
+        background: #8C001A !important;
+        color: white !important;
+    }
+
+    /* Bordes de la grilla */
+    #calendar .fc-scrollgrid {
+        border-radius: 10px !important;
+        overflow: hidden;
+        border: 1.5px solid #eee !important;
+    }
+
+    #calendar .fc-scrollgrid td,
+    #calendar .fc-scrollgrid th {
+        border-color: #f0f0f0 !important;
+    }
+
+    /* Vista lista */
+    #calendar .fc-list-event:hover td {
+        background: #fff8f8 !important;
+    }
+
+    #calendar .fc-list-event-dot {
+        border-radius: 3px !important;
+    }
+
+    #calendar .fc-list-day-cushion {
+        background: #f8f9fa !important;
         font-family: 'Space Grotesk', sans-serif;
-        font-size: 0.8rem;
-        font-weight: 600;
+        font-size: 0.82rem;
+        font-weight: 700;
         color: var(--texto);
-        text-decoration: none;
-    }
-    #calendar .fc-day-today { background: #fff8f8 !important; }
-    #calendar .fc-day-today .fc-daygrid-day-number {
-        background: var(--rojo);
-        color: #fff;
-        border-radius: 999px;
-        width: 26px; height: 26px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
     }
 
     /* ── LEYENDA CALENDARIO ── */
@@ -288,13 +436,82 @@
         display: flex;
         gap: 1.2rem;
         flex-wrap: wrap;
-        margin-bottom: 1rem;
+        margin-bottom: 1.2rem;
         font-size: 0.78rem;
         font-weight: 500;
         color: var(--muted);
+        padding: 0.75rem 1rem;
+        background: #f8f9fa;
+        border-radius: 8px;
+        border: 1px solid #eee;
     }
-    .leyenda span { display: flex; align-items: center; gap: 0.35rem; }
-    .leyenda-dot { width: 10px; height: 10px; border-radius: 3px; }
+
+    .leyenda span {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .leyenda-dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        flex-shrink: 0;
+    }
+    /* ── ACCESIBILIDAD: TEXTOS MÁS GRANDES ── */
+
+    #calendar .fc-toolbar-title {
+        font-size: 1.4rem !important;
+    }
+
+    #calendar .fc-col-header-cell-cushion {
+        font-size: 0.9rem !important;
+        letter-spacing: 0.03em;
+    }
+
+    #calendar .fc-daygrid-day-number {
+        font-size: 1rem !important;
+        padding: 8px 10px !important;
+    }
+
+    #calendar .fc-day-today .fc-daygrid-day-number {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 1rem !important;
+    }
+
+    #calendar .fc-event {
+        font-size: 0.82rem !important;
+        padding: 3px 7px !important;
+        margin-bottom: 3px !important;
+    }
+
+    #calendar .fc-daygrid-more-link {
+        font-size: 0.82rem !important;
+        padding: 2px 7px !important;
+    }
+
+    #calendar .fc-button {
+        font-size: 0.9rem !important;
+        padding: 0.45rem 1rem !important;
+    }
+
+    #calendar .fc-list-event-title {
+        font-size: 0.92rem !important;
+    }
+
+    #calendar .fc-list-day-cushion {
+        font-size: 0.9rem !important;
+    }
+
+    .leyenda {
+        font-size: 0.88rem !important;
+    }
+
+    .leyenda-dot {
+        width: 14px !important;
+        height: 14px !important;
+    }
 
     /* ── EMPTY STATE ── */
     .empty-state {

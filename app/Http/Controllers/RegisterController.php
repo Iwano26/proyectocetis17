@@ -16,43 +16,59 @@ class RegisterController extends Controller
         return view('RegisterViews.registrarusuario'); 
     }
     
-    public function store(Request $request){
-        $correo = $request->correo;
-        $nombre = $request->nombre;
-        $apellidoPa = $request->apellidoPa;
-        $apellidoMa = $request->apellidoMa;
-        $rol = $request->rol;
-        $telefono = $request->telefono;
-        $contrasennia = $request->contrasennia;
+    public function store(Request $request)
+    {
+        // Verificación manual de correo duplicado
+        $existe = DB::table('persona')->where('correo', $request->correo)->exists();
         
-        $contraseniaCifrada = Hash::make($contrasennia);
+        if ($existe) {
+            return redirect('/register')
+                ->withInput()
+                ->withErrors(['correo' => '¡Este correo ya está registrado! ¿Olvidaste tu contraseña?']);
+        }
+
+        $request->validate([
+            'correo'         => 'required|email',
+            'nombre'         => 'required|string|max:50',
+            'apellidoPa'     => 'required|string|max:50',
+            'apellidoMa'     => 'required|string|max:50',
+            'rol'            => 'required|in:Estudiante,Asesor',
+            'telefono'       => 'required|digits:10',
+            'contrasennia'   => 'required|string|min:8',
+            'recontrasennia' => 'required|same:contrasennia',
+        ], [
+            'correo.email'           => 'El correo no tiene un formato válido.',
+            'telefono.digits'        => 'El teléfono debe tener exactamente 10 dígitos.',
+            'contrasennia.min'       => 'La contraseña debe tener al menos 8 caracteres.',
+            'recontrasennia.same'    => 'Las contraseñas no coinciden.',
+        ]);
+
+        $contraseniaCifrada = Hash::make($request->contrasennia);
         $token = Str::random(64);
 
         try {
-            DB::connection('mysql')
-                ->table('persona')
-                ->insert([
-                    'correo' => $correo,         
-                    'nombre' => $nombre,
-                    'apellidoPa' => $apellidoPa,
-                    'apellidoMa' => $apellidoMa,
-                    'rol' => $rol,
-                    'telefono' => $telefono,
-                    'pass' => $contraseniaCifrada, 
-                    'activo' => 1, 
-                    'confirmado' => 0, 
-                    'token_confirmacion' => $token,
-                ]);
+            DB::table('persona')->insert([
+                'correo'             => $request->correo,
+                'nombre'             => $request->nombre,
+                'apellidoPa'         => $request->apellidoPa,
+                'apellidoMa'         => $request->apellidoMa,
+                'rol'                => $request->rol,
+                'telefono'           => $request->telefono,
+                'pass'               => $contraseniaCifrada,
+                'activo'             => 1,
+                'confirmado'         => 0,
+                'token_confirmacion' => $token,
+            ]);
 
-            // Enviamos el mailable
-            Mail::to($correo)->send(new ConfirmarCuentaMailable($nombre, $token));
+            Mail::to($request->correo)->send(new ConfirmarCuentaMailable($request->nombre, $token));
 
-            return redirect('/register')->with('success', "Cuenta creada. Revisa tu correo institucional para activarla.");
+            return redirect('/register')->with('success', 'Cuenta creada. Revisa tu correo para activarla.');
 
-            } catch (\Exception $e){
-            Log::error('Error al registrar: ' . $e->getMessage()); 
-        // Cambia el mensaje temporalmente para ver el error real en pantalla:
-        return redirect('/register')->with('mensaje', "Error: " . $e->getMessage());
+        } catch (\Exception $e) {
+            Log::error('Error al registrar: ' . $e->getMessage());
+            return redirect('/register')
+                ->withInput()
+                ->with('mensaje', 'Error inesperado: ' . $e->getMessage());
         }
     }
 

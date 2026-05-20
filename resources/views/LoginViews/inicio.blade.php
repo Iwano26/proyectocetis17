@@ -3,76 +3,122 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Inicio de Sesión</title>
+    <title>Inicio de Sesión | CETIS 17</title>
     <link rel="stylesheet" href="{{ asset('css/estiloindex.css') }}">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
+
+    {{-- Mensajes del servidor --}}
+    @if($errors->has('login'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Acceso denegado',
+                    text: @json($errors->first('login')),
+                    confirmButtonColor: '#8C001A',
+                    confirmButtonText: 'Intentar de nuevo'
+                });
+            });
+        </script>
+    @endif
+
+    @if(session('mensaje'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Aviso',
+                    text: @json(session('mensaje')),
+                    confirmButtonColor: '#8C001A',
+                });
+            });
+        </script>
+    @endif
+
     <div class="fondo">
         <div class="login-box">
+
             <div class="logo">
-                <img src="{{ asset('img/cetis.png') }}" alt="Logo Escuela" />
+                <img src="{{ asset('img/cetis.png') }}" alt="Logo CETIS 17" />
             </div>
-            <h2>Asesorias CETIS 17</h2>
-            <div>
-                @if ($errors->has('login'))
-                    <p style="color:red;">{{ $errors->first('login') }}</p>
-                @endif
-            </div>
-         <form id="loginForm" method="POST" action="{{ route('login.post') }}">
-    @csrf
-    <label for="correo">Correo </label>
-    <input type="text" id="correo" name="correo" placeholder="Ingresa tu correo institucional" value="{{ old('correo') }}">
-    @error('correo') <small style="color:red;">{{ $message }}</small> @enderror
 
-    <label for="pass">Contraseña </label>
-    <input type="password" id="pass" name="pass" placeholder="Ingresa tu contraseña">
-    @error('pass') <small style="color:red;">{{ $message }}</small> @enderror
+            <h2>Asesorías CETIS 17</h2>
+            <p class="subtitulo">Plataforma de Refuerzo Académico</p>
 
-    <button type="submit">ACCESO</button>
-    <div class="links">
-        <a href="/register">¿No tienes una cuenta?</a>
-        <a href="/olvido-contrasennia">¿Se te olvidó tu contraseña?</a>
-    </div>
-</form>
+            <form id="loginForm" method="POST" action="{{ route('login.post') }}">
+                @csrf
+
+                <label for="correo">Correo Electrónico</label>
+                <input type="text" id="correo" name="correo"
+                    placeholder="usuario@cetis17.edu.mx"
+                    value="{{ old('correo') }}"
+                    class="{{ $errors->has('correo') ? 'input-error' : '' }}">
+                @error('correo')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+
+                <label for="pass">Contraseña</label>
+                <input type="password" id="pass" name="pass"
+                    placeholder="Ingresa tu contraseña"
+                    class="{{ $errors->has('pass') ? 'input-error' : '' }}">
+                @error('pass')
+                    <div class="error-message">{{ $message }}</div>
+                @enderror
+
+                <button type="submit">ACCEDER</button>
+
+                <div class="links">
+                    <a href="/register">¿No tienes cuenta? Regístrate</a>
+                    <a href="/olvido-contrasennia">¿Olvidaste tu contraseña?</a>
+                </div>
+            </form>
+
+        </div>
     </div>
 
     <script>
-document.getElementById("loginForm").addEventListener("submit", function(e) {
-    const correo = document.getElementById("correo").value.trim();
-    const pass = document.getElementById("pass").value;
+    document.getElementById("loginForm").addEventListener("submit", function(e) {
+        const correo = document.getElementById("correo").value.trim();
+        const pass   = document.getElementById("pass").value;
 
-    const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
-    
-    // MODIFICADO PARA PRUEBAS: Acepta cualquier dominio de correo
-    //const regexCorreoGeneral = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    
-    function mostrarAlerta(titulo, texto) {
-        Swal.fire({
-            icon: 'error', 
-            title: titulo,
-            text: texto,
-            confirmButtonText: 'OK',
-        });
-    }
+        // ══════════════════════════════════════════════════════════════════
+        // MODO PRODUCCIÓN: Solo acepta correos institucionales @cetis17.edu.mx
+        const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
 
-    // 1. Solo validamos que no estén vacíos
-    if (correo === "" || pass === "") {
-        e.preventDefault();
-        mostrarAlerta('Campos Vacíos', 'Debes ingresar tu correo y contraseña.');
-        return;
-    }
+        // MODO PRUEBAS: Acepta cualquier correo válido
+        // const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        // ══════════════════════════════════════════════════════════════════
 
-    // 2. Validar dominio institucional
-    if (!regexCorreo.test(correo)) {
-        e.preventDefault();
-        mostrarAlerta('Correo inválido', 'Usa tu correo institucional @cetis17.edu.mx');
-        return;
-    }
-    
-    // ELIMINAMOS la validación regexPassword aquí. 
-    // Deja que el servidor (Laravel) decida si la contraseña es correcta o no.
-});
-</script>
+        function mostrarAlerta(titulo, texto) {
+            e.preventDefault();
+            Swal.fire({
+                icon: 'warning',
+                title: titulo,
+                text: texto,
+                confirmButtonColor: '#8C001A',
+                confirmButtonText: 'Entendido',
+            });
+        }
+
+        if (correo === "" || pass === "") {
+            mostrarAlerta('Campos vacíos', 'Debes ingresar tu correo y contraseña.');
+            return;
+        }
+
+        if (!regexCorreo.test(correo)) {
+            mostrarAlerta(
+                'Correo no válido',
+                // ── MODO PRODUCCIÓN ──
+                'Usa tu correo institucional @cetis17.edu.mx'
+                // ── MODO PRUEBAS ──
+                // 'Ingresa un correo electrónico válido.'
+            );
+            return;
+        }
+    });
+    </script>
+
 </body>
 </html>
