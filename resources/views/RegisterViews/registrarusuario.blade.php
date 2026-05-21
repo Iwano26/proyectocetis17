@@ -9,6 +9,9 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    
+    {{-- SCRIPT OBLIGATORIO DE RECAPTCHA --}}
+    {!! NoCaptcha::renderJs() !!}
 </head>
 <body>
 
@@ -124,6 +127,16 @@
                     <div class="error-message">{{ $message }}</div>
                 @enderror
 
+                {{-- CONTENEDOR VISUAL DEL RECAPTCHA --}}
+                <div style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center;">
+                    {!! NoCaptcha::display() !!}
+                    @if ($errors->has('g-recaptcha-response'))
+                        <div class="error-message" style="display: block; margin-top: 5px;">
+                            {{ $errors->first('g-recaptcha-response') }}
+                        </div>
+                    @endif
+                </div>
+
                 <button type="submit" id="enviarFormulario">REGISTRAR</button>
 
                 <div class="links">
@@ -155,6 +168,8 @@
             }, "El teléfono debe tener exactamente 10 dígitos.");
 
             $('#registroForm').validate({
+                // Ignoramos elementos ocultos y los contenedores del captcha para que JQuery no se confunda
+                ignore: ":hidden, #g-recaptcha-response",
                 rules: {
                     nombre:         { required: true },
                     apellidoPa:     { required: true },
@@ -205,4 +220,4 @@
     </script>
 
 </body>
-</html>x
+</html>

@@ -28,19 +28,24 @@ class RegisterController extends Controller
         }
 
         $request->validate([
-            'correo'         => 'required|email',
-            'nombre'         => 'required|string|max:50',
-            'apellidoPa'     => 'required|string|max:50',
-            'apellidoMa'     => 'required|string|max:50',
-            'rol'            => 'required|in:Estudiante,Asesor',
-            'telefono'       => 'required|digits:10',
-            'contrasennia'   => 'required|string|min:8',
-            'recontrasennia' => 'required|same:contrasennia',
+            'correo'                 => 'required|email',
+            'nombre'                 => 'required|string|max:50',
+            'apellidoPa'             => 'required|string|max:50',
+            'apellidoMa'             => 'required|string|max:50',
+            'rol'                    => 'required|in:Estudiante,Asesor',
+            'telefono'               => 'required|digits:10',
+            'contrasennia'           => 'required|string|min:8',
+            'recontrasennia'         => 'required|same:contrasennia',
+            // NUEVA VALIDACIÓN DEL CAPTCHA:
+            'g-recaptcha-response'   => 'required|captcha',
         ], [
-            'correo.email'           => 'El correo no tiene un formato válido.',
+            'correo.email'           => 'El correo no tiene un format válido.',
             'telefono.digits'        => 'El teléfono debe tener exactamente 10 dígitos.',
             'contrasennia.min'       => 'La contraseña debe tener al menos 8 caracteres.',
             'recontrasennia.same'    => 'Las contraseñas no coinciden.',
+            // MENSAJES DEL CAPTCHA:
+            'g-recaptcha-response.required' => 'Por favor, verifica que no eres un robot.',
+            'g-recaptcha-response.captcha'  => 'Error de captcha. Inténtalo de nuevo.',
         ]);
 
         $contraseniaCifrada = Hash::make($request->contrasennia);

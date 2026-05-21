@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="../../dist/css/adminlte.min.css"> 
     <link rel="stylesheet" href="../../plugins/sweetalert2-theme-bootstrap-4/bootstrap-4.min.css">
     
+    {{-- SCRIPT OBLIGATORIO DE RECAPTCHA --}}
+    {!! NoCaptcha::renderJs() !!}
+
     <style>
         #preloader { 
             position: fixed; 
@@ -23,6 +26,7 @@
         }
         .spinner-border { width: 3rem; height: 3rem; }
         body { background: none !important; }
+        .error-captcha { color: #dc3545; font-size: 80%; margin-top: 5px; display: block; text-align: center; }
     </style>
 </head>
 <body>
@@ -43,11 +47,21 @@
                 <input type="hidden" name="mytoken" value="{{ $token }}">
                 
                 <label for="password">Nueva Contraseña</label>
-                <input type="password" id="password" class="form-control" name="password" placeholder="Mínimo 8 caracteres">
+                <input type="password" id="password" class="form-control" name="password" placeholder="Mínimo 8 y máximo 50 caracteres" maxlength="50">
                 
                 <label for="password_confirmation" style="margin-top: 15px;">Confirmar Contraseña</label>
-                <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" placeholder="Repite tu contraseña">
+                <input type="password" id="password_confirmation" class="form-control" name="password_confirmation" placeholder="Repite tu contraseña" maxlength="50">
                 
+                {{-- CASILLA DEL RECAPTCHA --}}
+                <div style="margin-top: 20px; display: flex; flex-direction: column; align-items: center;">
+                    {!! NoCaptcha::display() !!}
+                    @if ($errors->has('g-recaptcha-response'))
+                        <span class="error-captcha">
+                            <strong>{{ $errors->first('g-recaptcha-response') }}</strong>
+                        </span>
+                    @endif
+                </div>
+
                 <button type="submit" style="margin-top: 25px;">ACTUALIZAR CONTRASEÑA</button>
 
                 <div class="links" style="text-align: center; margin-top: 15px;">
@@ -69,10 +83,13 @@
     <script>
         $(document).ready(function () {
             $('#registroForm').validate({
+                // Ignoramos el token del captcha para evitar conflictos con jQuery Validate local
+                ignore: ":hidden, #g-recaptcha-response",
                 rules: {
                     password: { 
                         required: true, 
-                        minlength: 8 
+                        minlength: 8,
+                        maxlength: 50 // Límite de 50 caracteres en JS
                     },
                     password_confirmation: { 
                         required: true, 
@@ -82,7 +99,8 @@
                 messages: {
                     password: {
                         required: "Ingresa la nueva contraseña",
-                        minlength: "Debe tener al menos 8 caracteres"
+                        minlength: "Debe tener al menos 8 caracteres",
+                        maxlength: "No puede tener más de 50 caracteres"
                     },
                     password_confirmation: {
                         required: "Repite la contraseña para confirmar",

@@ -33,7 +33,7 @@ class ResetPasswordController extends Controller
                 'token_expiracion' => Carbon::now()->addMinutes(15)
             ]);
 
-            // Enviamos el correo (Aquí es donde falla por tu configuración .env)
+            // Enviamos el correo
             Mail::to($request->correo)->send(new cambiarcontrasenniaMailable($persona->nombre, $token));
         }
 
@@ -59,9 +59,18 @@ class ResetPasswordController extends Controller
     public function resetPassword(Request $request)
     {
         $request->validate([
-            'password' => 'required|min:8',
+            // Agregamos max:50 y el captcha obligatorio
+            'password' => 'required|min:8|max:50',
             'password_confirmation' => 'required|same:password',
-            'mytoken' => 'required'
+            'mytoken' => 'required',
+            'g-recaptcha-response' => 'required|captcha'
+        ], [
+            // Mensajes de error personalizados
+            'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
+            'password.max' => 'La contraseña no puede exceder los 50 caracteres.',
+            'password_confirmation.same' => 'Las contraseñas no coinciden.',
+            'g-recaptcha-response.required' => 'Por favor, verifica que no eres un robot.',
+            'g-recaptcha-response.captcha' => 'Error de captcha. Inténtalo de nuevo.'
         ]);
 
         $persona = DB::table('persona')
