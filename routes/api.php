@@ -13,3 +13,5 @@ Route::get('/cursos-movil', [ApiController::class, 'obtenerCursos']);
 Route::get('/usuarios-movil', [ApiController::class, 'obtenerUsuarios']);
 Route::get('/eventos-movil', [ApiController::class, 'obtenerEventos']);
 Route::post('/biblioteca-movil', [ApiController::class, 'subirDocumento']);
+
+//OwO
