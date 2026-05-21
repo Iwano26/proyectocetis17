@@ -564,7 +564,30 @@
             <i class="bi bi-calendar3 me-2" style="color:var(--rojo)"></i>
             Agenda de <span>{{ Auth::user()->nombre }}</span>
         </h2>
-        <span class="agenda-rol-badge">{{ Auth::user()->rol }}</span>
+        <div class="d-flex align-items-center gap-2">
+            @if($rol === 'Estudiante')
+                <a href="{{ route('solicitud.create') }}" class="btn btn-danger fw-bold shadow-sm">
+                    <i class="bi bi-send-fill me-2"></i> Solicitar Asesoría
+                </a>
+            @elseif($rol === 'Asesor' || $rol === 'Administrador')
+                @php
+                    $pendientesAsesor = \Illuminate\Support\Facades\DB::table('solicitud')
+                        ->join('curso', 'solicitud.id_curso', '=', 'curso.id_curso')
+                        ->where('curso.correo_persona', Auth::user()->correo)
+                        ->where('solicitud.estado', 'PENDIENTE')
+                        ->count();
+                @endphp
+                <a href="{{ route('solicitud.bandeja') }}" class="btn btn-dark fw-bold shadow-sm position-relative">
+                    <i class="bi bi-envelope-fill me-2"></i> Bandeja
+                    @if($pendientesAsesor > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ $pendientesAsesor }}
+                        </span>
+                    @endif
+                </a>
+            @endif
+            <span class="agenda-rol-badge">{{ Auth::user()->rol }}</span>
+        </div>
     </div>
 
     {{-- STATS --}}

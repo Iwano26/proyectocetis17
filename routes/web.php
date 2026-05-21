@@ -18,7 +18,8 @@ use App\Http\Controllers\{
     AsesoriaController,
     ExamenController,
     RespuestaExamenController,
-    AgendaController
+    AgendaController,
+    SolicitudController
 };
 
 // --- PÚBLICAS ---
@@ -160,6 +161,17 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/examen/{id_cuestionario}/editar-config', [ExamenController::class, 'editarConfig'])->name('examenes.editarConfig');
     Route::put('/examen/{id_cuestionario}/actualizar-config', [ExamenController::class, 'actualizarConfig'])->name('examenes.actualizarConfig');
+
+
+
+    // ===== SOLICITUDES =====
+    Route::get('/solicitud/crear', [SolicitudController::class, 'create'])->name('solicitud.create');
+    Route::post('/solicitud/guardar', [SolicitudController::class, 'store'])->name('solicitud.store');
+    Route::get('/solicitud/bandeja', [SolicitudController::class, 'bandeja'])->name('solicitud.bandeja');
+    Route::post('/solicitud/{id}/aceptar', [SolicitudController::class, 'aceptar'])->name('solicitud.aceptar');
+    Route::post('/solicitud/{id}/rechazar', [SolicitudController::class, 'rechazar'])->name('solicitud.rechazar');
+    Route::get('/mis-solicitudes', [SolicitudController::class, 'misSolicitudes'])->name('solicitud.mis');
+    Route::get('/solicitud/horarios/{id_curso}', [SolicitudController::class, 'horariosCurso'])->name('solicitud.horarios');
 
 
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
