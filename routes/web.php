@@ -62,13 +62,8 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('gestioncurso', GestionCursoController::class);
 
     // --- SECCIÓN PROTEGIDA PARA ADMINISTRADORES ---
-    Route::middleware(['web', 'auth'])->group(function () {
-        Route::resource('gestionusuario', GestionUsuarioController::class)->middleware(function ($request, $next) {
-            if (Auth::user()->rol !== 'Administrador') {
-                return redirect('/principal')->with('mensaje', 'No tienes permisos de administrador.');
-            }
-            return $next($request);
-        });
+   Route::middleware([\App\Http\Middleware\CheckAdmin::class])->group(function () {
+        Route::resource('gestionusuario', GestionUsuarioController::class);
     });
 
     Route::controller(BibliotecaController::class)->group(function () {
