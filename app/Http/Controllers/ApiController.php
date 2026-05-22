@@ -59,7 +59,7 @@ class ApiController extends Controller
     {
         try {
             // Campos de tu tabla 'evento'
-            $eventos = Evento::select('id_evento', 'id_curso', 'nombre_eventos', 'fecha', 'hora', 'tipo')
+            $eventos = Evento::select('id_evento', 'id_curso', 'nombre_evento', 'fecha', 'hora', 'tipo')
                 ->get();
 
             return response()->json([
