@@ -43,8 +43,6 @@ Route::prefix('/register')->group(function () {
 Route::get('/olvido-contrasennia',           [ResetPasswordController::class, 'showResetForm'])->name('password.request');
 Route::post('/resetpass',                 [ResetPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
 Route::get('/cambiarpass/{token}',        [ResetPasswordController::class, 'showResetFormWithToken'])->name('password.reset');
-Route::post('/actualizar-contrasennia',   [ResetPasswordController::class, 'resetPassword'])->name('password.update');
-
 // --- VERIFICACIÓN DE CUENTA ---
 Route::get('/confirmar-cuenta/{token}', [RegisterController::class, 'confirmar'])->name('correo.confirmar');
 
@@ -64,13 +62,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('gestioncurso', GestionCursoController::class);
 
     // --- SECCIÓN PROTEGIDA PARA ADMINISTRADORES ---
-    Route::group(['middleware' => function ($request, $next) {
-        if (Auth::user()->rol !== 'Administrador') {
-            return redirect('/principal')->with('mensaje', 'No tienes permisos de administrador.');
-        }
-        return $next($request);
-    }], function () {
-        Route::resource('gestionusuario', GestionUsuarioController::class);
+    Route::middleware(['web', 'auth'])->group(function () {
+        Route::resource('gestionusuario', GestionUsuarioController::class)->middleware(function ($request, $next) {
+            if (Auth::user()->rol !== 'Administrador') {
+                return redirect('/principal')->with('mensaje', 'No tienes permisos de administrador.');
+            }
+            return $next($request);
+        });
     });
 
     Route::controller(BibliotecaController::class)->group(function () {
