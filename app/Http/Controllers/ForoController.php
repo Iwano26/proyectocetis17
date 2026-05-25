@@ -59,6 +59,12 @@ class ForoController extends Controller
     public function storePregunta(Request $request, $id)
     {
         $request->validate(['texto_pregunta' => 'required']);
+
+        // Filtrado de groserías para preguntas
+        if ($this->contieneGroserias($request->texto_pregunta)) {
+            return back()->with('error', 'Tu publicación contiene lenguaje inapropiado. Por favor, mantén el respeto en el foro escolar.');
+        }
+
         $foro = Foro::where('id_curso', $id)->first();
 
         PreguntaForo::create([
@@ -106,6 +112,11 @@ class ForoController extends Controller
             'texto_respuesta' => 'required'
         ]);
 
+        // Filtrado de groserías para respuestas
+        if ($this->contieneGroserias($request->texto_respuesta)) {
+            return back()->with('error', 'Tu respuesta contiene lenguaje inapropiado. Por favor, mantén el respeto en el foro escolar.');
+        }
+
         RespuestaForo::create([
             'id_pregunta_foro' => $id_pregunta,
             'correo_persona'   => Auth::user()->correo,
@@ -114,5 +125,30 @@ class ForoController extends Controller
         ]);
 
         return back()->with('success', 'Tu respuesta ha sido enviada.');
+    }
+
+    /**
+     * Filtro para verificar si el texto contiene palabras ofensivas comunes.
+     */
+    private function contieneGroserias($texto)
+    {
+        // Lista de insultos o palabras no permitidas comunes
+        $groserias = [
+            'puto', 'puta', 'pendejo', 'pendeja', 'mierda', 'culero', 'culera', 
+            'cabron', 'cabrona', 'chingar', 'chinga', 'pito', 'verga', 'joto', 
+            'pendejada', 'maricon', 'putita', 'putito', 'asshole', 'bitch'
+        ];
+
+        // Pasamos todo el texto a minúsculas para que no evadan el filtro usando Mayúsculas
+        $textoMinuscula = mb_strtolower($texto, 'UTF-8');
+
+        foreach ($groserias as $groseria) {
+            // El regex \b busca la palabra exacta para evitar falsos positivos (ej. "disPUTA" o "caBRONce")
+            if (preg_match('/\b' . preg_quote($groseria, '/') . '\b/u', $textoMinuscula)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
