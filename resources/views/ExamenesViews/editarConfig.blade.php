@@ -155,22 +155,38 @@ function esInvalido() {
 
 // Validar al enviar el formulario
 document.getElementById('formExamen').addEventListener('submit', function(e) {
-    // 1. Validar preguntas (esto ya lo tenías)
+    // 1. Validar preguntas
     const preguntas = document.querySelectorAll('.pregunta-card');
     if (preguntas.length === 0) {
         e.preventDefault();
-        alert('Debes agregar al menos una pregunta.');
+        Swal.fire({
+            icon: 'warning',
+            title: '¡Atención!',
+            text: 'Debes agregar al menos una pregunta.',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Entendido'
+        });
         return;
     }
 
     // 2. Validar fechas y horas combinadas
     if (esInvalido()) {
         e.preventDefault();
-        alert('Error: La fecha/hora de cierre debe ser posterior a la de inicio.');
-        document.getElementById('hora_fin').focus();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de horario',
+            text: 'La fecha/hora de cierre debe ser posterior a la de inicio.',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Corregir'
+        }).then(() => {
+            // Opcional: enfocar el campo tras cerrar la alerta
+            document.getElementById('hora_fin').focus();
+        });
     }
 });
 </script>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
@@ -196,5 +212,32 @@ document.getElementById('formExamen').addEventListener('submit', function(e) {
     });
 @endif
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    @if ($errors->any())
+        Swal.fire({
+            icon: 'error',
+            title: 'Oops...',
+            html: '{!! implode("<br>", $errors->all()) !!}',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Entendido'
+        });
+    @endif
+</script>
+
+@if(session('error'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: '¡Oops!',
+                text: "{{ session('error') }}",
+                confirmButtonColor: '#8C001A', // El color que usas en otros lados
+                confirmButtonText: 'Entendido'
+            });
+        });
+    </script>
+@endif
 
 @endsection

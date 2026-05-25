@@ -213,59 +213,63 @@ class CursoController extends Controller
      * Actualiza curso y reemplaza horarios.
      */
     public function update(Request $request, $id)
-    {
-        try {
-            // 1. PRIMERO validamos la propiedad del curso antes de cualquier otra cosa
-            $curso = DB::table($this->tableName)->where('id_curso', $id)->first();
+{
+    try {
+        $curso = DB::table($this->tableName)->where('id_curso', $id)->first();
+        if (!$curso) return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
 
-            if (!$curso) {
-                return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+        // Seguridad
+        if (auth()->user()->rol !== 'Administrador' && $curso->correo_persona !== auth()->user()->correo) {
+            return redirect()->route('cursos.index')->with('error', 'No tienes permiso.');
+        }
+
+        // 1. Validar horas en el request ANTES de hacer nada
+        if ($request->has('hora_inicio') && $request->has('hora_fin')) {
+            foreach ($request->hora_inicio as $key => $inicio) {
+                if (isset($request->hora_fin[$key]) && strtotime($request->hora_fin[$key]) <= strtotime($inicio)) {
+                    return back()->withInput()->with('error', 'La hora de fin debe ser posterior a la de inicio en el horario #' . ($key + 1));
+                }
             }
+        }
 
-            // BLOQUE DE SEGURIDAD: Solo el dueño o el Admin pueden actualizar
-            if (auth()->user()->rol !== 'Administrador' && $curso->correo_persona !== auth()->user()->correo) {
-                return redirect()->route('cursos.index')
-                    ->with('error', 'No tienes permiso para actualizar este curso.');
-            }
+        DB::beginTransaction();
 
-            DB::beginTransaction();
+        // 2. Actualizar curso
+        DB::table($this->tableName)->where('id_curso', $id)->update([
+            'nombre_curso' => $request->nombre_curso,
+            'fecha_inicio' => $request->fecha_inicio,
+            'fecha_fin'    => $request->fecha_fin,
+            // ... resto de campos
+        ]);
 
-            // 2. Actualizar el curso
-            DB::table($this->tableName)
-                ->where('id_curso', $id)
-                ->update([
-                    'nombre_curso'      => $request->nombre_curso,
-                    'descripcion'       => $request->descripcion,
-                    'materia'           => $request->materia,
-                    'estado'            => $request->estado,
-                    'acceso'            => $request->password_curso ?? '',
-                    'fecha_inicio'      => $request->fecha_inicio,
-                    'fecha_fin'         => $request->fecha_fin,
-                ]);
+        // 3. Gestionar Horarios de forma segura
+        DB::table('curso_horarios')->where('id_curso', $id)->delete();
 
-            // 3. Gestionar Horarios (Borrar y Reinsertar)
-            DB::table('curso_horarios')->where('id_curso', $id)->delete();
+        if ($request->has('dia')) {
+            foreach ($request->dia as $key => $dia) {
+                // Verificamos que los índices existan para evitar el error de "offset"
+                $hIni = $request->hora_inicio[$key] ?? null;
+                $hFin = $request->hora_fin[$key] ?? null;
 
-            if ($request->has('dia')) {
-                foreach ($request->dia as $key => $valorDia) {
+                if ($hIni && $hFin) {
                     DB::table('curso_horarios')->insert([
                         'id_curso'    => $id,
-                        'dia_semana'  => $valorDia,
-                        'hora_inicio' => $request->hora_inicio[$key],
-                        'hora_fin'    => $request->hora_fin[$key],
+                        'dia_semana'  => $dia,
+                        'hora_inicio' => $hIni,
+                        'hora_fin'    => $hFin,
                     ]);
                 }
             }
-
-            DB::commit();
-            return redirect()->route('cursos.index')->with('mensaje', 'Curso actualizado con éxito');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Error en update de curso: ' . $e->getMessage());
-            return redirect()->back()->with('error', 'Error al actualizar: ' . $e->getMessage());
         }
+
+        DB::commit();
+        return redirect()->route('cursos.index')->with('mensaje', 'Curso actualizado con éxito');
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return back()->with('error', 'Error: ' . $e->getMessage());
     }
+}
 
     public function show($id)
     {

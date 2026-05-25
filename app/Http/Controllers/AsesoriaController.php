@@ -21,17 +21,27 @@ class AsesoriaController extends Controller
 
     public function store(Request $request, $id_curso)
     {
+        // Validación básica
         $request->validate([
             'nombre_evento'  => 'required|string|max:255',
-            'lugar'          => 'required|string|max:255',
             'fecha_asesoria' => 'required|date',
             'hora_inicio'    => 'required',
             'hora_fin'       => 'required',
             'estado'         => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA'
         ]);
 
-        // 1. CONSULTA A LA BD: Traer las fechas de inicio y fin de este curso
         $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+
+        // 1. Regla de Rango de Curso
+        if ($request->fecha_asesoria < $curso->fecha_inicio || $request->fecha_asesoria > $curso->fecha_fin) {
+            return back()->withInput()->with('error', "La fecha debe estar entre " . date('d/m/Y', strtotime($curso->fecha_inicio)) . " y " . date('d/m/Y', strtotime($curso->fecha_fin)));
+        }
+
+        // 2. Regla de Horas: Solo validar si es el mismo día
+        // (Si fueran días distintos no validamos conflicto de horario porque es lógico)
+        if (strtotime($request->hora_fin) <= strtotime($request->hora_inicio)) {
+            return back()->withInput()->with('error', "La hora de fin debe ser posterior a la hora de inicio.");
+        }
 
         $requiereEvidencia = $request->has('requiere_evidencia') ? 1 : 0;
 
@@ -101,21 +111,18 @@ class AsesoriaController extends Controller
             'hora_inicio'    => 'required',
             'hora_fin'       => 'required',
             'estado'         => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA',
-            'id_curso'       => 'required' // Recuperamos el ID del curso enviado desde el formulario oculto
+            'id_curso'       => 'required'
         ]);
 
         $id_curso = $request->id_curso;
-
-        // 1. CONSULTA A LA BD: Traer las fechas límites del curso al editar
         $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
 
         if (!$curso) {
             return back()->withInput()->with('error', 'El curso especificado no existe.');
         }
 
-        // 2. VALIDACIÓN: Comprobar rango de fechas al editar
+        // 1. VALIDACIÓN: Rango de fechas del curso
         $fechaAsesoria = $request->fecha_asesoria;
-
         if ($fechaAsesoria < $curso->fecha_inicio || $fechaAsesoria > $curso->fecha_fin) {
             $inicioFormateado = date('d/m/Y', strtotime($curso->fecha_inicio));
             $finFormateado = date('d/m/Y', strtotime($curso->fecha_fin));
@@ -125,34 +132,38 @@ class AsesoriaController extends Controller
                 ->with('error', "No puedes mover la asesoría fuera del periodo del curso. Este comprende del {$inicioFormateado} al {$finFormateado}.");
         }
 
-        // Dentro de update(), abajo de la validación del curso:
+        // 2. NUEVA VALIDACIÓN: Asegurar que la hora de fin sea mayor a la de inicio
+        // Convertimos las horas a formato tiempo para compararlas
+        if (strtotime($request->hora_fin) <= strtotime($request->hora_inicio)) {
+            return back()
+                ->withInput()
+                ->with('error', "La hora de fin debe ser posterior a la hora de inicio.");
+        }
 
+        // 3. Lógica de estado automático
         $estadoFinal = $request->estado;
         if ($request->fecha_asesoria < Carbon::now()->toDateString()) {
             $estadoFinal = 'TERMINADA';
         }
-        // Si pasa la validación, ejecuta tu código original de actualizaciones
+
         $requiereEvidencia = $request->has('requiere_evidencia') ? 1 : 0;
 
         DB::beginTransaction();
-
         try {
-            // Actualizar tabla 'evento'
             DB::table('evento')
                 ->where('id_evento', $id_evento)
                 ->update([
                     'nombre_evento' => $request->nombre_evento,
                 ]);
 
-            // Actualizar tabla 'asesoria'
             DB::table('asesoria')
                 ->where('id_evento', $id_evento)
                 ->update([
-                    'fecha_asesoria' => $request->fecha_asesoria,
-                    'hora_inicio'    => $request->hora_inicio,
-                    'hora_fin'       => $request->hora_fin,
-                    'lugar'          => $request->lugar,
-                    'estado'         => $estadoFinal, // <--- Aquí se actualiza el estado también
+                    'fecha_asesoria'     => $request->fecha_asesoria,
+                    'hora_inicio'        => $request->hora_inicio,
+                    'hora_fin'           => $request->hora_fin,
+                    'lugar'              => $request->lugar,
+                    'estado'             => $estadoFinal,
                     'requiere_evidencia' => $requiereEvidencia
                 ]);
 

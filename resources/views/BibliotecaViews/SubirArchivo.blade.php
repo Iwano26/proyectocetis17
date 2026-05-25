@@ -33,7 +33,7 @@
 
                     {{-- Formulario funcional --}}
                     <form action="{{ route('biblioteca.guardar') }}" method="POST" enctype="multipart/form-data">
-                        @csrf 
+                    @csrf
                         
                         <div class="mb-4">
                             <label for="nombre_doc" class="form-label fw-bold">Título del Archivo</label>

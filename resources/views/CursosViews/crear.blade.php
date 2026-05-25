@@ -169,6 +169,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -193,39 +194,84 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // ── Validar fecha fin > fecha inicio ──────────────────────────────────
-    document.getElementById('formCrearCurso').addEventListener('submit', function(e) {
-        const inicio = document.querySelector('[name="fecha_inicio"]').value;
-        const fin    = document.getElementById('fecha_fin').value;
-        if (inicio && fin && fin <= inicio) {
-            e.preventDefault();
-            alert('La fecha de fin debe ser posterior a la fecha de inicio.');
+   // ── Validar fecha fin > fecha inicio ──────────────────────────────────
+document.getElementById('formCrearCurso').addEventListener('submit', function(e) {
+    const inicio = document.querySelector('[name="fecha_inicio"]').value;
+    const fin    = document.getElementById('fecha_fin').value;
+    
+    if (inicio && fin && fin <= inicio) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en fechas',
+            text: 'La fecha de fin debe ser posterior a la fecha de inicio.',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Entendido'
+        }).then(() => {
             document.getElementById('fecha_fin').focus();
-        }
-    });
+        });
+    }
+});
 
-    // ── Horarios: agregar / eliminar ──────────────────────────────────────
-    document.getElementById('agregar-horario').addEventListener('click', function() {
+// ── Horarios: agregar / eliminar ──────────────────────────────────────
+document.getElementById('agregar-horario').addEventListener('click', function() {
+    const filas = document.querySelectorAll('.fila-horario');
+    if (filas.length > 0) {
+        const nuevaFila = filas[0].cloneNode(true);
+        nuevaFila.querySelectorAll('input').forEach(i => i.value = '');
+        nuevaFila.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
+        document.getElementById('contenedor-horarios').appendChild(nuevaFila);
+    }
+});
+
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.eliminar-fila')) {
         const filas = document.querySelectorAll('.fila-horario');
-        if (filas.length > 0) {
-            const nuevaFila = filas[0].cloneNode(true);
-            nuevaFila.querySelectorAll('input').forEach(i => i.value = '');
-            nuevaFila.querySelectorAll('select').forEach(s => s.selectedIndex = 0);
-            document.getElementById('contenedor-horarios').appendChild(nuevaFila);
+        if (filas.length > 1) {
+            e.target.closest('.fila-horario').remove();
+        } else {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Acción no permitida',
+                text: 'Mínimo un día de horario es requerido.',
+                confirmButtonColor: '#8C001A',
+                confirmButtonText: 'Entendido'
+            });
+        }
+    }
+});
+});
+
+document.getElementById('formCrearCurso').addEventListener('submit', function(e) {
+    // ... (tu validación de fechas ya existente aquí arriba) ...
+
+    // ── Validar que hora_inicio < hora_fin en cada fila de horario ──
+    const filas = document.querySelectorAll('.fila-horario');
+    let errorHorario = false;
+
+    filas.forEach(fila => {
+        const inicio = fila.querySelector('[name="hora_inicio[]"]').value; // Ajusta el name según tu código
+        const fin = fila.querySelector('[name="hora_fin[]"]').value;       // Ajusta el name según tu código
+
+        if (inicio && fin && fin <= inicio) {
+            errorHorario = true;
         }
     });
 
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.eliminar-fila')) {
-            const filas = document.querySelectorAll('.fila-horario');
-            if (filas.length > 1) {
-                e.target.closest('.fila-horario').remove();
-            } else {
-                alert('Mínimo un día de horario es requerido.');
-            }
-        }
-    });
+    if (errorHorario) {
+        e.preventDefault();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error en horarios',
+            text: 'En uno o más horarios, la hora de fin debe ser posterior a la de inicio.',
+            confirmButtonColor: '#8C001A',
+            confirmButtonText: 'Corregir'
+        });
+        return; // Detiene el envío
+    }
 });
 </script>
+
+
 
 @endsection

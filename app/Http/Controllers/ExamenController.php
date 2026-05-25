@@ -28,15 +28,29 @@ class ExamenController extends Controller
     // =============================================
     public function store(Request $request, $id_curso)
     {
-        $request->validate([
-            'nombre_cuestionario' => 'required|string|max:255',
-            'fecha_examen'        => 'required|date',
-            'fecha_cierre'        => 'required|date|after_or_equal:fecha_examen',
-            'hora_inicio'         => 'required',
-            'hora_fin'            => 'required',
-            'oportunidades'       => 'required|integer|min:1|max:5',
-            'preguntas'           => 'required|array|min:1',
-        ]);
+    $request->validate([
+        'nombre_cuestionario' => 'required|string|max:255',
+        'fecha_examen'        => 'required|date',
+        'fecha_cierre'        => 'required|date|after_or_equal:fecha_examen',
+        'hora_inicio'         => 'required',
+        'hora_fin'            => 'required',
+        'oportunidades'       => 'required|integer|min:1|max:5',
+    ]);
+
+    // Obtener datos del curso
+    $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+
+    // 1. Validar rango de fechas del curso
+    if ($request->fecha_examen < $curso->fecha_inicio || $request->fecha_cierre > $curso->fecha_fin) {
+        return back()->withInput()->with('error', "El periodo del examen debe estar dentro del curso: " . date('d/m/Y', strtotime($curso->fecha_inicio)) . " al " . date('d/m/Y', strtotime($curso->fecha_fin)));
+    }
+
+    // 2. Validar horas solo si es el mismo día
+    if ($request->fecha_examen == $request->fecha_cierre) {
+        if (strtotime($request->hora_fin) <= strtotime($request->hora_inicio)) {
+            return back()->withInput()->with('error', 'Si el examen inicia y termina el mismo día, la hora de fin debe ser posterior a la hora de inicio.');
+        }
+    }
 
         DB::beginTransaction();
 
@@ -278,25 +292,45 @@ class ExamenController extends Controller
     }
 
     public function actualizarConfig(Request $request, $id_cuestionario)
-    {
-        $request->validate([
-            'fecha_examen'  => 'required|date',
-            'hora_inicio'   => 'required',
-            'hora_fin'      => 'required|after:hora_inicio',
-            'oportunidades' => 'required|integer|min:1|max:5',
-            'estado'        => 'required|in:PENDIENTE,ACTIVO,CERRADO',
-        ]);
+{
+    // 1. Validaciones básicas
+    $request->validate([
+        'fecha_examen'  => 'required|date',
+        'fecha_cierre'  => 'required|date|after_or_equal:fecha_examen',
+        'hora_inicio'   => 'required',
+        'hora_fin'      => 'required',
+        'oportunidades' => 'required|integer|min:1|max:5',
+        'estado'        => 'required|in:PENDIENTE,ACTIVO,CERRADO',
+    ]);
 
-        DB::table('configuracion_examen')
-            ->where('id_cuestionario', $id_cuestionario)
-            ->update([
-                'fecha_examen'  => $request->fecha_examen,
-                'fecha_cierre'  => $request->fecha_cierre,
-                'hora_inicio'   => $request->hora_inicio,
-                'hora_fin'      => $request->hora_fin,
-                'oportunidades' => $request->oportunidades,
-                'estado'        => $request->estado,
-            ]);
+    // Obtener curso mediante el cuestionario
+    $cuestionario = Cuestionario::findOrFail($id_cuestionario);
+    $idCurso = DB::table('evento')->where('id_evento', $cuestionario->id_evento)->value('id_curso');
+    $curso = DB::table('curso')->where('id_curso', $idCurso)->first();
+
+    // 1. Validar fechas dentro del curso
+    if ($request->fecha_examen < $curso->fecha_inicio || $request->fecha_cierre > $curso->fecha_fin) {
+        return back()->withInput()->with('error', "El examen debe realizarse dentro del periodo del curso (" . date('d/m/Y', strtotime($curso->fecha_inicio)) . " al " . date('d/m/Y', strtotime($curso->fecha_fin)) . ").");
+    }
+
+    // 2. Validar horas (solo si es el mismo día)
+    if ($request->fecha_examen == $request->fecha_cierre) {
+        if (strtotime($request->hora_fin) <= strtotime($request->hora_inicio)) {
+            return back()->withInput()->with('error', 'Si el examen es el mismo día, la hora de fin debe ser mayor a la de inicio.');
+        }
+    }
+
+    // 4. Actualización
+    DB::table('configuracion_examen')
+        ->where('id_cuestionario', $id_cuestionario)
+        ->update([
+            'fecha_examen'  => $request->fecha_examen,
+            'fecha_cierre'  => $request->fecha_cierre,
+            'hora_inicio'   => $request->hora_inicio,
+            'hora_fin'      => $request->hora_fin,
+            'oportunidades' => $request->oportunidades,
+            'estado'        => $request->estado,
+        ]);
 
         // También actualizamos el nombre del evento si cambió
         if ($request->filled('nombre_cuestionario')) {
