@@ -235,3 +235,40 @@ button#enviarFormulario:active {
         font-size: 1.4rem;
     }
 }
+
+/* ── SOLUCIÓN DE ALINEACIÓN DEL OJO CON ERRORES ───────────────────────── */
+.password-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+.password-wrapper {
+    position: relative;
+    width: 100%;
+}
+
+.password-wrapper i {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 1.1rem;
+    z-index: 2;
+}
+
+.password-wrapper input {
+    margin-bottom: 0 !important;
+}
+
+/* ── SEPARACIÓN DEL RECAPTCHA ────────────────────────────────────────── */
+.captcha-container {
+    margin-top: 20px;
+    margin-bottom: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+}

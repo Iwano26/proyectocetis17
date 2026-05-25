@@ -113,36 +113,38 @@
                 <input type="hidden" name="rol" value="Estudiante">
 
                 <label for="contrasennia">Contraseña</label>
-                <div style="position: relative;">
-                    <input type="password" name="contrasennia" id="contrasennia"
-                        placeholder="Mín 8 caracteres, Mayús/Minús/Número"
-                        class="{{ $errors->has('contrasennia') ? 'input-error' : '' }}">
-                    <i class="bi bi-eye-slash" id="toggleContrasennia" 
-                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                <div class="password-group">
+                    <div class="password-wrapper">
+                        <input type="password" name="contrasennia" id="contrasennia"
+                            placeholder="Mín 8 caracteres, Mayús/Minús/Número"
+                            class="{{ $errors->has('contrasennia') ? 'input-error' : '' }}">
+                        <i class="bi bi-eye-slash" id="toggleContrasennia"></i>
+                    </div>
                 </div>
                 @error('contrasennia')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
 
                 <label for="recontrasennia" style="margin-top: 15px;">Confirmar Contraseña</label>
-                <div style="position: relative;">
-                    <input type="password" name="recontrasennia" id="recontrasennia"
-                        placeholder="Confirma tu Contraseña"
-                        class="{{ $errors->has('recontrasennia') ? 'input-error' : '' }}">
-                    <i class="bi bi-eye-slash" id="toggleRecontrasennia" 
-                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                <div class="password-group">
+                    <div class="password-wrapper">
+                        <input type="password" name="recontrasennia" id="recontrasennia"
+                            placeholder="Confirma tu Contraseña"
+                            class="{{ $errors->has('recontrasennia') ? 'input-error' : '' }}">
+                        <i class="bi bi-eye-slash" id="toggleRecontrasennia"></i>
+                    </div>
                 </div>
                 @error('recontrasennia')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
 
-                {{-- CONTENEDOR VISUAL DEL RECAPTCHA --}}
-                <div style="margin-bottom: 15px; display: flex; flex-direction: column; align-items: center;">
-                    {!! NoCaptcha::display() !!}
-                    @if ($errors->has('g-recaptcha-response'))
-                        <div class="error-message" style="display: block; margin-top: 5px;">
-                            {{ $errors->first('g-recaptcha-response') }}
-                        </div>
+              {{-- CONTENEDOR VISUAL DEL RECAPTCHA --}}
+                <div class="captcha-container">
+                {!! NoCaptcha::display() !!}
+                @if ($errors->has('g-recaptcha-response'))
+                <div class="error-message" style="display: block; margin-top: 5px;">
+                    {{ $errors->first('g-recaptcha-response') }}
+                </div>
                     @endif
                 </div>
 
@@ -177,7 +179,6 @@
             }, "El teléfono debe tener exactamente 10 dígitos.");
 
             $('#registroForm').validate({
-                // Ignoramos elementos ocultos y los contenedores del captcha para que JQuery no se confunda
                 ignore: ":hidden, #g-recaptcha-response",
                 rules: {
                     nombre:         { required: true },
@@ -219,7 +220,12 @@
                 errorElement: 'div',
                 errorPlacement: function(error, element) {
                     error.addClass('error-message');
-                    error.insertAfter(element);
+                    // Si el elemento está dentro del contenedor wrapper del campo de contraseña
+                    if (element.closest('.password-wrapper').length) {
+                        error.insertAfter(element.closest('.password-wrapper'));
+                    } else {
+                        error.insertAfter(element);
+                    }
                 },
                 submitHandler: function(form) {
                     form.submit();
@@ -227,29 +233,28 @@
             });
         });
 
-            function togglePassword(inputId, iconId) {
-                const input = document.getElementById(inputId);
-                const icon = document.getElementById(iconId);
-                
-                if (input.type === "password") {
-                    input.type = "text";
-                    icon.classList.remove("bi-eye-slash");
-                    icon.classList.add("bi-eye"); // Cambia a ojo abierto
-                } else {
-                    input.type = "password";
-                    icon.classList.remove("bi-eye");
-                    icon.classList.add("bi-eye-slash"); // Cambia a ojo cerrado
-                }
+        function togglePassword(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.remove("bi-eye-slash");
+                icon.classList.add("bi-eye");
+            } else {
+                input.type = "password";
+                icon.classList.remove("bi-eye");
+                icon.classList.add("bi-eye-slash");
             }
+        }
 
-            document.getElementById('toggleContrasennia').addEventListener('click', function() {
-                togglePassword('contrasennia', 'toggleContrasennia');
-            });
+        document.getElementById('toggleContrasennia').addEventListener('click', function() {
+            togglePassword('contrasennia', 'toggleContrasennia');
+        });
 
-            document.getElementById('toggleRecontrasennia').addEventListener('click', function() {
-                togglePassword('recontrasennia', 'toggleRecontrasennia');
-            });
-        </script>
+        document.getElementById('toggleRecontrasennia').addEventListener('click', function() {
+            togglePassword('recontrasennia', 'toggleRecontrasennia');
+        });
     </script>
 
 </body>
