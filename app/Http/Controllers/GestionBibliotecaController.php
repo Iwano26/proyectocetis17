@@ -44,7 +44,7 @@ class GestionBibliotecaController extends Controller
         $request->validate([
             'nombre_doc'   => 'required|string|max:255',
             'materia'      => 'required|string|max:100', // Sigue validando la materia seleccionada
-            'ruta_archivo' => 'required|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx|max:10240',
+            'ruta_archivo' => 'required|file|mimes:pdf|max:10240',
         ]);
 
         try {
