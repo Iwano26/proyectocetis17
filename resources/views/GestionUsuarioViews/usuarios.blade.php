@@ -3,8 +3,8 @@
 @section('content')
 
 {{-- 
-  Cargamos las hojas de estilos institucionales si no se cargan automáticamente en el layout.
-  Si ya están en layouts.app, puedes omitir estas dos líneas de <link>.
+    Cargamos las hojas de estilos institucionales si no se cargan automáticamente en el layout.
+    Si ya están en layouts.app, puedes omitir estas dos líneas de <link>.
 --}}
 <link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
 <link rel="stylesheet" href="{{ asset('css/home.css') }}">
@@ -135,7 +135,80 @@
         padding: 12px 28px;
         border-radius: 8px;
     }
+
+    /* ========== AJUSTE ESTRUCTURAL PARA EL OJITO DE LA CONTRASEÑA ========== */
+    .password-group {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-wrapper i {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        cursor: pointer;
+        color: #555;
+        font-size: 1.25rem;
+        z-index: 10;
+    }
+
+    /* Estilo personalizado para el texto de error nativo si usas bootstrap feedback */
+    .invalid-feedback-custom {
+        color: #dc3545;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-top: 5px;
+        text-align: left;
+    }
 </style>
+
+{{-- ========== CONTROLADOR DE ALERTAS FLOTANTES GLOBAL ========== --}}
+@if(session('success'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'success',
+                title: '¡Operación Exitosa!',
+                text: @json(session('success')),
+                confirmButtonColor: '#8C001A'
+            });
+        });
+    </script>
+@endif
+
+@if(session('mensaje'))
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            let isActionOk = @json(session('sessionInsertado')) == "true" || @json(session('sessionEliminado')) == "true" || @json(session('sessionActualizado')) == "true";
+            Swal.fire({
+                icon: isActionOk ? 'success' : 'error',
+                title: isActionOk ? '¡Completado!' : 'Atención',
+                text: @json(session('mensaje')),
+                confirmButtonColor: '#8C001A'
+            });
+        });
+    </script>
+@endif
+
+@if($errors->any())
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de Validación',
+                text: 'Por favor, revise que todos los campos cumplan con las reglas solicitadas.',
+                confirmButtonColor: '#8C001A'
+            });
+        });
+    </script>
+@endif
 
 <section class="section-gestion-usuarios">
     <div class="container">
@@ -198,7 +271,18 @@
                             
                             <div class="mb-3">
                                 <label class="form-label">Contraseña de acceso</label>
-                                <input type="password" name="contrasennia" id="pass" class="form-control" placeholder="Mínimo 8 caracteres">
+                                <div class="password-group">
+                                    <div class="password-wrapper">
+                                        <input type="password" name="contrasennia" id="pass" class="form-control" 
+                                            placeholder="Mínimo 8 caracteres" 
+                                            minlength="8"
+                                            pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$">
+                                        <i class="bi bi-eye-slash" id="togglePass"></i>
+                                    </div>
+                                    <div class="invalid-feedback-custom d-none" id="errorPassMessage">
+                                        La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número.
+                                    </div>
+                                </div>
                             </div>
                             
                             <div class="d-flex justify-content-end gap-2 mt-4">
@@ -256,30 +340,14 @@
                                             @endif
                                         </td>
                                         <td class="text-center" style="width: 140px;">
-                                        {{-- Contenedor flexible que alinea los botones en fila y les da espacio (Evita que se corten) --}}
                                         <div class="d-flex justify-content-center gap-2">
                                             
-                                            {{-- Editar (Permitido para todos los registros del panel) con clase grande --}}
+                                            {{-- Editar --}}
                                             <button class="btn btn-warning btn-sm btn-action-grande text-white" 
                                                     title="Editar Usuario"
                                                     onclick="iniciarEdicion(event, '{{ route('gestionusuario.update', $usuario->correo) }}', {{ json_encode($usuario) }})">
                                                 <i class="bi bi-pencil-square"></i>
-                                            </button>
-
-                                            {{-- Eliminar o Proteger (Impedir borrado propio únicamente) con clase grande --}}
-                                            @if(!$esMismoUsuario)
-                                                <button class="btn btn-danger btn-sm btn-action-grande" 
-                                                        title="Eliminar Usuario"
-                                                        onclick="mostrarAlertaEliminar(event, '{{ $usuario->correo }}', '{{ route('gestionusuario.destroy', $usuario->correo) }}')">
-                                                    <i class="bi bi-trash-fill"></i>
-                                                </button>
-                                            @else
-                                                <button class="btn btn-outline-secondary btn-sm btn-action-grande" 
-                                                        title="Usuario Protegido"
-                                                        onclick="alertaProteccion()">
-                                                    <i class="bi bi-shield-lock-fill"></i>
-                                                </button>
-                                            @endif
+                                            </button>                                           
 
                                         </div>
                                     </td>
@@ -316,6 +384,11 @@
         document.getElementById('telefono').value = user.telefono;
         document.getElementById('rol').value = user.rol;
         
+        // Al editar la contraseña pasa a ser opcional, limpiamos advertencias previas
+        document.getElementById('pass').value = '';
+        document.getElementById('pass').removeAttribute('required');
+        document.getElementById('errorPassMessage').classList.add('d-none');
+        
         document.getElementById('registroForm').action = updateUrl;
         document.getElementById('methodField').value = 'PUT';
         document.getElementById('submitBtn').innerText = 'Guardar Cambios';
@@ -326,6 +399,8 @@
     function cancelarEdicion() {
         document.getElementById('registroForm').reset();
         document.getElementById('correo').removeAttribute('readonly');
+        document.getElementById('pass').setAttribute('required', true);
+        document.getElementById('errorPassMessage').classList.add('d-none');
         document.getElementById('methodField').value = 'POST';
         document.getElementById('submitBtn').innerText = 'Registrar';
         document.getElementById('cancelarEdicionBtn').classList.add('d-none');
@@ -353,14 +428,37 @@
         });
     }
 
-    @if(session('mensaje'))
-        Swal.fire({
-            icon: '{{ session("sessionInsertado") == "true" || session("sessionEliminado") == "true" ? "success" : "info" }}',
-            title: 'Se elimino correctamente el usuario',
-            text: '{{ session("mensaje") }}',
-            confirmButtonColor: '#8C001A'
-        });
-    @endif
+    // Funcionalidad del ojo para mostrar/ocultar contraseña
+    document.getElementById('togglePass').addEventListener('click', function() {
+        const inputPass = document.getElementById('pass');
+        if (inputPass.type === "password") {
+            inputPass.type = "text";
+            this.classList.remove("bi-eye-slash");
+            this.classList.add("bi-eye");
+        } else {
+            inputPass.type = "password";
+            this.classList.remove("bi-eye");
+            this.classList.add("bi-eye-slash");
+        }
+    });
+
+    // Validación interactiva de la expresión regular en tiempo real
+    document.getElementById('registroForm').addEventListener('submit', function(e) {
+        const passInput = document.getElementById('pass');
+        const errorContainer = document.getElementById('errorPassMessage');
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+        
+        // Si el campo tiene datos o es obligatorio (Registro nuevo) evaluamos la expresión regular
+        if (passInput.value.length > 0 || passInput.hasAttribute('required')) {
+            if (!regex.test(passInput.value)) {
+                e.preventDefault();
+                errorContainer.classList.remove('d-none');
+                passInput.focus();
+                return false;
+            }
+        }
+        errorContainer.classList.add('d-none');
+    });
 </script>
 
 @endsection
