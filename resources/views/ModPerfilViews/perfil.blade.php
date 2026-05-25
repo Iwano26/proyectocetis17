@@ -1,84 +1,131 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mi Perfil | CETIS 17</title>
-    
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/perfil.css') }}">
-</head>
-<body>  
-    
-    <x-sidebar />
-    
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-            <div class="container">
-                <a class="navbar-brand fw-bold">
-                    <img src="https://placehold.co/32x32/8C001A/ffffff?text=C17" alt="Logo" class="d-inline-block align-text-top rounded-full me-2">
-                    Sistema de Asesorías
-                </a>
-                <div class="ms-auto">
-                    <span class="fw-bold text-dark">
-                        <i class="bi bi-person-circle text-cetis"></i> {{ Auth::user()->nombre }}
-                    </span>
-                </div>
-            </div>
-        </nav>
+@extends('layouts.app')
 
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-5">
-                    
-                    <div class="card card-profile shadow-sm overflow-hidden">
-                        <div class="profile-header-accent">
-                            <i class="bi bi-person-badge display-4"></i>
-                            <h2 class="h4 mt-2 fw-bold">Mi Perfil</h2>
-                            <p class="mb-0 opacity-75 small">Información del Usuario</p>
-                        </div>
+@section('content')
+<style>
+    /* Aplicamos Times New Roman a todo el contenedor del perfil */
+    .profile-page-wrapper {
+        font-family: 'Times New Roman', Times, serif !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+    }
 
-                        <div class="card-body p-4 p-md-5">
-                            <div class="info-box">
-                                <div class="info-label">Nombre Completo</div>
-                                <div class="info-value">{{ $nombre }}</div>
-                            </div>
+    /* Estilo del recuadro rojo moderno */
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        width: 100%;
+        max-width: 450px;
+        overflow: hidden;
+    }
 
-                            <div class="info-box">
-                                <div class="info-label">Correo Electrónico</div>
-                                <div class="info-value">{{ $correo }}</div>
-                            </div>
+    .header-rojo {
+        background-color: #8C001A;
+        color: white;
+        padding: 40px 20px;
+        text-align: center;
+    }
 
-                            <div class="info-box border-bottom-0">
-                                <div class="info-label">Teléfono de Contacto</div>
-                                <div class="info-value">{{ $telefono }}</div>
-                            </div>
+    .info-group {
+        padding: 20px 30px;
+        text-align: left;
+    }
 
-                            <div class="text-center mt-4 d-grid gap-2">
-                               <a href="{{ route('perfil.edit') }}" class="btn btn-outline-cetis fw-bold shadow-sm">
-                                <i class="bi bi-gear-fill me-2"></i> Configurar Perfil
-                               </a>
-                                
-                                <a href="{{ url('/principal') }}" class="btn btn-cetis-primary fw-bold shadow-sm">
-                                    <i class="bi bi-arrow-left me-2"></i> Volver al Inicio
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+    .label-text {
+        color: #8C001A;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        margin-bottom: 5px;
+        display: block;
+    }
 
-                </div>
-            </div>
+    .value-text {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 5px;
+    }
+
+    .btn-custom {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 50px;
+        text-align: center;
+        font-weight: bold;
+        text-decoration: none;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+    .card-profile-modern {
+        background: url("../img/salon.jpg") no-repeat center center fixed;
+        background-size: cover;
+        display: flex;
+        flex-direction: column; /* Alineación vertical */
+    }
+    /* 1. Esto pone la imagen de fondo en toda la pantalla */
+    body {
+        background: url("{{ asset('img/salon.jpg') }}") no-repeat center center fixed !important;
+        background-size: cover !important;
+    }
+
+    /* 2. El resto de tus estilos */
+    .profile-page-wrapper {
+        font-family: 'Times New Roman', Times, serif !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh; /* Ocupa toda la pantalla */
+        padding: 20px;
+    }
+
+    .profile-card {
+        background: white; /* La tarjeta es blanca para que se lea bien sobre el salón */
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        width: 100%;
+        max-width: 450px;
+        overflow: hidden;
+    }
+
+
+</style>
+
+<div class="profile-page-wrapper">
+    <div class="profile-card">
+        {{-- Encabezado Rojo --}}
+        <div class="header-rojo">
+            <i class="bi bi-person-badge" style="font-size: 3rem;"></i>
+            <h2 class="mt-2">Mi Perfil</h2>
+            <p style="opacity: 0.8;">Información del Usuario</p>
         </div>
-    </div> <footer class="bg-dark text-white py-4">
-        <div class="container text-center">
-            <p class="mb-0">&copy; 2026 CETIS 17 | DGETI.</p>
-        </div>
-    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        {{-- Contenido --}}
+        <div class="info-group">
+            <span class="label-text">Nombre Completo</span>
+            <div class="value-text">{{ $nombre }}</div>
+
+            <span class="label-text">Correo Electrónico</span>
+            <div class="value-text">{{ $correo }}</div>
+
+            <span class="label-text">Teléfono de contacto</span>
+            <div class="value-text">{{ $telefono }}</div>
+
+            {{-- Botones --}}
+            <a href="{{ route('perfil.edit') }}" class="btn-custom" 
+               style="border: 2px solid #8C001A; color: #8C001A;">
+                <i class="bi bi-gear"></i> Configurar Perfil
+            </a>
+            
+            <a href="{{ url('/principal') }}" class="btn-custom" 
+               style="background-color: #8C001A; color: white;">
+                <i class="bi bi-arrow-left"></i> Volver al Inicio
+            </a>
+        </div>
+    </div>
+</div>
+@endsection

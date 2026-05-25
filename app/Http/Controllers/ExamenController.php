@@ -31,6 +31,7 @@ class ExamenController extends Controller
         $request->validate([
             'nombre_cuestionario' => 'required|string|max:255',
             'fecha_examen'        => 'required|date',
+            'fecha_cierre'        => 'required|date|after_or_equal:fecha_examen',
             'hora_inicio'         => 'required',
             'hora_fin'            => 'required',
             'oportunidades'       => 'required|integer|min:1|max:5',
@@ -64,6 +65,7 @@ class ExamenController extends Controller
                 'hora_fin'        => $request->hora_fin,
                 'oportunidades'   => $request->oportunidades,
                 'estado'          => 'PENDIENTE',
+                'fecha_cierre'    => $request->fecha_cierre,
             ]);
 
             // 4. Insert preguntas y opciones
@@ -88,6 +90,46 @@ class ExamenController extends Controller
             }
 
             DB::commit();
+
+            // ── NOTIFICAR A ALUMNOS INSCRITOS ─────────────────────────────────
+            try {
+                $alumnos = DB::table('inscripcion')
+                    ->join('persona', 'inscripcion.correo_estudiante', '=', 'persona.correo')
+                    ->where('inscripcion.id_curso', $id_curso)
+                    ->select('persona.correo', 'persona.nombre', 'persona.apellidoPa')
+                    ->get();
+
+                $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+                $config = DB::table('configuracion_examen')
+                    ->where('id_cuestionario', $id_cuestionario)
+                    ->first();
+
+                foreach ($alumnos as $alumno) {
+                    \Illuminate\Support\Facades\Mail::to($alumno->correo)
+                        ->send(new \App\Mail\NuevoExamenMailable(
+                            $alumno->nombre . ' ' . $alumno->apellidoPa,
+                            $request->nombre_cuestionario,
+                            $curso->nombre_curso ?? 'Tu curso',
+                            $config->fecha_examen,
+                            $config->hora_inicio,
+                            $config->hora_fin,
+                            $config->oportunidades,
+                            $id_curso
+                        ));
+
+                    DB::table('notificacion')->insert([
+                        'id_evento'      => $id_evento,
+                        'correo_persona' => $alumno->correo,
+                        'mensaje'        => 'Nuevo examen publicado: ' . $request->nombre_cuestionario,
+                        'leido'          => 0,
+                        'fecha_envio'    => now(),
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Error notificando examen: ' . $e->getMessage());
+            }
+            // ──────────────────────────────────────────────────────────────────
+
             return redirect('/curso/' . $id_curso . '/eventos')
                 ->with('success', '¡Examen creado con éxito!');
 
@@ -103,6 +145,8 @@ class ExamenController extends Controller
     public function resultados($id_cuestionario)
     {
         $cuestionario = Cuestionario::with('configuracion', 'evento')->findOrFail($id_cuestionario);
+        // Cargamos el evento junto con el cuestionario para obtener el id_curso
+        $cuestionario = Cuestionario::with(['configuracion', 'evento'])->findOrFail($id_cuestionario);
 
         // Todos los intentos agrupados por alumno
         $intentos = DB::table('intento_examen')
@@ -247,6 +291,7 @@ class ExamenController extends Controller
             ->where('id_cuestionario', $id_cuestionario)
             ->update([
                 'fecha_examen'  => $request->fecha_examen,
+                'fecha_cierre'  => $request->fecha_cierre,
                 'hora_inicio'   => $request->hora_inicio,
                 'hora_fin'      => $request->hora_fin,
                 'oportunidades' => $request->oportunidades,

@@ -1,93 +1,106 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurar Perfil | CETIS 17</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/perfil.css') }}">
-</head>
-<body>  
-    <x-sidebar />
+@extends('layouts.app')
+
+@section('content')
+<style>
+    /* Mantenemos la consistencia con el perfil */
+
+    body {
+        background: url("{{ asset('img/salon.jpg') }}") no-repeat center center fixed !important;
+        background-size: cover !important;
+        min-height: 100vh;
+    }
     
-    <div class="main-content">
-        <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm">
-            <div class="container">
-                <a class="navbar-brand fw-bold">Actualizar Mis Datos</a>
-            </div>
-        </nav>
+    .profile-page-wrapper {
+        font-family: 'Times New Roman', Times, serif !important;
+        display: flex;
+        justify-content: center;
+        padding-top: 30px; /* Ajuste para que no esté tan abajo */
+    }
 
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-md-10 col-lg-7">
-                    
-                    <div class="card card-profile shadow-sm overflow-hidden">
-                        <div class="profile-header-accent">
-                            <i class="bi bi-person-gear display-4"></i>
-                            <h2 class="h4 mt-2 fw-bold">Editar Perfil</h2>
-                        </div>
+    .profile-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        width: 100%;
+        max-width: 450px;
+        overflow: hidden;
+    }
 
-                        <div class="card-body p-4 p-md-5">
-                            @if(session('mensaje'))
-                                <div class="alert {{ session('sessionInsertado') == 'true' ? 'alert-success' : 'alert-danger' }} shadow-sm">
-                                    {{ session('mensaje') }}
-                                </div>
-                            @endif
+    .header-rojo {
+        background-color: #8C001A;
+        color: white;
+        padding: 30px 20px;
+        text-align: center;
+    }
 
-                            <form action="{{ route('perfil.update') }}" method="POST">
-                                @csrf
-                                @method('PUT')
+    .form-group {
+        padding: 20px 30px;
+    }
 
-                                <div class="mb-4">
-                                    <label class="info-label">Nombre(s)</label>
-                                    <input type="text" name="nombre" class="form-control form-control-lg" 
-                                           value="{{ old('nombre', $user->nombre) }}" required>
-                                </div>
+    .label-text {
+        color: #8C001A;
+        font-weight: 800;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        margin-bottom: 5px;
+        display: block;
+    }
 
-                                <div class="row">
-                                    <div class="col-md-6 mb-4">
-                                        <label class="info-label">Apellido Paterno</label>
-                                        <input type="text" name="apellidoPa" class="form-control form-control-lg" 
-                                               value="{{ old('apellidoPa', $user->apellidoPa) }}" required>
-                                    </div>
-                                    <div class="col-md-6 mb-4">
-                                        <label class="info-label">Apellido Materno</label>
-                                        <input type="text" name="apellidoMa" class="form-control form-control-lg" 
-                                               value="{{ old('apellidoMa', $user->apellidoMa) }}" required>
-                                    </div>
-                                </div>
+    .form-control {
+        border: 2px solid #eee;
+        border-radius: 10px;
+        padding: 10px;
+        font-family: 'Times New Roman', Times, serif;
+        margin-bottom: 15px;
+    }
 
-                                <div class="mb-4">
-                                    <label class="info-label">Teléfono de Contacto</label>
-                                    <input type="text" name="telefono" class="form-control form-control-lg" 
-                                           value="{{ old('telefono', $user->telefono) }}" maxlength="10" required>
-                                    <small class="text-muted">Introduce los 10 dígitos sin espacios.</small>
-                                </div>
+    .btn-custom {
+        display: block;
+        width: 100%;
+        padding: 12px;
+        border-radius: 50px;
+        text-align: center;
+        font-weight: bold;
+        text-decoration: none;
+        margin-bottom: 10px;
+        transition: 0.3s;
+    }
+</style>
 
-                                <div class="text-center mt-5 d-grid gap-2">
-                                    <button type="submit" class="btn btn-cetis-primary fw-bold shadow-sm py-3">
-                                        <i class="bi bi-save2-fill me-2"></i> Actualizar Perfil
-                                    </button>
-                                    <a href="{{ route('perfil.index') }}" class="btn btn-light text-muted fw-bold">
-                                        <i class="bi bi-x-circle me-1"></i> Cancelar
-                                    </a>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
+<div class="profile-page-wrapper">
+    <div class="profile-card">
+        {{-- Encabezado igual al de perfil --}}
+        <div class="header-rojo">
+            <i class="bi bi-pencil-square" style="font-size: 2.5rem;"></i>
+            <h2 class="mt-2">Editar Datos</h2>
         </div>
+
+        {{-- Formulario --}}
+        <form action="{{ route('perfil.update') }}" method="POST" class="form-group">
+            @csrf
+            @method('PUT')
+
+            <span class="label-text">Nombre</span>
+            <input type="text" name="nombre" class="form-control" value="{{ old('nombre', $user->nombre) }}" required>
+
+            <span class="label-text">Apellido Paterno</span>
+            <input type="text" name="apellidoPa" class="form-control" value="{{ old('apellidoPa', $user->apellidoPa) }}" required>
+
+            <span class="label-text">Apellido Materno</span>
+            <input type="text" name="apellidoMa" class="form-control" value="{{ old('apellidoMa', $user->apellidoMa) }}" required>
+
+            <span class="label-text">Teléfono (10 dígitos)</span>
+            <input type="text" name="telefono" class="form-control" value="{{ old('telefono', $user->telefono) }}" maxlength="10" required>
+
+            {{-- Botones --}}
+            <button type="submit" class="btn-custom" style="background-color: #8C001A; color: white; border: none;">
+                <i class="bi bi-check-circle"></i> Guardar Cambios
+            </button>
+            
+            <a href="{{ route('perfil.index') }}" class="btn-custom" style="border: 2px solid #6c757d; color: #6c757d;">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </form>
     </div>
-
-    <footer class="bg-dark text-white py-4">
-        <div class="container text-center"><p class="mb-0">&copy; 2026 CETIS 17 | DGETI.</p></div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+</div>
+@endsection

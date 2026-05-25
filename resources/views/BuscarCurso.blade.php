@@ -23,22 +23,26 @@
     </div>
 
     {{-- Filtros --}}
+    {{-- Filtros corregidos con horarios escolares en BuscarCurso.blade.php --}}
     <form action="{{ route('cursos.index') }}" method="GET">
-        <div class="row g-3 mb-4 bg-white p-4 rounded shadow-sm" style="border: 1px solid rgba(0,0,0,0.05);">
-            <div class="col-md-4">
+        <div class="row g-2 mb-4 bg-white p-4 rounded shadow-sm" style="border: 1px solid rgba(0,0,0,0.05);">
+            {{-- Nombre --}}
+            <div class="col-md-3">
                 <label class="form-label small fw-bold text-secondary">Buscar por nombre:</label>
                 <input type="text" name="buscar" value="{{ request('buscar') }}"
                     class="form-control" placeholder="Ej: Álgebra, Programación...">
             </div>
+            {{-- Materia --}}
             <div class="col-md-3">
                 <label class="form-label small fw-bold text-secondary">Filtrar por materia:</label>
                 <input type="text" name="materia" value="{{ request('materia') }}"
                     class="form-control" placeholder="Ej: Matemáticas...">
             </div>
-            <div class="col-md-3">
+            {{-- Día --}}
+            <div class="col-md-2">
                 <label class="form-label small fw-bold text-secondary">Día de la semana:</label>
                 <select name="dia" class="form-select">
-                    <option value="">-- Todos los días --</option>
+                    <option value="">-- Todos --</option>
                     @foreach(['Lunes','Martes','Miércoles','Jueves','Viernes'] as $dia)
                         <option value="{{ $dia }}" {{ request('dia') == $dia ? 'selected' : '' }}>
                             {{ $dia }}
@@ -46,6 +50,16 @@
                     @endforeach
                 </select>
             </div>
+            {{-- Horario Escolar --}}
+            <div class="col-md-2">
+                <label class="form-label small fw-bold text-secondary">Horario/Turno:</label>
+                <select name="bloque_horario" class="form-select">
+                    <option value="">-- Todos --</option>
+                    <option value="matutino" {{ request('bloque_horario') == 'matutino' ? 'selected' : '' }}>Matutino (6 AM - 12 PM)</option>
+                    <option value="vespertino" {{ request('bloque_horario') == 'vespertino' ? 'selected' : '' }}>Vespertino (12 PM - 8 PM)</option>
+                </select>
+            </div>
+            {{-- Botón --}}
             <div class="col-md-2 d-flex align-items-end">
                 <button type="submit" class="btn btn-dark w-100 fw-bold py-2 shadow-sm"
                         style="background-color: #1a1a2e; border: none; border-radius: 8px;">
@@ -54,7 +68,6 @@
             </div>
         </div>
     </form>
-
     {{-- ── MIS CURSOS ──────────────────────────────────────────────────────── --}}
     @if($misCursos->isNotEmpty())
         <div class="d-flex align-items-center gap-2 mb-3 mt-2">

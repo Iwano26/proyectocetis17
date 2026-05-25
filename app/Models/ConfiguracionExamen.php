@@ -8,8 +8,9 @@ class ConfiguracionExamen extends Model
     protected $primaryKey = 'id_config';
     public $timestamps = false;
 
+    // AGREGAMOS 'fecha_cierre' a la lista de fillable
     protected $fillable = [
-        'id_cuestionario', 'fecha_examen', 'hora_inicio',
+        'id_cuestionario', 'fecha_examen', 'fecha_cierre', 'hora_inicio',
         'hora_fin', 'oportunidades', 'estado'
     ];
 

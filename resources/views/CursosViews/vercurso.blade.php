@@ -100,64 +100,32 @@
                     <small class="text-secondary"><i class="bi bi-book me-1"></i> Materia: {{ $curso->materia }}</small>
                 </div>
                 <div class="col-md-5 text-md-end mt-3 mt-md-0">
-                    <span class="badge {{ $curso->estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary' }} mb-2 shadow-sm">
-                        ESTADO: {{ $curso->estado }}
-                    </span>
-                    <br>
+                    <div class="d-flex flex-column align-items-md-end">
+                        <span class="badge {{ $curso->estado == 'ACTIVO' ? 'bg-success' : 'bg-secondary' }} mb-2 shadow-sm">
+                            ESTADO: {{ $curso->estado }}
+                        </span>
 
-                    @if(Auth::user()->rol === 'Estudiante')
-                        @if($yaInscrito)
-                            {{-- ESTADO: YA UNIDO --}}
-                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded border mt-2">
-                                {{-- Botón Salir (Izquierda) --}}
-                                <form id="form-salir-curso" action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST">
+                        @if(Auth::user()->rol === 'Estudiante')
+                            @if($yaInscrito)
+                                <form action="{{ route('cursos.salir', $curso->id_curso) }}" method="POST" class="d-inline form-salir-curso">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="button" onclick="confirmarSalida()" class="btn btn-link text-danger fw-bold p-0 text-decoration-none small">
-                                        <i class="bi bi-box-arrow-left"></i> SALIR DEL CURSO
+                                    <button type="submit" class="btn btn-outline-danger fw-bold px-4">
+                                        <i class="bi bi-box-arrow-left me-2"></i> SALIR DEL CURSO
                                     </button>
                                 </form>
-
-                                <script>
-                                function confirmarSalida() {
-                                    Swal.fire({
-                                        title: '¿Estás seguro?',
-                                        text: "Ya no estarás inscrito en este curso y podrías perder tu lugar.",
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#d33', // Rojo para confirmar
-                                        cancelButtonColor: '#3085d6', // Azul para cancelar
-                                        confirmButtonText: 'Sí, salir del curso',
-                                        cancelButtonText: 'Cancelar',
-                                        reverseButtons: true
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            document.getElementById('form-salir-curso').submit();
-                                        }
-                                    })
-                                }
-                                </script>
-
-                                {{-- Texto de Confirmación (Derecha) --}}
-                                <span class="text-success fw-bold small">
-                                    <i class="bi bi-check-circle-fill"></i> YA TE UNISTE
-                                </span>
-                            </div>
+                            @else
+                                <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    <button type="submit" class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
+                                        <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
+                                    </button>
+                                </form>
+                            @endif
                         @else
-                            {{-- ACCIÓN: UNIRSE (Si no está inscrito) --}}
-                            <form action="{{ route('cursos.inscribir', $curso->id_curso) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
-                                    <i class="bi bi-person-plus-fill me-2"></i> UNIRSE AL CURSO
-                                </button>
-                            </form>
+                            
                         @endif
-                    @else
-                        {{-- VISTA PARA ASESOR/ADMIN --}}
-                        <button class="btn btn-dark fw-bold px-4" {{ $curso->estado != 'ACTIVO' ? 'disabled' : '' }}>
-                            <i class="bi bi-door-open-fill me-2"></i> INGRESAR AL CURSO
-                        </button>
-                    @endif
+                    </div>
                 </div>
             </div>
         </div>

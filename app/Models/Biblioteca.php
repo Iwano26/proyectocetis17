@@ -23,4 +23,14 @@ class Biblioteca extends Model
 
     // Si tu tabla tiene created_at y updated_at, déjalo en true
     public $timestamps = true; 
+
+    public function usuario()
+    {
+        return $this->belongsTo(Usuario::class, 'correo_usuario', 'correo');
+    }
+    
+    public function curso()
+    {
+        return $this->belongsTo(Curso::class, 'id_curso', 'id_curso');
+    }
 }

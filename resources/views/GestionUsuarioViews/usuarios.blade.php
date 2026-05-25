@@ -1,58 +1,170 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gestión de Usuarios | CETIS 17</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <style>
-        :root { --cetis-primary: #8C001A; --cetis-light: #f8f9fa; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--cetis-light); }
-        .navbar-cetis { background-color: var(--cetis-primary); }
-        .btn-cetis-primary { background-color: var(--cetis-primary); border-color: var(--cetis-primary); color: white; }
-        .btn-cetis-primary:hover { background-color: #A61E34; color: white; }
-        .card-header-cetis { background-color: var(--cetis-primary) !important; color: white; font-weight: 600; }
-        .main-content { padding-top: 80px; }
-    </style>
-</head>
-<body>
+@extends('layouts.app')
 
-    <nav class="navbar navbar-expand-lg navbar-dark navbar-cetis fixed-top shadow">
-        <div class="container-fluid">
-            <a class="navbar-brand fw-bold" href="#"><i class="bi bi-gear-fill me-2"></i> Panel de Administración</a>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link active" href="#"><i class="bi bi-people-fill me-1"></i> Usuarios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="/principal"><i class="bi bi-box-arrow-right me-1"></i> Inicio</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+@section('content')
+
+{{-- 
+  Cargamos las hojas de estilos institucionales si no se cargan automáticamente en el layout.
+  Si ya están en layouts.app, puedes omitir estas dos líneas de <link>.
+--}}
+<link rel="stylesheet" href="{{ asset('css/menuiz.css') }}">
+<link rel="stylesheet" href="{{ asset('css/home.css') }}">
+
+<style>
+    /* ========== OPTIMIZACIÓN DE ACCESIBILIDAD Y TAMAÑO DE LETRA (MAYORES DE 40 AÑOS) ========== */
     
-    <div class="main-content container mt-4 mb-5">
-        <h2 class="text-center mb-5 fw-bolder" style="color: var(--cetis-primary);">
-            <i class="bi bi-person-gear me-2"></i> Gestión de Usuarios
-        </h2>
+    .section-gestion-usuarios {
+        padding: 40px 0 80px;
+        /* Aumentamos el tamaño de letra base de toda la sección */
+        font-size: 1.1rem; 
+    }
+    
+    .card-gestion {
+        background: #ffffff;
+        border: 1px solid rgba(140, 0, 26, 0.12);
+        border-radius: 16px;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+    
+    .card-header-cetis {
+        background-color: var(--cetis-rojo, #8C001A) !important;
+        color: white !important;
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+        font-size: 1.35rem; /* Título del formulario más grande */
+        padding: 18px 24px;
+        border-bottom: none;
+    }
+
+    /* Etiquetas de los campos del formulario (Nombre, Correo, Rol, etc.) */
+    .form-label {
+        font-weight: 700;
+        font-size: 1.1rem; /* Texto de etiquetas grande y claro */
+        color: var(--cetis-texto, #1a1a2e);
+        margin-bottom: 8px;
+        display: block;
+    }
+
+    /* Cajas de texto, inputs y selectores grandes y legibles */
+    .form-control, .form-select {
+        border-radius: 8px;
+        border: 1.5px solid rgba(140, 0, 26, 0.25); /* Bordes más oscuros para mejor contraste */
+        padding: 0.8rem 1rem; /* Más espacio interno para que no se amontone el texto */
+        font-family: 'Inter', sans-serif;
+        font-size: 1.1rem; /* Texto interno grande */
+        color: #1a1a2e;
+        transition: all 0.2s;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--cetis-rojo-claro, #b0001f);
+        box-shadow: 0 0 0 0.25rem rgba(140, 0, 26, 0.15);
+    }
+    
+    /* Placeholders con gris más oscuro para que se alcancen a leer perfectamente */
+    .form-control::placeholder {
+        color: #72777a;
+        opacity: 1;
+    }
+
+    /* ========== ESTILOS DE LA TABLA DE USUARIOS CON LETRA GRANDE ========== */
+    
+    /* Encabezados de la tabla de usuarios */
+    .table-usuarios th {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 1.05rem; /* Encabezados grandes */
+        color: #2c3e50;
+        padding: 16px 18px;
+        background-color: #f8f9fa;
+        border-bottom: 3px solid rgba(140, 0, 26, 0.15);
+    }
+
+    /* Celdas de la tabla con los datos del usuario */
+    .table-usuarios td {
+        padding: 18px 18px; /* Mayor separación por fila para descanso visual */
+        font-family: 'Inter', sans-serif;
+        font-size: 1.05rem; /* Texto de datos grande */
+        color: #1a1a2e;
+    }
+
+    /* Nombre del Usuario destacado en la lista */
+    .usuario-title {
+        font-family: 'Georgia', serif;
+        font-weight: bold;
+        color: var(--cetis-rojo, #8C001A); /* Destacado institucional */
+        font-size: 1.2rem;
+        margin-bottom: 4px;
+    }
+
+    /* Textos secundarios (como el correo o teléfono abajo del nombre) */
+    .text-muted-grande {
+        color: #4a5568 !important; /* Gris oscuro de alto contraste */
+        font-size: 0.95rem;
+        font-weight: 500;
+    }
+
+    .badge-rol {
+        font-family: 'Inter', sans-serif;
+        font-weight: 700;
+        font-size: 0.9rem; /* Badges de roles legibles (ADMIN, DOCENTE, etc.) */
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    /* Botones de acción grandes (Editar/Eliminar) para evitar clics erróneos */
+    .btn-action-grande {
+        padding: 10px 14px; /* Más amplios para el dedo o el mouse */
+        border-radius: 8px;
+        font-size: 1.05rem;
+        transition: transform 0.15s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .btn-action-grande:hover {
+        transform: scale(1.05);
+    }
+    
+    /* Botón principal de registrar usuario */
+    .btn-submit-grande {
+        font-size: 1.15rem;
+        font-weight: 700;
+        padding: 12px 28px;
+        border-radius: 8px;
+    }
+</style>
+
+<section class="section-gestion-usuarios">
+    <div class="container">
+        
+        {{-- Encabezado de Página Estilo Institucional --}}
+        <div class="text-center mb-5">
+            <h2 class="section-titulo">
+                <i class="bi bi-person-gear me-2" style="color: var(--cetis-rojo);"></i>Gestión de Usuarios
+            </h2>
+            <p class="section-subtitulo">Administra los accesos, roles y estados de las cuentas en el ecosistema académico</p>
+        </div>
 
         <div class="row">
-            <div class="col-12 col-lg-5 mb-4">
-                <div class="card shadow-lg border-0">
+            {{-- Columna del Formulario --}}
+            <div class="col-12 col-lg-5">
+                <div class="card card-gestion">
                     <div class="card-header card-header-cetis">
                         <span id="formTitle"><i class="bi bi-person-plus-fill me-1"></i> Registro de Usuario</span>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body p-4">
                         <form method="POST" action="{{ route('gestionusuario.store') }}" id="registroForm" class="needs-validation" novalidate>
                             @csrf 
                             <input type="hidden" name="_method" value="POST" id="methodField">
 
                             <div class="mb-3">
-                                <label class="form-label">Nombre</label>
+                                <label class="form-label">Nombre(s)</label>
                                 <input type="text" name="nombre" id="nombre" class="form-control" required>
                             </div>
+                            
                             <div class="row">
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label">Apellido Paterno</label>
@@ -63,16 +175,19 @@
                                     <input type="text" name="apellidoMa" id="apellidoMa" class="form-control" required>
                                 </div>
                             </div>
+                            
                             <div class="mb-3">
-                                <label class="form-label">Correo Electrónico (Regla 4: No modificable en edición)</label>
+                                <label class="form-label">Correo Electrónico institucional</label>
                                 <input type="email" name="correo" id="correo" class="form-control" required pattern="^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$">
                             </div>
+                            
                             <div class="mb-3">
                                 <label class="form-label">Teléfono</label>
                                 <input type="tel" name="telefono" id="telefono" class="form-control" required pattern="\d{10}" maxlength="10">
                             </div>
+                            
                             <div class="mb-3">
-                                <label class="form-label">Rol</label>
+                                <label class="form-label">Rol del Usuario</label>
                                 <select name="rol" id="rol" class="form-select" required>
                                     <option value="" disabled selected>Seleccione un rol</option>
                                     <option value="Administrador">Administrador</option>
@@ -80,30 +195,35 @@
                                     <option value="Estudiante">Estudiante</option>
                                 </select>
                             </div>
+                            
                             <div class="mb-3">
-                                <label class="form-label">Contraseña</label>
+                                <label class="form-label">Contraseña de acceso</label>
                                 <input type="password" name="contrasennia" id="pass" class="form-control" placeholder="Mínimo 8 caracteres">
                             </div>
-                            <div class="text-end mt-4">
-                                <button type="button" class="btn btn-secondary d-none" id="cancelarEdicionBtn" onclick="cancelarEdicion()">Cancelar</button>
-                                <button type="submit" class="btn btn-cetis-primary" id="submitBtn">Registrar</button>
+                            
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-light d-none" id="cancelarEdicionBtn" onclick="cancelarEdicion()" style="border-radius: 8px; font-weight:600;">Cancelar</button>
+                                <button type="submit" class="btn btn-cetis-primary px-4" id="submitBtn" style="padding: 10px 24px;">Registrar</button>
                             </div>
                         </form>
                     </div>
                 </div>
             </div>
             
+            {{-- Columna de la Tabla --}}
             <div class="col-12 col-lg-7">
-                <div class="card shadow-lg border-0">
-                    <div class="card-header card-header-cetis"><i class="bi bi-table me-1"></i> Usuarios del Sistema</div>
+                <div class="card card-gestion">
+                    <div class="card-header card-header-cetis">
+                        <i class="bi bi-table me-2"></i> Usuarios del Sistema
+                    </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle m-0">
-                                <thead class="table-light">
+                            <table class="table table-hover table-usuarios align-middle m-0">
+                                <thead>
                                     <tr>
-                                        <th>Nombre</th>
-                                        <th>Correo</th>
+                                        <th>Información del Usuario</th>
                                         <th>Rol</th>
+                                        <th>Estado</th>
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
@@ -111,33 +231,58 @@
                                     @foreach ($usuarios as $usuario)
                                     @php
                                         $esMismoUsuario = Auth::user()->correo === $usuario->correo;
-                                        $esOtroAdmin = ($usuario->rol === 'Administrador' && !$esMismoUsuario);
                                     @endphp
                                     <tr>
-                                        <td>{{ $usuario->nombre }} {{ $usuario->apellidoPa }}</td>
-                                        <td><small>{{ $usuario->correo }}</small></td>
-                                        <td><span class="badge {{ $usuario->rol == 'Administrador' ? 'bg-danger' : 'bg-primary' }}">{{ $usuario->rol }}</span></td>
-                                        <td class="text-nowrap">
-                                            @if(!$esOtroAdmin)
-                                            <button class="btn btn-warning btn-sm text-white" onclick="iniciarEdicion(event, '{{ route('gestionusuario.update', $usuario->correo) }}', {{ json_encode($usuario) }})">
-                                                <i class="bi bi-pencil-square"></i>
-                                            </button>
+                                        <td>
+                                            <div class="user-name-title">{{ $usuario->nombre }} {{ $usuario->apellidoPa }} {{ $usuario->apellidoMa }}</div>
+                                            <small class="text-muted d-block mt-1" style="font-size: 0.8rem;"><i class="bi bi-envelope me-1"></i>{{ $usuario->correo }}</small>
+                                        </td>
+                                        <td>
+                                            <span class="badge badge-rol {{ $usuario->rol == 'Administrador' ? 'bg-danger' : ($usuario->rol == 'Asesor' ? 'bg-warning text-dark' : 'bg-primary') }}">
+                                                {{ $usuario->rol }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            @if(!$esMismoUsuario)
+                                                <form action="{{ route('gestionusuario.toggleStatus', $usuario->correo) }}" method="POST" class="d-inline m-0">
+                                                    @csrf
+                                                    <button type="submit" class="btn btn-sm btn-action {{ $usuario->activo == 1 ? 'btn-success' : 'btn-secondary' }} px-2 py-1" style="font-size: 0.75rem; font-weight: 600;">
+                                                        <i class="bi {{ $usuario->activo == 1 ? 'bi-check-circle-fill' : 'bi-dash-circle-fill' }} me-1"></i>
+                                                        {{ $usuario->activo == 1 ? 'Activo' : 'Inactivo' }}
+                                                    </button>
+                                                </form>
                                             @else
-                                            <button class="btn btn-outline-secondary btn-sm" onclick="alertaProteccion('editar')">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </button>
-                                            @endif
-
-                                            @if(!$esMismoUsuario && $usuario->rol !== 'Administrador')
-                                            <button class="btn btn-danger btn-sm" onclick="mostrarAlertaEliminar(event, '{{ $usuario->correo }}', '{{ route('gestionusuario.destroy', $usuario->correo) }}')">
-                                                <i class="bi bi-trash-fill"></i>
-                                            </button>
-                                            @else
-                                            <button class="btn btn-outline-secondary btn-sm" onclick="alertaProteccion('eliminar', '{{ $esMismoUsuario }}')">
-                                                <i class="bi bi-shield-lock-fill"></i>
-                                            </button>
+                                                <span class="badge bg-success badge-rol px-2 py-1"><i class="bi bi-check-circle-fill me-1"></i>Activo</span>
                                             @endif
                                         </td>
+                                        <td class="text-center" style="width: 140px;">
+                                        {{-- Contenedor flexible que alinea los botones en fila y les da espacio (Evita que se corten) --}}
+                                        <div class="d-flex justify-content-center gap-2">
+                                            
+                                            {{-- Editar (Permitido para todos los registros del panel) con clase grande --}}
+                                            <button class="btn btn-warning btn-sm btn-action-grande text-white" 
+                                                    title="Editar Usuario"
+                                                    onclick="iniciarEdicion(event, '{{ route('gestionusuario.update', $usuario->correo) }}', {{ json_encode($usuario) }})">
+                                                <i class="bi bi-pencil-square"></i>
+                                            </button>
+
+                                            {{-- Eliminar o Proteger (Impedir borrado propio únicamente) con clase grande --}}
+                                            @if(!$esMismoUsuario)
+                                                <button class="btn btn-danger btn-sm btn-action-grande" 
+                                                        title="Eliminar Usuario"
+                                                        onclick="mostrarAlertaEliminar(event, '{{ $usuario->correo }}', '{{ route('gestionusuario.destroy', $usuario->correo) }}')">
+                                                    <i class="bi bi-trash-fill"></i>
+                                                </button>
+                                            @else
+                                                <button class="btn btn-outline-secondary btn-sm btn-action-grande" 
+                                                        title="Usuario Protegido"
+                                                        onclick="alertaProteccion()">
+                                                    <i class="bi bi-shield-lock-fill"></i>
+                                                </button>
+                                            @endif
+
+                                        </div>
+                                    </td>
                                     </tr>
                                     @endforeach
                                 </tbody>
@@ -148,82 +293,74 @@
             </div>
         </div>
     </div>
+</section>
 
-    <script>
-        // REGLA 6: SweetAlerts Afinadas
-        function alertaProteccion(accion, esMismo = false) {
-            let config = {
-                icon: 'error',
-                confirmButtonColor: '#8C001A',
-                title: 'Acción Restringida'
-            };
+<script>
+    function alertaProteccion() {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Operación Inválida',
+            text: 'Por medidas de seguridad, no está permitido remover de forma autónoma su propia cuenta de administrador durante la sesión actual.',
+            confirmButtonColor: '#8C001A'
+        });
+    }
 
-            if (accion === 'editar') {
-                config.text = 'No puedes modificar los datos de otro administrador por seguridad.';
-            } else {
-                config.text = esMismo ? 'No puedes eliminar tu propia cuenta mientras estás en sesión.' : 'Las cuentas de administradores están protegidas y no pueden ser eliminadas.';
-                config.icon = 'warning';
+    function iniciarEdicion(event, updateUrl, user) {
+        event.preventDefault();
+        document.getElementById('formTitle').innerHTML = '<i class="bi bi-pencil-square"></i> Modificar Usuario: ' + user.nombre;
+        document.getElementById('correo').value = user.correo;
+        document.getElementById('correo').setAttribute('readonly', true);
+        document.getElementById('nombre').value = user.nombre;
+        document.getElementById('apellidoPa').value = user.apellidoPa;
+        document.getElementById('apellidoMa').value = user.apellidoMa;
+        document.getElementById('telefono').value = user.telefono;
+        document.getElementById('rol').value = user.rol;
+        
+        document.getElementById('registroForm').action = updateUrl;
+        document.getElementById('methodField').value = 'PUT';
+        document.getElementById('submitBtn').innerText = 'Guardar Cambios';
+        document.getElementById('cancelarEdicionBtn').classList.remove('d-none');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('registroForm').reset();
+        document.getElementById('correo').removeAttribute('readonly');
+        document.getElementById('methodField').value = 'POST';
+        document.getElementById('submitBtn').innerText = 'Registrar';
+        document.getElementById('cancelarEdicionBtn').classList.add('d-none');
+        document.getElementById('formTitle').innerHTML = '<i class="bi bi-person-plus-fill"></i> Registro de Usuario';
+    }
+
+    function mostrarAlertaEliminar(event, correo, url) {
+        Swal.fire({
+            title: '¿Confirmar eliminación permanente?',
+            text: "Esta acción removerá definitivamente al usuario " + correo + " de la base de datos institucional.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Confirmar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const f = document.createElement('form');
+                f.method='POST'; f.action=url;
+                f.innerHTML = `@csrf @method('DELETE')`;
+                document.body.appendChild(f);
+                f.submit();
             }
-            Swal.fire(config);
-        }
+        });
+    }
 
-        function iniciarEdicion(event, updateUrl, user) {
-            event.preventDefault();
-            document.getElementById('formTitle').innerHTML = '<i class="bi bi-pencil-square"></i> Editando a: ' + user.nombre;
-            document.getElementById('correo').value = user.correo;
-            document.getElementById('correo').setAttribute('readonly', true); // REGLA 4
-            document.getElementById('nombre').value = user.nombre;
-            document.getElementById('apellidoPa').value = user.apellidoPa;
-            document.getElementById('apellidoMa').value = user.apellidoMa;
-            document.getElementById('telefono').value = user.telefono;
-            document.getElementById('rol').value = user.rol;
-            
-            document.getElementById('registroForm').action = updateUrl;
-            document.getElementById('methodField').value = 'PUT';
-            document.getElementById('submitBtn').innerText = 'Actualizar Datos';
-            document.getElementById('cancelarEdicionBtn').classList.remove('d-none');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
+    @if(session('mensaje'))
+        Swal.fire({
+            icon: '{{ session("sessionInsertado") == "true" || session("sessionEliminado") == "true" ? "success" : "info" }}',
+            title: 'Se elimino correctamente el usuario',
+            text: '{{ session("mensaje") }}',
+            confirmButtonColor: '#8C001A'
+        });
+    @endif
+</script>
 
-        function cancelarEdicion() {
-            document.getElementById('registroForm').reset();
-            document.getElementById('correo').removeAttribute('readonly');
-            document.getElementById('methodField').value = 'POST';
-            document.getElementById('submitBtn').innerText = 'Registrar';
-            document.getElementById('cancelarEdicionBtn').classList.add('d-none');
-            document.getElementById('formTitle').innerHTML = '<i class="bi bi-person-plus-fill"></i> Registro de Usuario';
-        }
-
-        function mostrarAlertaEliminar(event, correo, url) {
-            Swal.fire({
-                title: '¿Confirmar eliminación?',
-                text: "Se borrará permanentemente a: " + correo,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Sí, eliminar',
-                cancelButtonText: 'Cancelar'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const f = document.createElement('form');
-                    f.method='POST'; f.action=url;
-                    f.innerHTML = `@csrf @method('DELETE')`;
-                    document.body.appendChild(f);
-                    f.submit();
-                }
-            });
-        }
-
-        // Alerta de éxito/error al cargar la página si hay sesión
-        @if(session('mensaje'))
-            Swal.fire({
-                icon: '{{ session("sessionInsertado") == "true" || session("sessionEliminado") == "true" ? "success" : "error" }}',
-                title: 'Información',
-                text: '{{ session("mensaje") }}',
-                confirmButtonColor: '#8C001A'
-            });
-        @endif
-    </script>
-</body>
-</html>
+@endsection

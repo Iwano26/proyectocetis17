@@ -13,18 +13,36 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2 class="fw-bold m-0 text-title-custom">Biblioteca virtual</h2>
             <div>
-                <button class="btn btn-outline-danger fw-bold me-2 btn-custom-action">MIS ARCHIVOS</button>
-                <a href="{{ route('biblioteca.create') }}" class="btn btn-danger fw-bold btn-custom-danger">
-                    <i class="bi bi-cloud-upload me-1"></i> SUBIR ARCHIVO
-                </a>
+                {{-- Botón dinámico de Mis Archivos / Ver Todos --}}
+                @if(request('mis_archivos') == 1)
+                    <a href="{{ route('biblioteca.index') }}" class="btn btn-dark fw-bold me-2 btn-custom-action">
+                        <i class="bi bi-files me-1"></i> VER TODOS LOS ARCHIVOS
+                    </a>
+                @else
+                    <a href="{{ route('biblioteca.index', ['mis_archivos' => 1]) }}" class="btn btn-outline-danger fw-bold me-2 btn-custom-action">
+                        MIS ARCHIVOS
+                    </a>
+                @endif
+
+                {{-- RESTRICCIÓN DE ROL: Solo Asesor y Administrador ven este botón --}}
+                @if(Auth::user()->rol === 'Asesor' || Auth::user()->rol === 'Administrador')
+                    <a href="{{ route('biblioteca.create') }}" class="btn btn-danger fw-bold btn-custom-danger">
+                        <i class="bi bi-cloud-upload me-1"></i> SUBIR ARCHIVO
+                    </a>
+                @endif
             </div>
         </div>
 
         <form action="{{ route('biblioteca.index') }}" method="GET">
+            {{-- Mantenemos el estado de "Mis Archivos" si estaba activo al filtrar --}}
+            @if(request('mis_archivos'))
+                <input type="hidden" name="mis_archivos" value="1">
+            @endif
+
             <div class="mb-3">
                 <div class="input-group shadow-sm">
                     <input type="text" name="buscar" class="form-control form-control-lg custom-input" 
-                           placeholder="Buscar documentos..." 
+                           placeholder="Buscar por nombre de documento..." 
                            value="{{ request('buscar') }}">
                     <button class="btn btn-danger px-4 btn-custom-danger" type="submit">
                         <i class="bi bi-search"></i>
@@ -34,6 +52,7 @@
 
             <div class="seccion-filtros shadow-sm bg-white border p-3 rounded-3 mb-4">
                 <div class="row align-items-end">
+                    {{-- Ordenar por Fecha --}}
                     <div class="col-md-4 mb-2 mb-md-0">
                         <label class="form-label small fw-bold text-muted">Filtrar por Fecha:</label>
                         <select name="orden" class="form-select custom-select">
@@ -42,14 +61,16 @@
                         </select>
                     </div>
 
+                    {{-- Filtrar por Cursos Existentes --}}
                     <div class="col-md-4 mb-2 mb-md-0">
-                        <label class="form-label small fw-bold text-muted">Materia Relacionada:</label>
-                        <select name="materia" class="form-select custom-select">
-                            <option value="">-- Todas las Materias --</option>
-                            <option value="Programación" {{ request('materia') == 'Programación' ? 'selected' : '' }}>Programación</option>
-                            <option value="Soporte Técnico" {{ request('materia') == 'Soporte Técnico' ? 'selected' : '' }}>Soporte Técnico</option>
-                            <option value="Ofimática" {{ request('materia') == 'Ofimática' ? 'selected' : '' }}>Ofimática</option>
-                            <option value="Base de Datos" {{ request('materia') == 'Base de Datos' ? 'selected' : '' }}>Base de Datos</option>
+                        <label class="form-label small fw-bold text-muted">Materia:</label>
+                        <select name="materia" class="form-select">
+                            <option value="">-- Todas las materias --</option>
+                            @foreach($materiasDisponibles as $mat)
+                                <option value="{{ $mat }}" {{ request('materia') == $mat ? 'selected' : '' }}>
+                                    {{ $mat }}
+                                </option>
+                            @endforeach
                         </select>
                     </div>
 
@@ -91,14 +112,19 @@
                                 <i class="bi bi-download"></i> DESCARGAR
                             </a>
 
-                            @if(Auth::user()->rol === 'Administrador' || Auth::user()->rol === 'Asesor')
+                            {{-- RESTRICCIÓN PROFESIONAL DE ACCIONES --}}
+                            @if(Auth::user()->rol === 'Administrador' || (Auth::user()->rol === 'Asesor' && $archivo->correo_usuario === Auth::user()->correo))
+                                {{-- Botón Editar --}}
                                 <a href="{{ route('biblioteca.edit', $archivo->id_biblioteca) }}" class="btn btn-warning btn-action text-white px-2">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <form action="{{ route('biblioteca.eliminar', $archivo->id_biblioteca) }}" method="POST" class="d-inline m-0">
+                                
+                                {{-- Botón Eliminar --}}
+                                {{-- Formulario con la clase "form-eliminar" para que JavaScript lo cache --}}
+                                <form action="{{ route('biblioteca.eliminar', $archivo->id_biblioteca) }}" method="POST" class="d-inline m-0 form-eliminar">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-action px-2" onclick="return confirm('¿Estás seguro?')">
+                                    <button type="submit" class="btn btn-danger btn-action px-2">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </form>
@@ -117,3 +143,42 @@
 
     </div>
 @endsection
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Capturamos todos los formularios de eliminación
+    const formularios = document.querySelectorAll('.form-eliminar');
+
+    formularios.forEach(formulario => {
+        formulario.addEventListener('submit', function (e) {
+            // Detenemos el envío automático del formulario
+            e.preventDefault();
+
+            // Disparamos la alerta con textos institucionales
+            Swal.fire({
+                title: '¿Está seguro de eliminar este archivo?',
+                text: "Esta acción no se puede deshacer y el documento se borrará permanentemente.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545', // Color rojo danger
+                cancelButtonColor: '#6c757d',  // Color gris secondary
+                confirmButtonText: '<i class="bi bi-trash"></i> Confirmar eliminación',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true, // Ubica cancelar a la izquierda
+                customClass: {
+                    popup: 'rounded-3 shadow',
+                    confirmButton: 'fw-bold px-3 btn-lg',
+                    cancelButton: 'fw-bold px-3 btn-lg'
+                }
+            }).then((result) => {
+                // Si el usuario confirma la acción, se procesa el formulario
+                if (result.isConfirmed) {
+                    this.submit();
+                }
+            });
+        });
+    });
+});
+</script>

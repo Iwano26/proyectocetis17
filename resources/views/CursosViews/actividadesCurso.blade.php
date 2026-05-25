@@ -356,17 +356,23 @@
                                         </span>
                                     @endif
                                     @if($evento->tipo === 'cuestionario' && $evento->ex_fecha)
-                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
-                                            <i class="bi bi-calendar-event me-1" style="color:#1a3a5c;"></i>
-                                            {{ \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') }}
-                                            {{ \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') }} —
-                                            {{ \Carbon\Carbon::parse($evento->ex_fin)->format('h:i A') }}
-                                        </span>
-                                        <span class="badge bg-light text-dark border" style="font-size:0.78rem;">
-                                            <i class="bi bi-arrow-repeat me-1" style="color:#1a3a5c;"></i>
-                                            {{ $evento->ex_oportunidades ?? 1 }} intento(s)
-                                        </span>
+                                        <div class="card-text mt-2 p-2 bg-light border rounded" style="font-size: 0.85rem;">
+                                            <div class="row">
+                                                <div class="col-12 mb-1">
+                                                    <strong>Fecha Inicio:</strong> {{ \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') }} 
+                                                    &nbsp; <strong>Hora:</strong> {{ \Carbon\Carbon::parse($evento->ex_inicio)->format('H:i') }}
+                                                </div>
+                                                <div class="col-12">
+                                                    <strong>Fecha Cierre:</strong> {{ \Carbon\Carbon::parse($evento->ex_fecha_cierre)->format('d/m/Y') }}
+                                                    &nbsp; <strong>Hora:</strong> {{ \Carbon\Carbon::parse($evento->ex_fin)->format('H:i') }}
+                                                </div>
+                                            </div>
+                                            <div class="mt-2 text-primary fw-bold">
+                                                <i class="bi bi-arrow-repeat"></i> {{ $evento->ex_oportunidades ?? 1 }} intento(s)
+                                            </div>
+                                        </div>
                                     @endif
+                                    {{-- Borra temporalmente tu código y pon esto para ver qué hay --}}
                                 </div>
                             </div>
 
@@ -398,6 +404,28 @@
                                                     @if(in_array($evento->ases_estado ?? '', ['TERMINADA','CANCELADA','EN_CURSO'])) disabled @endif>
                                                     <i class="bi bi-check-circle-fill me-1"></i> Registrado
                                                 </button>
+                                                @if(($evento->ya_inscrito ?? 0) > 0 
+                                                    && ($evento->ases_requiere_evidencia ?? 0) == 1 
+                                                    && in_array($evento->ases_estado ?? '', ['EN_CURSO', 'TERMINADA']))
+                                                    @php
+                                                        $yaSubioEvidencia = DB::table('evidencia_asesoria')
+                                                            ->where('id_asesoria', $evento->id_asesoria)
+                                                            ->where('correo_alumno', Auth::user()->correo)
+                                                            ->exists();
+                                                    @endphp
+                                                    @if(!$yaSubioEvidencia)
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-outline-danger fw-bold px-3"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#modalEvidencia{{ $evento->id_asesoria }}">
+                                                            <i class="bi bi-file-earmark-arrow-up me-1"></i> Subir Evidencia
+                                                        </button>
+                                                    @else
+                                                        <button class="btn btn-sm btn-success fw-bold px-3" disabled>
+                                                            <i class="bi bi-file-earmark-check me-1"></i> Evidencia enviada
+                                                        </button>
+                                                    @endif
+                                                @endif
                                             </form>
                                         @else
                                             <form action="{{ route('asesorias.unirse', $evento->id_evento) }}"
@@ -455,6 +483,14 @@
                                         style="font-size:0.85rem;" title="Editar">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
+                                        @if(($evento->ases_requiere_evidencia ?? 0) == 1)
+                                            <a href="{{ route('evidencia.ver', $evento->id_asesoria) }}"
+                                            class="btn btn-sm btn-outline-danger fw-bold px-2 shadow-sm"
+                                            title="Ver Evidencias">
+                                                <i class="bi bi-file-earmark-pdf"></i>
+                                                <span class="d-none d-md-inline ms-1">Evidencias</span>
+                                            </a>
+                                        @endif
                                     @endif
 
                                     @if($evento->tipo === 'cuestionario' && $evento->id_cuestionario)
@@ -570,33 +606,46 @@
                                     </div>
                                 @endif
                                 @if($evento->tipo === 'cuestionario')
-                                    <div class="row text-center bg-light rounded py-3 g-0 border mb-3">
-                                        <div class="col-4 border-end">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fecha</small>
-                                            <span class="fw-bold text-dark">
-                                                {{ $evento->ex_fecha ? \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') : 'N/A' }}
-                                            </span>
-                                        </div>
-                                        <div class="col-4 border-end">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Inicio</small>
-                                            <span class="fw-bold text-success">
-                                                {{ $evento->ex_inicio ? \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') : 'N/A' }}
-                                            </span>
-                                        </div>
-                                        <div class="col-4">
-                                            <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.68rem;">Fin</small>
-                                            <span class="fw-bold text-danger">
-                                                {{ $evento->ex_fin ? \Carbon\Carbon::parse($evento->ex_fin)->format('h:i A') : 'N/A' }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div class="d-flex align-items-center gap-2">
-                                        <i class="bi bi-arrow-repeat text-muted"></i>
-                                        <span class="text-muted" style="font-size:0.85rem;">
-                                            Intentos permitidos: <strong>{{ $evento->ex_oportunidades ?? 1 }}</strong>
+                                {{-- Fila 1: Fechas --}}
+                                <div class="row text-center bg-light rounded py-2 g-0 border mb-2">
+                                    <div class="col-6 border-end">
+                                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.6rem;">Inicio</small>
+                                        <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                            {{ $evento->ex_fecha ? \Carbon\Carbon::parse($evento->ex_fecha)->format('d/m/Y') : 'N/A' }}
                                         </span>
                                     </div>
-                                @endif
+                                    <div class="col-6">
+                                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.6rem;">Cierre</small>
+                                        <span class="fw-bold text-dark" style="font-size: 0.85rem;">
+                                            {{ $evento->ex_fecha_cierre ? \Carbon\Carbon::parse($evento->ex_fecha_cierre)->format('d/m/Y') : 'N/A' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Fila 2: Horarios --}}
+                                <div class="row text-center bg-light rounded py-2 g-0 border mb-3">
+                                    <div class="col-6 border-end">
+                                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.6rem;">Hora Inicio</small>
+                                        <span class="fw-bold text-success" style="font-size: 0.85rem;">
+                                            {{ $evento->ex_inicio ? \Carbon\Carbon::parse($evento->ex_inicio)->format('h:i A') : 'N/A' }}
+                                        </span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="d-block text-muted text-uppercase fw-bold" style="font-size:0.6rem;">Hora Fin</small>
+                                        <span class="fw-bold text-danger" style="font-size: 0.85rem;">
+                                            {{ $evento->ex_fin ? \Carbon\Carbon::parse($evento->ex_fin)->format('h:i A') : 'N/A' }}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                {{-- Intentos --}}
+                                <div class="d-flex align-items-center gap-2 mb-3">
+                                    <i class="bi bi-arrow-repeat text-muted"></i>
+                                    <span class="text-muted" style="font-size:0.85rem;">
+                                        Intentos permitidos: <strong>{{ $evento->ex_oportunidades ?? 1 }}</strong>
+                                    </span>
+                                </div>
+                            @endif
                                 <hr class="opacity-25">
                                 <div class="text-muted" style="font-size:0.75rem;">
                                     <i class="bi bi-clock me-1"></i>
@@ -673,6 +722,7 @@
                                                         <th>Nombre</th>
                                                         <th>Correo</th>
                                                         <th class="text-center">Estado</th>
+                                                        <th class="text-center">Acción</th>  {{-- ← agrega esto --}}
                                                     </tr>
                                                 </thead>
                                                 <tbody>
@@ -690,6 +740,18 @@
                                                                     @else bg-warning text-dark @endif">
                                                                     {{ $asistente->asistio }}
                                                                 </span>
+                                                            </td>
+                                                            {{-- ← agrega esta columna --}}
+                                                            <td class="text-center">
+                                                                <form action="{{ route('asesorias.quitarAsistente', $asistente->id_asistencia) }}"
+                                                                    method="POST" class="form-quitar-asistente m-0">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger fw-bold px-2"
+                                                                            title="Quitar de la lista">
+                                                                        <i class="bi bi-person-x-fill"></i>
+                                                                    </button>
+                                                                </form>
                                                             </td>
                                                         </tr>
                                                     @endforeach
@@ -736,6 +798,50 @@
                                                     data-bs-dismiss="modal">Cancelar</button>
                                             <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
                                                 <i class="bi bi-person-check-fill me-1"></i> Agregar
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
+
+                @if(($evento->ases_requiere_evidencia ?? 0) == 1 && $evento->id_asesoria)
+                    <div class="modal fade" id="modalEvidencia{{ $evento->id_asesoria }}" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content border-0 shadow">
+                                <div class="modal-header bg-dark text-white py-3">
+                                    <h5 class="modal-title fw-bold">
+                                        <i class="bi bi-file-earmark-arrow-up text-danger me-2"></i>
+                                        Subir Evidencia
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body p-4">
+                                    <p class="text-muted mb-3" style="font-size:0.9rem;">
+                                        <i class="bi bi-info-circle text-danger me-1"></i>
+                                        Sube tu evidencia en formato <strong>PDF</strong>. Máximo <strong>5MB</strong>.
+                                    </p>
+                                    <form action="{{ route('evidencia.store', $evento->id_asesoria) }}"
+                                        method="POST" enctype="multipart/form-data">
+                                        @csrf
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold small text-secondary">
+                                                Selecciona tu archivo PDF
+                                            </label>
+                                            <input type="file"
+                                                name="archivo"
+                                                class="form-control border-2"
+                                                accept=".pdf"
+                                                required>
+                                            <small class="text-muted">Solo archivos .pdf — máximo 5MB</small>
+                                        </div>
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <button type="button" class="btn btn-light border fw-bold"
+                                                    data-bs-dismiss="modal">Cancelar</button>
+                                            <button type="submit" class="btn btn-danger fw-bold px-4 shadow-sm">
+                                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Subir
                                             </button>
                                         </div>
                                     </form>
@@ -838,6 +944,25 @@
                         confirmButtonColor: '#8C001A',
                         cancelButtonColor: '#6c757d',
                         confirmButtonText: 'Sí, salir',
+                        cancelButtonText: 'Cancelar',
+                    }).then((result) => {
+                        if (result.isConfirmed) form.submit();
+                    });
+                });
+            });
+
+            // Confirmar quitar asistente
+            document.querySelectorAll('.form-quitar-asistente').forEach(function(form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Quitar alumno?',
+                        text: 'Se eliminará de la lista de asistencia.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#8C001A',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Sí, quitar',
                         cancelButtonText: 'Cancelar',
                     }).then((result) => {
                         if (result.isConfirmed) form.submit();

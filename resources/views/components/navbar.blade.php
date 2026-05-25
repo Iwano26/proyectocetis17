@@ -17,8 +17,10 @@
         {{-- Enlaces Derechos y Dropdown de Perfil --}}
         <ul class="navbar-nav-cetis">
             @if(Auth::user()->rol === 'Administrador')
-                <li><a href="/gestioncurso" class="nav-link-cetis">Cursos</a></li>
+
                 <li><a href="/gestionusuario" class="nav-link-cetis">Usuarios</a></li>
+                <li><a href="/gestioncurso" class="nav-link-cetis">Cursos</a></li>
+                <li><a href="/gestionbiblioteca" class="nav-link-cetis">Biblioteca</a></li>
             @endif
 
             <li class="perfil-dropdown">

@@ -15,14 +15,27 @@ class ForoController extends Controller
 {
     public function index($id)
     {
-        $curso = Curso::findOrFail($id);
+        // ── CORRECCIÓN: mismo JOIN que EventoController para obtener nombre_asesor ──
+        $curso = DB::table('curso')
+            ->join('persona', 'curso.correo_persona', '=', 'persona.correo')
+            ->select(
+                'curso.*',
+                DB::raw("CONCAT(persona.nombre, ' ', persona.apellidoPa, ' ', persona.apellidoMa) as nombre_asesor")
+            )
+            ->where('curso.id_curso', $id)
+            ->first();
+
+        if (!$curso) {
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+        }
+
         $foro = Foro::where('id_curso', $id)->first();
 
         if (!$foro) {
             $foro = Foro::create([
-                'id_curso' => $id,
-                'nombre_foro' => 'Foro de Consultas: ' . $curso->nombre_curso,
-                'descripcion' => 'Espacio dedicado a resolver dudas académicas.'
+                'id_curso'     => $id,
+                'nombre_foro'  => 'Foro de Consultas: ' . $curso->nombre_curso,
+                'descripcion'  => 'Espacio dedicado a resolver dudas académicas.'
             ]);
         }
 
@@ -32,15 +45,13 @@ class ForoController extends Controller
             ->orderBy('fecha_pregunta', 'desc')
             ->get();
 
-        // ── AGREGAR ESTO ──────────────────────────────────────────────────────
         $yaInscrito = false;
         if (Auth::check() && Auth::user()->rol === 'Estudiante') {
-            $yaInscrito = \Illuminate\Support\Facades\DB::table('inscripcion')
+            $yaInscrito = DB::table('inscripcion')
                 ->where('id_curso', $id)
                 ->where('correo_estudiante', Auth::user()->correo)
                 ->exists();
         }
-        // ─────────────────────────────────────────────────────────────────────
 
         return view('CursosViews.foro', compact('curso', 'foro', 'preguntas', 'yaInscrito'));
     }
@@ -51,10 +62,10 @@ class ForoController extends Controller
         $foro = Foro::where('id_curso', $id)->first();
 
         PreguntaForo::create([
-            'id_foro' => $foro->id_foro,
-            'correo_persona' => Auth::user()->correo,
-            'texto_pregunta' => $request->texto_pregunta,
-            'fecha_pregunta' => Carbon::now()
+            'id_foro'         => $foro->id_foro,
+            'correo_persona'  => Auth::user()->correo,
+            'texto_pregunta'  => $request->texto_pregunta,
+            'fecha_pregunta'  => Carbon::now()
         ]);
 
         return back()->with('success', 'Tu duda ha sido publicada correctamente.');
@@ -62,23 +73,33 @@ class ForoController extends Controller
 
     public function show($id, $id_pregunta)
     {
-        $curso = Curso::findOrFail($id);
+        // ── CORRECCIÓN: mismo JOIN para que nombre_asesor también funcione en el detalle ──
+        $curso = DB::table('curso')
+            ->join('persona', 'curso.correo_persona', '=', 'persona.correo')
+            ->select(
+                'curso.*',
+                DB::raw("CONCAT(persona.nombre, ' ', persona.apellidoPa, ' ', persona.apellidoMa) as nombre_asesor")
+            )
+            ->where('curso.id_curso', $id)
+            ->first();
+
+        if (!$curso) {
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+        }
+
         $pregunta = PreguntaForo::with(['autor', 'respuestas.autor'])->findOrFail($id_pregunta);
 
-        // ── AGREGAR ESTO ──────────────────────────────────────────────────────
         $yaInscrito = false;
         if (Auth::check() && Auth::user()->rol === 'Estudiante') {
-            $yaInscrito = \Illuminate\Support\Facades\DB::table('inscripcion')
+            $yaInscrito = DB::table('inscripcion')
                 ->where('id_curso', $id)
                 ->where('correo_estudiante', Auth::user()->correo)
                 ->exists();
         }
-        // ─────────────────────────────────────────────────────────────────────
 
         return view('CursosViews.foro_detalle', compact('curso', 'pregunta', 'yaInscrito'));
     }
 
-    // ESTE ES EL MÉTODO QUE TE FALTABA
     public function storeRespuesta(Request $request, $id, $id_pregunta)
     {
         $request->validate([
@@ -87,9 +108,9 @@ class ForoController extends Controller
 
         RespuestaForo::create([
             'id_pregunta_foro' => $id_pregunta,
-            'correo_persona' => Auth::user()->correo,
-            'texto_respuesta' => $request->texto_respuesta,
-            'fecha_respuesta' => Carbon::now()
+            'correo_persona'   => Auth::user()->correo,
+            'texto_respuesta'  => $request->texto_respuesta,
+            'fecha_respuesta'  => Carbon::now()
         ]);
 
         return back()->with('success', 'Tu respuesta ha sido enviada.');

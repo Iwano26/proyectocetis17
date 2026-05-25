@@ -19,7 +19,9 @@ use App\Http\Controllers\{
     ExamenController,
     RespuestaExamenController,
     AgendaController,
-    SolicitudController
+    SolicitudController,
+    EvidenciaController,
+    GestionBibliotecaController
 };
 
 // --- PÚBLICAS ---
@@ -62,7 +64,10 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/perfil/actualizar', [PerfilController::class, 'update'])->name('perfil.update');
 
     Route::resource('gestioncurso', GestionCursoController::class);
+    Route::post('/gestionusuario/{correo}/toggle-status', [App\Http\Controllers\GestionUsuarioController::class, 'toggleStatus'])->name('gestionusuario.toggleStatus');
 
+    // Ruta de recursos para el Gestor de Biblioteca
+    Route::resource('gestionbiblioteca', GestionBibliotecaController::class);
     // --- SECCIÓN PROTEGIDA PARA ADMINISTRADORES ---
     Route::group(['middleware' => function ($request, $next) {
         if (Auth::user()->rol !== 'Administrador') {
@@ -138,6 +143,15 @@ Route::middleware(['auth'])->group(function () {
     // RUTA PARA AGREGAR MANUALMENTE A UN ESTUDIANTE: El asesor agrega a un estudiante a la asesoría
     Route::post('/asesoria/{id_asesoria}/agregar-manualmente', [AsesoriaController::class, 'agregarManualmente'])->name('asesorias.agregarManualmente');
 
+
+
+    // ===== EVIDENCIAS =====
+    Route::post('/asesoria/{id_asesoria}/evidencia', [EvidenciaController::class, 'store'])->name('evidencia.store');
+    Route::get('/asesoria/{id_asesoria}/evidencias', [EvidenciaController::class, 'verEvidencias'])->name('evidencia.ver');
+    Route::delete('/evidencia/{id_evidencia}', [EvidenciaController::class, 'destroy'])->name('evidencia.destroy');
+
+    // RUTA PARA QUITAR MANUALMENTE A UN ESTUDIANTE: El asesor quita a un estudiante de la asesoría
+    Route::delete('/asistencia/{id_asistencia}/quitar', [AsesoriaController::class, 'quitarAsistente'])->name('asesorias.quitarAsistente');
 
     //Examenes
     // ===== EXÁMENES =====

@@ -44,13 +44,14 @@
                             <div class="form-text">Este es el nombre que verán los alumnos.</div>
                         </div>
 
+                        {{-- SELECCIÓN DE MATERIA REPARADA (SIN DUPLICADOS) --}}
                         <div class="mb-4">
-                            <label for="id_curso" class="form-label fw-bold">Materia Relacionada</label>
-                            <select name="id_curso" id="id_curso" class="form-select" required>
+                            <label for="materia" class="form-label fw-bold">Materia Relacionada</label>
+                            <select name="materia" id="materia" class="form-select" required>
                                 <option value="" selected disabled>-- Selecciona una materia --</option>
-                                {{-- Loop dinámico basado en tu tabla curso --}}
+                                {{-- Bucle dinámico basado en materias únicas --}}
                                 @foreach($materias as $m)
-                                    <option value="{{ $m->id_curso }}">{{ $m->materia }}</option>
+                                    <option value="{{ $m }}">{{ $m }}</option>
                                 @endforeach
                             </select>
                         </div>

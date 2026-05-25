@@ -5,8 +5,8 @@
 
     {{-- Header --}}
     <div class="d-flex align-items-center gap-3 mb-4">
-        <a href="{{ url()->previous() }}" class="btn btn-light border fw-bold">
-            <i class="bi bi-arrow-left me-1"></i> Volver
+        <a href="{{ route('curso.eventos', $cuestionario->evento->id_curso ?? $cuestionario->evento->curso_id) }}" class="btn btn-light border fw-bold">
+            <i class="bi bi-arrow-left me-1"></i> Volver a Actividades
         </a>
         <div>
             <h4 class="fw-bold mb-0">{{ $cuestionario->nombre_cuestionario }}</h4>

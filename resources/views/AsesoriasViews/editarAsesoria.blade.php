@@ -114,7 +114,32 @@
                             </div>
                         </div>
 
+                        {{-- Toggle Evidencia --}}
+                        <div class="mb-4 p-3 bg-light rounded border">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div>
+                                    <label class="form-label fw-bold text-secondary mb-0">
+                                        <i class="bi bi-file-earmark-pdf text-danger me-2"></i>
+                                        Solicitar Evidencia
+                                    </label>
+                                    <small class="d-block text-muted mt-1">
+                                        Los alumnos inscritos podrán subir un PDF como evidencia de asistencia.
+                                    </small>
+                                </div>
+                                <div class="form-check form-switch ms-3">
+                                    <input class="form-check-input" type="checkbox"
+                                        id="toggleEvidencia"
+                                        name="requiere_evidencia"
+                                        value="1"
+                                        {{ old('requiere_evidencia', $asesoria->requiere_evidencia) ? 'checked' : '' }}
+                                        style="width:3em; height:1.5em; cursor:pointer; accent-color:#8C001A;">
+                                </div>
+                            </div>
+                        </div>
+
                         <hr class="my-4 opacity-25">
+
+                        {{-- Botones de Acción --}}
 
                         <div class="d-flex justify-content-end gap-2">
                             <a href="{{ url()->previous() }}" class="btn btn-light border fw-bold px-4">

@@ -41,8 +41,10 @@
                         </p>
 
                         {{-- Fecha --}}
-                        <div class="mb-3">
-                            <label class="form-label fw-bold text-secondary">Fecha del Examen</label>
+                        <div class="row">
+                        {{-- Fecha de Inicio --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary">Fecha de Inicio</label>
                             <input type="date"
                                 name="fecha_examen"
                                 class="form-control border-2 @error('fecha_examen') is-invalid @enderror"
@@ -51,6 +53,19 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        {{-- Fecha de Cierre --}}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-bold text-secondary">Fecha de Cierre</label>
+                            <input type="date"
+                                name="fecha_cierre"
+                                class="form-control border-2 @error('fecha_cierre') is-invalid @enderror"
+                                value="{{ old('fecha_cierre', $config->fecha_cierre) }}" required>
+                            @error('fecha_cierre')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
 
                         {{-- Horas --}}
                         <div class="row">
@@ -122,11 +137,37 @@
 </div>
 
 <script>
-document.getElementById('hora_inicio').addEventListener('change', function() {
-    const horaFin = document.getElementById('hora_fin');
-    horaFin.min = this.value;
-    if (horaFin.value && horaFin.value <= this.value) {
-        horaFin.value = '';
+function esInvalido() {
+    const fInicio = document.querySelector('input[name="fecha_examen"]').value;
+    const fCierre = document.querySelector('input[name="fecha_cierre"]').value;
+    const hInicio = document.getElementById('hora_inicio').value;
+    const hFin = document.getElementById('hora_fin').value;
+
+    if (!fInicio || !fCierre || !hInicio || !hFin) return false;
+
+    // Convertimos todo a un formato comparable (timestamp)
+    const inicioCompleto = new Date(fInicio + 'T' + hInicio);
+    const cierreCompleto = new Date(fCierre + 'T' + hFin);
+
+    // Si el cierre es antes o igual al inicio, es inválido
+    return cierreCompleto <= inicioCompleto;
+}
+
+// Validar al enviar el formulario
+document.getElementById('formExamen').addEventListener('submit', function(e) {
+    // 1. Validar preguntas (esto ya lo tenías)
+    const preguntas = document.querySelectorAll('.pregunta-card');
+    if (preguntas.length === 0) {
+        e.preventDefault();
+        alert('Debes agregar al menos una pregunta.');
+        return;
+    }
+
+    // 2. Validar fechas y horas combinadas
+    if (esInvalido()) {
+        e.preventDefault();
+        alert('Error: La fecha/hora de cierre debe ser posterior a la de inicio.');
+        document.getElementById('hora_fin').focus();
     }
 });
 </script>

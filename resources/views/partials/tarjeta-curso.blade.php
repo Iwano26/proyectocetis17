@@ -84,37 +84,38 @@
 
                    
 
+                    {{-- SECCIÓN CORREGIDA DENTRO DE ACCIONES EN TARJETA-CURSO.BLADE.PHP --}}
                     @if(Auth::user()->rol === 'Estudiante')
                         @if(in_array($curso->id_curso, $misInscripciones))
                             <a href="{{ route('cursos.show', $curso->id_curso) }}"
-                               class="btn btn-success btn-sm fw-bold px-3 btn-accion"
-                               style="font-size: 0.8rem; border-radius: 0;">
+                            class="btn btn-success btn-sm fw-bold px-3 btn-accion w-100"
+                            style="font-size: 0.8rem; border-radius: 0;">
                                 <i class="bi bi-box-arrow-in-right me-1"></i> ENTRAR
                             </a>
                         @elseif($curso->estado === 'ACTIVO')
                             @if($curso->acceso)
-                                {{-- Curso con clave: abre modal --}}
+                                {{-- Curso con clave: abre modal (Le agregamos w-100) --}}
                                 <button type="button"
-                                    class="btn btn-danger btn-sm fw-bold px-3 btn-accion"
+                                    class="btn btn-danger btn-sm fw-bold px-3 btn-accion w-100"
                                     style="background-color: #8C001A; border: none; font-size: 0.8rem; border-radius: 0;"
                                     data-bs-toggle="modal"
                                     data-bs-target="#modalClave{{ $curso->id_curso }}">
                                     <i class="bi bi-lock-fill me-1"></i> UNIRSE
                                 </button>
                             @else
-                                {{-- Curso libre --}}
+                                {{-- Curso libre (Le agregamos w-100 al button para que venza el aislamiento del form) --}}
                                 <form action="{{ route('cursos.inscribir', $curso->id_curso) }}"
                                     method="POST" style="display: contents;">
                                     @csrf
                                     <button type="submit"
-                                        class="btn btn-danger btn-sm fw-bold px-3 btn-accion"
+                                        class="btn btn-danger btn-sm fw-bold px-3 btn-accion w-100"
                                         style="background-color: #8C001A; border: none; font-size: 0.8rem; border-radius: 0;">
                                         <i class="bi bi-person-plus-fill me-1"></i> UNIRSE
                                     </button>
                                 </form>
                             @endif
                         @else
-                            <button class="btn btn-secondary btn-sm fw-bold px-3 btn-accion"
+                            <button class="btn btn-secondary btn-sm fw-bold px-3 btn-accion w-100"
                                 style="font-size: 0.8rem; border-radius: 0;" disabled>
                                 No disponible
                             </button>

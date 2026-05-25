@@ -145,25 +145,31 @@
                                 value="{{ old('nombre_cuestionario') }}" required>
                         </div>
                         <div class="row">
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label fw-bold text-secondary">Fecha del Examen</label>
-                                <input type="date" name="fecha_examen"
-                                    class="form-control border-2"
-                                    value="{{ old('fecha_examen') }}" required>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-secondary">Fecha de Inicio</label>
+                                    <input type="date" name="fecha_examen" class="form-control border-2" 
+                                        value="{{ old('fecha_examen', $config->fecha_examen ?? '') }}" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-bold text-secondary">Fecha de Cierre</label>
+                                    <input type="date" name="fecha_cierre" class="form-control border-2" 
+                                        value="{{ old('fecha_cierre', $config->fecha_cierre ?? '') }}" required>
+                                </div>
                             </div>
                             <div class="col-md-3 mb-3">
                                 <label class="form-label fw-bold text-secondary">Hora Inicio</label>
-                                <input type="time" name="hora_fin"
-                                id="hora_fin"
-                                class="form-control border-2"
-                                value="{{ old('hora_fin') }}" required>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <label class="form-label fw-bold text-secondary">Hora Fin</label>
                                 <input type="time" name="hora_inicio"
                                 id="hora_inicio"
                                 class="form-control border-2"
                                 value="{{ old('hora_inicio') }}" required>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label fw-bold text-secondary">Hora Fin</label>
+                                <input type="time" name="hora_fin"
+                                id="hora_fin"
+                                class="form-control border-2"
+                                value="{{ old('hora_fin') }}" required>
                             </div>
                             <div class="col-md-2 mb-3">
                                 <label class="form-label fw-bold text-secondary">Intentos</label>
@@ -390,19 +396,25 @@ document.getElementById('formExamen').addEventListener('submit', function(e) {
     }
 });
 
-// Validar que hora_fin sea mayor a hora_inicio
-document.getElementById('hora_inicio').addEventListener('change', function() {
-    const horaFin = document.getElementById('hora_fin');
-    horaFin.min = this.value;
+function esInvalido() {
+    const fInicio = document.querySelector('input[name="fecha_examen"]').value;
+    const fCierre = document.querySelector('input[name="fecha_cierre"]').value;
+    const hInicio = document.getElementById('hora_inicio').value;
+    const hFin = document.getElementById('hora_fin').value;
 
-    // Si ya tenía un valor menor, lo limpiamos
-    if (horaFin.value && horaFin.value <= this.value) {
-        horaFin.value = '';
-    }
-});
+    if (!fInicio || !fCierre || !hInicio || !hFin) return false;
+
+    // Convertimos todo a un formato comparable (timestamp)
+    const inicioCompleto = new Date(fInicio + 'T' + hInicio);
+    const cierreCompleto = new Date(fCierre + 'T' + hFin);
+
+    // Si el cierre es antes o igual al inicio, es inválido
+    return cierreCompleto <= inicioCompleto;
+}
 
 // Validar al enviar el formulario
 document.getElementById('formExamen').addEventListener('submit', function(e) {
+    // 1. Validar preguntas (esto ya lo tenías)
     const preguntas = document.querySelectorAll('.pregunta-card');
     if (preguntas.length === 0) {
         e.preventDefault();
@@ -410,16 +422,13 @@ document.getElementById('formExamen').addEventListener('submit', function(e) {
         return;
     }
 
-    const inicio = document.getElementById('hora_inicio').value;
-    const fin = document.getElementById('hora_fin').value;
-
-    if (inicio && fin && fin <= inicio) {
+    // 2. Validar fechas y horas combinadas
+    if (esInvalido()) {
         e.preventDefault();
-        alert('La hora de fin debe ser mayor a la hora de inicio.');
+        alert('Error: La fecha/hora de cierre debe ser posterior a la de inicio.');
         document.getElementById('hora_fin').focus();
     }
 });
-
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

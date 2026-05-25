@@ -2,30 +2,35 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Curso;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class GestionCursoController extends Controller
 {
-    protected $tableName = 'curso';
-    protected $primaryKey = 'id_curso';
     protected $indexRoute = 'gestioncurso.index';
     protected $viewPath = 'GestionCursoViews/curso';
 
+    /**
+     * Muestra el panel principal de control de cursos.
+     */
     public function index()
     {
         try {
-            $cursos = DB::connection('mysql')->table($this->tableName)->get();
-            return view($this->viewPath, ['cursos' => $cursos]);
+            // Usamos Eloquent nativo a través de tu modelo Curso
+            $cursos = Curso::all();
+            return view($this->viewPath, compact('cursos'));
         } catch (\Exception $e) {
             Log::error('Error al cargar la gestión de cursos: ' . $e->getMessage());
             return view($this->viewPath, ['cursos' => collect()])
-                        ->with('mensaje', 'Error al conectar con la base de datos: ' . $e->getMessage())
+                        ->with('mensaje', 'Error al conectar con la base de datos institucional: ' . $e->getMessage())
                         ->with('sessionInsertado', 'false');
         }
     }
 
+    /**
+     * Registra una nueva entidad curso en el esquema.
+     */
     public function store(Request $request)
     {
         $request->validate([
@@ -39,30 +44,24 @@ class GestionCursoController extends Controller
         ]);
         
         try {
-            DB::connection('mysql')
-                ->table($this->tableName)
-                ->insert([
-                    'correo_persona'    => $request->correo_persona,
-                    'nombre_curso'      => $request->nombre_curso,
-                    'fecha_inicio'      => $request->fecha_inicio,
-                    'materia'           => $request->materia,
-                    'fecha_fin'         => $request->fecha_fin,
-                    'horas_disponibles' => $request->horas_disponibles,
-                    'estado'            => $request->estado,
-                ]);
+            // Inserción directa mapeada por el modelo Eloquent
+            Curso::create($request->all());
 
             return redirect()->route($this->indexRoute)
                 ->with('sessionInsertado', 'true')
-                ->with('mensaje', "Curso '{$request->nombre_curso}' registrado exitosamente.");
+                ->with('mensaje', "El curso '{$request->nombre_curso}' ha sido dado de alta exitosamente.");
 
         } catch (\Exception $e) {
             Log::error('Error al registrar curso: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('sessionInsertado', 'false')
-                ->with('mensaje', "Error al registrar: " . $e->getMessage());
+                ->with('mensaje', "Fallo en el registro técnico: " . $e->getMessage());
         }
     }
     
+    /**
+     * Actualiza los datos de un curso específico mediante PUT.
+     */
     public function update(Request $request, int $id_curso)
     {
         $request->validate([
@@ -76,42 +75,44 @@ class GestionCursoController extends Controller
         ]);
 
         try {
-            DB::connection('mysql')
-                ->table($this->tableName)
-                ->where($this->primaryKey, $id_curso)
-                ->update([
-                    'correo_persona'    => $request->correo_persona,
-                    'nombre_curso'      => $request->nombre_curso,
-                    'fecha_inicio'      => $request->fecha_inicio,
-                    'materia'           => $request->materia,
-                    'fecha_fin'         => $request->fecha_fin,
-                    'horas_disponibles' => $request->horas_disponibles,
-                    'estado'            => $request->estado,
-                ]);
+            $curso = Curso::findOrFail($id_curso);
+            $curso->update($request->all());
 
             return redirect()->route($this->indexRoute)
                 ->with('sessionInsertado', 'true')
-                ->with('mensaje', "Curso ID {$id_curso} actualizado correctamente.");
+                ->with('mensaje', "Información del curso ID {$id_curso} actualizada correctamente.");
 
         } catch (\Exception $e) {
             Log::error('Error al actualizar curso: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('sessionInsertado', 'false')
-                ->with('mensaje', "Error al actualizar: " . $e->getMessage());
+                ->with('mensaje', "Error de guardado en base de datos: " . $e->getMessage());
         }
     }
     
+    /**
+     * Remueve la entidad curso de forma permanente.
+     */
     public function destroy(int $id_curso)
     {
         try {
-            $deleted = DB::connection('mysql')->table($this->tableName)->where($this->primaryKey, $id_curso)->delete();
+            $curso = Curso::find($id_curso);
+            
+            if ($curso) {
+                $curso->delete();
+                return redirect()->route($this->indexRoute)
+                    ->with('mensaje', 'El curso seleccionado fue eliminado del sistema.')
+                    ->with('sessionEliminado', 'true');
+            }
+
             return redirect()->route($this->indexRoute)
-                ->with('mensaje', $deleted ? 'Curso eliminado.' : 'No se encontró el curso.')
-                ->with('sessionEliminado', $deleted ? 'true' : 'false');
+                ->with('mensaje', 'No se localizó la clave del curso solicitado.')
+                ->with('sessionEliminado', 'false');
+
         } catch (\Exception $e) {
             Log::error('Error al eliminar curso: ' . $e->getMessage());
             return redirect()->route($this->indexRoute)
-                ->with('mensaje', 'Error al eliminar: ' . $e->getMessage())
+                ->with('mensaje', 'Imposible eliminar registro: ' . $e->getMessage())
                 ->with('sessionEliminado', 'false');
         }
     }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
 
 class AsesoriaController extends Controller
@@ -12,63 +13,156 @@ class AsesoriaController extends Controller
     // Muestra la pantalla para crear la asesoría
     public function create($id_curso)
     {
-        return view('AsesoriasViews.crearAsesoria', compact('id_curso'));
+        // Traemos el curso para mostrar sus fechas en la vista
+        $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+
+        return view('AsesoriasViews.crearAsesoria', compact('id_curso', 'curso'));
     }
 
-    // EL MÉTODO QUE TE FALTA: Guarda los datos en la base de datos (Doble Insert)
     public function store(Request $request, $id_curso)
     {
-        // 1. Validar que los campos vengan completos
         $request->validate([
             'nombre_evento'  => 'required|string|max:255',
-            'lugar'           => 'required|string|max:255',
-            'fecha_asesoria'  => 'required|date',
-            'hora_inicio'     => 'required',
-            'hora_fin'        => 'required',
-            'estado'          => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA'
+            'lugar'          => 'required|string|max:255',
+            'fecha_asesoria' => 'required|date',
+            'hora_inicio'    => 'required',
+            'hora_fin'       => 'required',
+            'estado'         => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA'
         ]);
 
-        // Usamos una Transacción por seguridad
+        // 1. CONSULTA A LA BD: Traer las fechas de inicio y fin de este curso
+        $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+
+        if (!$curso) {
+            return back()->withInput()->with('error', 'El curso especificado no existe.');
+        }
+
+        // 2. VALIDACIÓN DEL MAESTRO: Comprobar rango del curso
+        $fechaAsesoria = $request->fecha_asesoria;
+
+        if ($fechaAsesoria < $curso->fecha_inicio || $fechaAsesoria > $curso->fecha_fin) {
+            $inicioFormateado = date('d/m/Y', strtotime($curso->fecha_inicio));
+            $finFormateado = date('d/m/Y', strtotime($curso->fecha_fin));
+
+            return back()
+                ->withInput()
+                ->with('error', "No puedes agendar fuera del periodo del curso. Este comprende del {$inicioFormateado} al {$finFormateado}.");
+        }
+
+        // 3. LOGICA REQUERIDA: Si la fecha ya pasó (es menor a hoy), forzar estado TERMINADA
+        $estadoFinal = $request->estado;
+        $hoy = Carbon::now()->toDateString();
+
+        if ($fechaAsesoria < $hoy) {
+            $estadoFinal = 'TERMINADA';
+        }
+
+        // Continuamos con los inserts usando el $estadoFinal controlado
         DB::beginTransaction();
 
         try {
-            // 2. PRIMER INSERT: Tabla 'evento'
+            // PRIMER INSERT: Tabla 'evento'
             $id_evento = DB::table('evento')->insertGetId([
                 'id_curso'      => $id_curso,
                 'nombre_evento' => $request->nombre_evento,
-                'fecha'         => Carbon::now()->toDateString(), 
-                'hora'          => Carbon::now()->toTimeString(), 
-                'tipo'          => 'asesoria'                     
+                'fecha'         => Carbon::now()->toDateString(),
+                'hora'          => Carbon::now()->toTimeString(),
+                'tipo'          => 'asesoria'
             ]);
 
-            // 3. SEGUNDO INSERT: Tabla 'asesoria'
+            // SEGUNDO INSERT: Tabla 'asesoria'
             DB::table('asesoria')->insert([
-                'id_evento'      => $id_evento, 
+                'id_evento'      => $id_evento,
+                'fecha_asesoria' => $request->fecha_asesoria,
+                'hora_inicio'    => $request->hora_inicio,
+                'hora_fin'       => $request->hora_fin,
                 'lugar'          => $request->lugar,
-                'fecha_asesoria' => $request->fecha_asesoria, 
-                'hora_inicio'    => $request->hora_inicio,    
-                'hora_fin'       => $request->hora_fin,       
-                'estado'         => $request->estado              
+                'estado'         => $estadoFinal // <--- Aquí entra el estado automático
             ]);
 
             DB::commit();
-
-            // Redireccionamos a la vista del curso
-            return redirect('/curso/' . $id_curso . '/eventos')->with('success', '¡Asesoría agendada con éxito, papu!');
+            return redirect()->route('curso.eventos', $id_curso)->with('success', 'Asesoría agendada correctamente.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withInput()->with('error', 'Hubo un error al guardar: ' . $e->getMessage());
+            return back()->withInput()->with('error', 'Error al agendar: ' . $e->getMessage());
+        }
+    }
+
+    public function update(Request $request, $id_evento)
+    {
+        $request->validate([
+            'nombre_evento'  => 'required|string|max:255',
+            'lugar'          => 'required|string|max:255',
+            'fecha_asesoria' => 'required|date',
+            'hora_inicio'    => 'required',
+            'hora_fin'       => 'required',
+            'estado'         => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA',
+            'id_curso'       => 'required' // Recuperamos el ID del curso enviado desde el formulario oculto
+        ]);
+
+        $id_curso = $request->id_curso;
+
+        // 1. CONSULTA A LA BD: Traer las fechas límites del curso al editar
+        $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
+
+        if (!$curso) {
+            return back()->withInput()->with('error', 'El curso especificado no existe.');
+        }
+
+        // 2. VALIDACIÓN: Comprobar rango de fechas al editar
+        $fechaAsesoria = $request->fecha_asesoria;
+
+        if ($fechaAsesoria < $curso->fecha_inicio || $fechaAsesoria > $curso->fecha_fin) {
+            $inicioFormateado = date('d/m/Y', strtotime($curso->fecha_inicio));
+            $finFormateado = date('d/m/Y', strtotime($curso->fecha_fin));
+
+            return back()
+                ->withInput()
+                ->with('error', "No puedes mover la asesoría fuera del periodo del curso. Este comprende del {$inicioFormateado} al {$finFormateado}.");
+        }
+
+        // Dentro de update(), abajo de la validación del curso:
+        $estadoFinal = $request->estado;
+        if ($request->fecha_asesoria < Carbon::now()->toDateString()) {
+            $estadoFinal = 'TERMINADA';
+        }
+        // Si pasa la validación, ejecuta tu código original de actualizaciones
+        DB::beginTransaction();
+
+        try {
+            // Actualizar tabla 'evento'
+            DB::table('evento')
+                ->where('id_evento', $id_evento)
+                ->update([
+                    'nombre_evento' => $request->nombre_evento,
+                ]);
+
+            // Actualizar tabla 'asesoria'
+            DB::table('asesoria')
+                ->where('id_evento', $id_evento)
+                ->update([
+                    'fecha_asesoria' => $request->fecha_asesoria,
+                    'hora_inicio'    => $request->hora_inicio,
+                    'hora_fin'       => $request->hora_fin,
+                    'lugar'          => $request->lugar,
+                    'estado'         => $estadoFinal // <--- Aquí se actualiza el estado también
+                ]);
+
+            DB::commit();
+            return redirect()->route('curso.eventos', $id_curso)->with('success', 'Asesoría actualizada correctamente.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->withInput()->with('error', 'Error al actualizar: ' . $e->getMessage());
         }
     }
 
     public function destroy($id_evento)
     {
         try {
-            // Buscamos el evento y lo eliminamos
             DB::table('evento')->where('id_evento', $id_evento)->delete();
-            
-            return back()->with('success', '¡Actividad eliminada correctamente, papu!');
+            return back()->with('success', '¡Actividad eliminada correctamente!');
         } catch (\Exception $e) {
             return back()->with('error', 'No se pudo eliminar: ' . $e->getMessage());
         }
@@ -76,16 +170,12 @@ class AsesoriaController extends Controller
 
     public function unirse($id_evento)
     {
-        // 1. Buscamos la asesoría ligada a ese evento
-        $asesoria = DB::table('asesoria')
-            ->where('id_evento', $id_evento)
-            ->first();
+        $asesoria = DB::table('asesoria')->where('id_evento', $id_evento)->first();
 
         if (!$asesoria) {
             return back()->with('error', 'No se encontró la asesoría.');
         }
 
-        // 2. Verificamos que no esté ya registrado
         $yaRegistrado = DB::table('asistencia_asesoria')
             ->where('id_asesoria', $asesoria->id_asesoria)
             ->where('correo_persona', Auth::user()->correo)
@@ -95,7 +185,6 @@ class AsesoriaController extends Controller
             return back()->with('error', 'Ya estás registrado en esta asesoría.');
         }
 
-        // 3. Insertamos el registro
         DB::table('asistencia_asesoria')->insert([
             'id_asesoria'    => $asesoria->id_asesoria,
             'correo_persona' => Auth::user()->correo,
@@ -135,9 +224,7 @@ class AsesoriaController extends Controller
 
     public function cancelarAsistencia($id_evento)
     {
-        $asesoria = DB::table('asesoria')
-            ->where('id_evento', $id_evento)
-            ->first();
+        $asesoria = DB::table('asesoria')->where('id_evento', $id_evento)->first();
 
         if (!$asesoria) {
             return back()->with('error', 'No se encontró la asesoría.');
@@ -153,7 +240,6 @@ class AsesoriaController extends Controller
 
     public function edit($id_evento)
     {
-        // Buscamos el evento y la asesoría juntos
         $asesoria = DB::table('asesoria')
             ->join('evento', 'asesoria.id_evento', '=', 'evento.id_evento')
             ->where('asesoria.id_evento', $id_evento)
@@ -166,7 +252,8 @@ class AsesoriaController extends Controller
                 'asesoria.fecha_asesoria',
                 'asesoria.hora_inicio',
                 'asesoria.hora_fin',
-                'asesoria.estado'
+                'asesoria.estado',
+                'asesoria.requiere_evidencia'
             )
             ->first();
 
@@ -174,60 +261,17 @@ class AsesoriaController extends Controller
             return redirect()->back()->with('error', 'Asesoría no encontrada.');
         }
 
-        return view('AsesoriasViews.editarAsesoria', compact('asesoria'));
+        // Traemos el curso para mostrar su rango de fechas en la vista
+        $curso = DB::table('curso')->where('id_curso', $asesoria->id_curso)->first();
+
+        return view('AsesoriasViews.editarAsesoria', compact('asesoria', 'curso'));
     }
 
-    public function update(Request $request, $id_evento)
-    {
-        $request->validate([
-            'nombre_evento'  => 'required|string|max:255',
-            'lugar'          => 'required|string|max:255',
-            'fecha_asesoria' => 'required|date',
-            'hora_inicio'    => 'required',
-            'hora_fin'       => 'required',
-            'estado'         => 'required|in:DISPONIBLE,EN_CURSO,TERMINADA,CANCELADA'
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            // Actualizamos la tabla evento
-            DB::table('evento')
-                ->where('id_evento', $id_evento)
-                ->update([
-                    'nombre_evento' => $request->nombre_evento,
-                ]);
-
-            // Actualizamos la tabla asesoria
-            DB::table('asesoria')
-                ->where('id_evento', $id_evento)
-                ->update([
-                    'lugar'          => $request->lugar,
-                    'fecha_asesoria' => $request->fecha_asesoria,
-                    'hora_inicio'    => $request->hora_inicio,
-                    'hora_fin'       => $request->hora_fin,
-                    'estado'         => $request->estado,
-                ]);
-
-            DB::commit();
-
-            // Regresamos a los eventos del curso
-            return redirect('/curso/' . $request->id_curso . '/eventos')
-                ->with('success', '¡Asesoría actualizada con éxito!');
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->withInput()->with('error', 'Error al actualizar: ' . $e->getMessage());
-        }
-    }
 
     public function agregarManualmente(Request $request, $id_asesoria)
     {
-        $request->validate([
-            'correo_persona' => 'required|email'
-        ]);
+        $request->validate(['correo_persona' => 'required|email']);
 
-        // Verificar que no esté ya registrado
         $yaExiste = DB::table('asistencia_asesoria')
             ->where('id_asesoria', $id_asesoria)
             ->where('correo_persona', $request->correo_persona)
@@ -244,5 +288,22 @@ class AsesoriaController extends Controller
         ]);
 
         return back()->with('success', 'Alumno agregado a la lista correctamente.');
+    }
+
+    public function quitarAsistente($id_asistencia)
+    {
+        $asistencia = DB::table('asistencia_asesoria')
+            ->where('id_asistencia', $id_asistencia)
+            ->first();
+
+        if (!$asistencia) {
+            return back()->with('error', 'Registro no encontrado.');
+        }
+
+        DB::table('asistencia_asesoria')
+            ->where('id_asistencia', $id_asistencia)
+            ->delete();
+
+        return back()->with('success', 'Alumno quitado de la lista correctamente.');
     }
 }

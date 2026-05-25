@@ -23,11 +23,28 @@ class CursoController extends Controller
     public function index(Request $request)
     {
         try {
-            $buscar  = $request->input('buscar');
-            $materia = $request->input('materia');
-            $dia     = $request->input('dia');
-            $rol     = Auth::user()->rol;
-            $correo  = Auth::user()->correo;
+            $buscar         = $request->input('buscar');
+            $materia        = $request->input('materia');
+            $dia            = $request->input('dia');
+            $bloque_horario = $request->input('bloque_horario'); // NUEVO PARAMETRO
+            
+            $rol    = Auth::user()->rol;
+            $correo = Auth::user()->correo;
+
+            // NUEVO: Definimos el filtro de horario de forma reutilizable para no repetir código
+            // Cambia la función anónima al inicio de tu index por esta:
+            $filtroHorario = function($q) use ($bloque_horario) {
+                return $q->whereHas('horarios', function($h) use ($bloque_horario) {
+                    if ($bloque_horario === 'matutino') {
+                        // Cursos que inicien antes de las 12:00 PM
+                        $h->where('hora_inicio', '<', '12:00:00');
+                    } elseif ($bloque_horario === 'vespertino') {
+                        // Cursos que inicien entre las 12:00 PM y las 8:00 PM
+                        $h->where('hora_inicio', '>=', '12:00:00')
+                        ->where('hora_inicio', '<=', '20:00:00');
+                    }
+                });
+            };
 
             // ── MIS CURSOS ────────────────────────────────────────────────────────
             if ($rol === 'Estudiante') {
@@ -44,6 +61,7 @@ class CursoController extends Controller
                     }))
                     ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
                     ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->when($bloque_horario, $filtroHorario) // <- APLICADO
                     ->get();
 
                 // Otros cursos ACTIVOS donde NO está inscrito
@@ -56,6 +74,7 @@ class CursoController extends Controller
                     }))
                     ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
                     ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->when($bloque_horario, $filtroHorario) // <- APLICADO
                     ->get();
 
             } elseif ($rol === 'Asesor') {
@@ -68,6 +87,7 @@ class CursoController extends Controller
                     }))
                     ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
                     ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->when($bloque_horario, $filtroHorario) // <- APLICADO
                     ->get();
 
                 // Otros cursos: ACTIVO y COMPLETADO de otros asesores
@@ -80,6 +100,7 @@ class CursoController extends Controller
                     }))
                     ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
                     ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->when($bloque_horario, $filtroHorario) // <- APLICADO
                     ->get();
 
             } else {
@@ -92,6 +113,7 @@ class CursoController extends Controller
                     }))
                     ->when($materia, fn($q) => $q->where('materia', 'LIKE', "%{$materia}%"))
                     ->when($dia, fn($q) => $q->whereHas('horarios', fn($h) => $h->where('dia_semana', $dia)))
+                    ->when($bloque_horario, $filtroHorario) // <- APLICADO
                     ->get();
             }
 
@@ -107,8 +129,8 @@ class CursoController extends Controller
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error('Error en index de cursos: ' . $e->getMessage());
             return view('BuscarCurso', [
-                'misCursos'       => collect(),
-                'otrosCursos'     => collect(),
+                'misCursos'        => collect(),
+                'otrosCursos'      => collect(),
                 'misInscripciones' => []
             ])->with('mensaje', 'Error al cargar cursos.');
         }

@@ -85,10 +85,10 @@
 
         // ══════════════════════════════════════════════════════════════════
         // MODO PRODUCCIÓN: Solo acepta correos institucionales @cetis17.edu.mx
-        const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
+        //const regexCorreo = /^[a-zA-Z0-9._%+-]+@cetis17\.edu\.mx$/;
 
         // MODO PRUEBAS: Acepta cualquier correo válido
-        // const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
         // ══════════════════════════════════════════════════════════════════
 
         function mostrarAlerta(titulo, texto) {

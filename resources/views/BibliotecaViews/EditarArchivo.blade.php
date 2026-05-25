@@ -48,10 +48,10 @@
                             <label for="id_curso" class="form-label fw-bold">Materia Relacionada</label>
                             <div class="input-group">
                                 <span class="input-group-text"><i class="bi bi-book"></i></span>
-                                <select name="id_curso" id="id_curso" class="form-select" required>
+                                <select name="materia" id="materia" class="form-select" required>
                                     @foreach($materias as $m)
-                                        <option value="{{ $m->id_curso }}" {{ $archivo->id_curso == $m->id_curso ? 'selected' : '' }}>
-                                            {{ $m->materia }}
+                                        <option value="{{ $m }}" {{ $archivo->materia == $m ? 'selected' : '' }}>
+                                            {{ $m }}
                                         </option>
                                     @endforeach
                                 </select>

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Curso;
 use App\Models\Inscripcion;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class ReportesController extends Controller
 {
@@ -14,11 +15,22 @@ class ReportesController extends Controller
      */
     public function index($id)
     {
-        $curso = Curso::findOrFail($id);
+        // ── CORRECCIÓN: JOIN igual que EventoController para obtener nombre_asesor ──
+        $curso = DB::table('curso')
+            ->join('persona', 'curso.correo_persona', '=', 'persona.correo')
+            ->select(
+                'curso.*',
+                DB::raw("CONCAT(persona.nombre, ' ', persona.apellidoPa, ' ', persona.apellidoMa) as nombre_asesor")
+            )
+            ->where('curso.id_curso', $id)
+            ->first();
 
-        // Consultamos la tabla inscripcion para obtener los estudiantes del curso
+        if (!$curso) {
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+        }
+
         $estudiantes = Inscripcion::where('id_curso', $id)
-            ->with('estudiante') 
+            ->with('estudiante')
             ->get();
 
         return view('CursosViews.reportes', compact('curso', 'estudiantes'));
@@ -29,20 +41,29 @@ class ReportesController extends Controller
      */
     public function generarPDF($id)
     {
-        $curso = Curso::findOrFail($id);
-        
-        // Obtenemos los inscritos para el PDF
+        // ── CORRECCIÓN: mismo JOIN para que el PDF también muestre el nombre ──
+        $curso = DB::table('curso')
+            ->join('persona', 'curso.correo_persona', '=', 'persona.correo')
+            ->select(
+                'curso.*',
+                DB::raw("CONCAT(persona.nombre, ' ', persona.apellidoPa, ' ', persona.apellidoMa) as nombre_asesor")
+            )
+            ->where('curso.id_curso', $id)
+            ->first();
+
+        if (!$curso) {
+            return redirect()->route('cursos.index')->with('mensaje', 'Curso no encontrado');
+        }
+
         $registros = Inscripcion::where('id_curso', $id)
             ->with('estudiante')
             ->get();
 
-        // Cargamos la vista del diseño profesional
         $pdf = Pdf::loadView('CursosViews.pdf_reporte', [
-            'curso' => $curso,
+            'curso'    => $curso,
             'registros' => $registros
         ]);
 
-        // Retorna el archivo para descarga inmediata
         return $pdf->download('Reporte_Asesorias_' . $curso->nombre_curso . '.pdf');
     }
 }
