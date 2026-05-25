@@ -203,7 +203,7 @@
                                 <th class="ps-4">#</th>
                                 <th>Estudiante</th>
                                 <th>Correo</th>
-                                <th>Grupo</th>
+                            
                                 <th class="text-center pe-4">Acción</th>
                             </tr>
                         </thead>
@@ -237,13 +237,7 @@
                                     </span>
                                 </td>
 
-                                {{-- Grupo --}}
-                                <td>
-                                    <span class="badge-grupo">
-                                        <i class="bi bi-diagram-3 me-1"></i>
-                                        {{ $inscrito->estudiante->grupo ?? 'S/G' }}
-                                    </span>
-                                </td>
+                                
 
                                 {{-- Acción --}}
                                 <td class="text-center pe-4">

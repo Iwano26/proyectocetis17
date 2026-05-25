@@ -23,7 +23,7 @@
                 <i class="bi bi-calendar-event-fill"></i> Mi Agenda
             </a>
             <a class="sidebar-link {{ (request()->is('buscarcurso') || request()->is('cursos*')) ? 'active' : '' }}" href="/buscarcurso">
-                <i class="bi bi-journal-bookmark-fill"></i> Buscar Cursos
+                <i class="bi bi-journal-bookmark-fill"></i> Cursos Disponibles
             </a>
             <a class="sidebar-link {{ request()->is('biblioteca*') ? 'active' : '' }}" href="/biblioteca">
                 <i class="bi bi-archive-fill"></i> Biblioteca Digital
@@ -42,7 +42,10 @@
                 </a>
                 <a class="sidebar-link {{ request()->is('gestioncurso') ? 'active' : '' }}" href="/gestioncurso">
                     <i class="bi bi-journal-bookmark-fill"></i> Cursos
-                </a>                
+                </a>   
+                <a class="sidebar-link {{ request()->is('gestionbiblioteca') ? 'active' : '' }}" href="/gestionbiblioteca">
+                    <i class="bi bi-archive-fill"></i> Biblioteca
+                </a>
             </nav>
         @endif
     </div>
