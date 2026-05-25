@@ -10,7 +10,7 @@
 
     {{-- Header --}}
     <div style="background-color: #1a3a5c; padding: 24px 20px; text-align: center; border-top-left-radius: 8px; border-top-right-radius: 8px;">
-        <img src="{{ config('app.url') }}/img/cetis.png"
+        <img src="https://mx122.hostgator.mx:2083/cpsess7297228033/viewer/home4%2fbrandonn%2fasesoriascetis17.com%2fimg/cetis.png"
              alt="CETIS 17"
              style="width:65px; height:65px; border-radius:50%; border:3px solid rgba(255,255,255,0.5); margin-bottom:10px; display:block; margin-left:auto; margin-right:auto;">
         <h2 style="color:#ffffff; margin:0; font-size:1.4rem;">

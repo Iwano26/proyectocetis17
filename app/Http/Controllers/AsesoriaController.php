@@ -33,6 +33,8 @@ class AsesoriaController extends Controller
         // 1. CONSULTA A LA BD: Traer las fechas de inicio y fin de este curso
         $curso = DB::table('curso')->where('id_curso', $id_curso)->first();
 
+        $requiereEvidencia = $request->has('requiere_evidencia') ? 1 : 0;
+
         if (!$curso) {
             return back()->withInput()->with('error', 'El curso especificado no existe.');
         }
@@ -77,7 +79,8 @@ class AsesoriaController extends Controller
                 'hora_inicio'    => $request->hora_inicio,
                 'hora_fin'       => $request->hora_fin,
                 'lugar'          => $request->lugar,
-                'estado'         => $estadoFinal // <--- Aquí entra el estado automático
+                'estado'         => $estadoFinal, // <--- Aquí entra el estado automático
+                'requiere_evidencia' => $requiereEvidencia
             ]);
 
             DB::commit();
@@ -123,11 +126,14 @@ class AsesoriaController extends Controller
         }
 
         // Dentro de update(), abajo de la validación del curso:
+
         $estadoFinal = $request->estado;
         if ($request->fecha_asesoria < Carbon::now()->toDateString()) {
             $estadoFinal = 'TERMINADA';
         }
         // Si pasa la validación, ejecuta tu código original de actualizaciones
+        $requiereEvidencia = $request->has('requiere_evidencia') ? 1 : 0;
+
         DB::beginTransaction();
 
         try {
@@ -146,7 +152,8 @@ class AsesoriaController extends Controller
                     'hora_inicio'    => $request->hora_inicio,
                     'hora_fin'       => $request->hora_fin,
                     'lugar'          => $request->lugar,
-                    'estado'         => $estadoFinal // <--- Aquí se actualiza el estado también
+                    'estado'         => $estadoFinal, // <--- Aquí se actualiza el estado también
+                    'requiere_evidencia' => $requiereEvidencia
                 ]);
 
             DB::commit();

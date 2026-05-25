@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.5/dist/jquery.validate.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     
     {{-- SCRIPT OBLIGATORIO DE RECAPTCHA --}}
     {!! NoCaptcha::renderJs() !!}
@@ -112,17 +113,25 @@
                 <input type="hidden" name="rol" value="Estudiante">
 
                 <label for="contrasennia">Contraseña</label>
-                <input type="password" name="contrasennia" id="contrasennia"
-                    placeholder="Mín 8 caracteres, Mayús/Minús/Número"
-                    class="{{ $errors->has('contrasennia') ? 'input-error' : '' }}">
+                <div style="position: relative;">
+                    <input type="password" name="contrasennia" id="contrasennia"
+                        placeholder="Mín 8 caracteres, Mayús/Minús/Número"
+                        class="{{ $errors->has('contrasennia') ? 'input-error' : '' }}">
+                    <i class="bi bi-eye-slash" id="toggleContrasennia" 
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                </div>
                 @error('contrasennia')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
 
-                <label for="recontrasennia">Confirmar Contraseña</label>
-                <input type="password" name="recontrasennia" id="recontrasennia"
-                    placeholder="Confirma tu Contraseña"
-                    class="{{ $errors->has('recontrasennia') ? 'input-error' : '' }}">
+                <label for="recontrasennia" style="margin-top: 15px;">Confirmar Contraseña</label>
+                <div style="position: relative;">
+                    <input type="password" name="recontrasennia" id="recontrasennia"
+                        placeholder="Confirma tu Contraseña"
+                        class="{{ $errors->has('recontrasennia') ? 'input-error' : '' }}">
+                    <i class="bi bi-eye-slash" id="toggleRecontrasennia" 
+                    style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #666;"></i>
+                </div>
                 @error('recontrasennia')
                     <div class="error-message">{{ $message }}</div>
                 @enderror
@@ -217,6 +226,30 @@
                 }
             });
         });
+
+            function togglePassword(inputId, iconId) {
+                const input = document.getElementById(inputId);
+                const icon = document.getElementById(iconId);
+                
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.classList.remove("bi-eye-slash");
+                    icon.classList.add("bi-eye"); // Cambia a ojo abierto
+                } else {
+                    input.type = "password";
+                    icon.classList.remove("bi-eye");
+                    icon.classList.add("bi-eye-slash"); // Cambia a ojo cerrado
+                }
+            }
+
+            document.getElementById('toggleContrasennia').addEventListener('click', function() {
+                togglePassword('contrasennia', 'toggleContrasennia');
+            });
+
+            document.getElementById('toggleRecontrasennia').addEventListener('click', function() {
+                togglePassword('recontrasennia', 'toggleRecontrasennia');
+            });
+        </script>
     </script>
 
 </body>

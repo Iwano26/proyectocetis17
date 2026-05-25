@@ -61,11 +61,12 @@
                                     </small>
                                 </div>
                                 <div class="form-check form-switch ms-3">
-                                    <input class="form-check-input" type="checkbox"
-                                        id="toggleEvidencia"
-                                        name="requiere_evidencia"
-                                        value="1"
-                                        style="width:3em; height:1.5em; cursor:pointer; accent-color:#8C001A;">
+                                    <input class="form-check-input" type="checkbox" 
+                                    id="toggleEvidencia" 
+                                    name="requiere_evidencia" 
+                                    value="1" 
+                                    style="width:3em; height:1.5em; cursor:pointer; accent-color:#8C001A;"
+                                    {{ (isset($asesoria) && $asesoria->requiere_evidencia == 1) ? 'checked' : '' }}>
                                 </div>
                             </div>
                         </div>
