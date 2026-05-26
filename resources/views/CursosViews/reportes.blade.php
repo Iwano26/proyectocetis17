@@ -190,6 +190,9 @@
                             {{ $estudiantes->count() }} {{ $estudiantes->count() == 1 ? 'estudiante inscrito' : 'estudiantes inscritos' }}
                         </small>
                     </div>
+                    <a href="{{ route('reportes.listaAsistencia', $curso->id_curso) }}" class="btn btn-cetis shadow-sm px-4 py-2 ms-2">
+                        <i class="bi bi-person-check me-2"></i> LISTA DE ASISTENCIA
+                    </a>
                     <a href="{{ route('reportes.pdf', $curso->id_curso) }}" class="btn btn-cetis shadow-sm px-4 py-2">
                         <i class="bi bi-filetype-pdf me-2"></i> DESCARGAR PDF
                     </a>
@@ -204,7 +207,7 @@
                                 <th>Estudiante</th>
                                 <th>Correo</th>
                             
-                                <th class="text-center pe-4">Acción</th>
+                                
                             </tr>
                         </thead>
                         <tbody>
@@ -237,18 +240,6 @@
                                     </span>
                                 </td>
 
-                                
-
-                                {{-- Acción --}}
-                                <td class="text-center pe-4">
-                                    <button class="btn btn-sm fw-bold px-3 py-1"
-                                            title="Editar Bitácora"
-                                            style="border: 2px solid var(--cetis-rojo); color: var(--cetis-rojo); border-radius: 8px; background: white; font-size: 0.78rem; transition: all 0.2s;"
-                                            onmouseover="this.style.background='#8C001A'; this.style.color='white';"
-                                            onmouseout="this.style.background='white'; this.style.color='#8C001A';">
-                                        <i class="bi bi-pencil-square me-1"></i> Bitácora
-                                    </button>
-                                </td>
                             </tr>
                             @empty
                             <tr>

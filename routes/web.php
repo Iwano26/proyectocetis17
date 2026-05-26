@@ -188,6 +188,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/solicitud/horarios/{id_curso}', [SolicitudController::class, 'horariosCurso'])->name('solicitud.horarios');
 
 
+    Route::get('/curso/{id}/reportes/lista-asistencia', [ReportesController::class, 'generarListaAsistencia'])->name('reportes.listaAsistencia');
+
+
     Route::get('/modificarperfil', function () { return view('GestionUsuarioViews/perfil'); });
 
     Route::get('/agenda', [AgendaController::class, 'index'])->name('agenda');
