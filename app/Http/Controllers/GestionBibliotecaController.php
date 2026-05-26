@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Biblioteca;
-use Illuminate\Support\Facades\DB; // Añadido para consultar la tabla curso
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class GestionBibliotecaController extends Controller
 {
@@ -16,26 +17,31 @@ class GestionBibliotecaController extends Controller
     public function index()
     {
         try {
-            // Eager Loading de la relación de usuario para el nombre completo
             $archivos = Biblioteca::with('usuario')->get();
 
-            // Obtenemos las materias únicas registradas en la tabla de cursos
             $materiasDisponibles = DB::connection('mysql')
                 ->table('curso')
                 ->whereNotNull('materia')
                 ->where('materia', '!=', '')
-                ->distinct()
+                ->select(DB::raw('DISTINCT TRIM(materia) as materia'))
+                ->orderBy('materia', 'asc')
                 ->pluck('materia');
 
-            return view($this->viewPath, compact('archivos', 'materiasDisponibles'));
+            // Todos los cursos para el select del admin
+            $cursosDisponibles = DB::connection('mysql')
+                ->table('curso')
+                ->orderBy('nombre_curso', 'asc')
+                ->get(['id_curso', 'nombre_curso', 'materia']);
+
+            return view($this->viewPath, compact('archivos', 'materiasDisponibles', 'cursosDisponibles'));
         } catch (\Exception $e) {
             Log::error('Error al cargar biblioteca: ' . $e->getMessage());
             return view($this->viewPath, [
-                    'archivos' => collect(), 
-                    'materiasDisponibles' => collect()
-                ])
-                ->with('mensaje', 'Error al conectar con el servidor.')
-                ->with('sessionInsertado', 'false');
+                'archivos' => collect(),
+                'materiasDisponibles' => collect(),
+                'cursosDisponibles' => collect()
+            ])->with('mensaje', 'Error al conectar con el servidor.')
+            ->with('sessionInsertado', 'false');
         }
     }
 
@@ -43,21 +49,23 @@ class GestionBibliotecaController extends Controller
     {
         $request->validate([
             'nombre_doc'   => 'required|string|max:255',
-            'materia'      => 'required|string|max:100', // Sigue validando la materia seleccionada
+            'materia'      => 'required|string|max:100',
+            'id_curso'     => 'required|integer|exists:curso,id_curso',
             'ruta_archivo' => 'required|file|mimes:pdf|max:10240',
         ]);
 
         try {
-            $path = $request->file('ruta_archivo')->store('biblioteca', 'public');
-            $usuarioLogueado = Auth::user(); 
+            $user = Auth::user();
+            $file = $request->file('ruta_archivo');
+            $nombreArchivo = time() . '_' . $file->getClientOriginalName();
+            $file->move(public_path('documentos'), $nombreArchivo);
 
             Biblioteca::create([
                 'nombre_doc'     => $request->nombre_doc,
                 'materia'        => $request->materia,
-                'ruta_archivo'   => $path,
-                'correo_usuario' => $usuarioLogueado ? $usuarioLogueado->correo : 'admin@cetis17.edu.mx',
-                'id_curso'       => null,
-                'autor'          => $usuarioLogueado ? $usuarioLogueado->nombre : 'Administrador'
+                'ruta_archivo'   => $nombreArchivo,
+                'correo_usuario' => $user ? $user->correo : 'admin@cetis17.edu.mx',
+                'id_curso'       => $request->id_curso, // Ya viene del select
             ]);
 
             return redirect()->route($this->indexRoute)
@@ -67,7 +75,7 @@ class GestionBibliotecaController extends Controller
             Log::error('Error en store de biblioteca: ' . $e->getMessage());
             return redirect()->back()->withInput()
                 ->with('sessionInsertado', 'false')
-                ->with('mensaje', 'Error al subir el archivo.');
+                ->with('mensaje', 'Error al subir el archivo: ' . $e->getMessage());
         }
     }
 
@@ -80,10 +88,10 @@ class GestionBibliotecaController extends Controller
 
         try {
             $documento = Biblioteca::findOrFail($id);
-            
+
             $documento->update([
                 'nombre_doc' => $request->nombre_doc,
-                'materia'    => $request->materia
+                'materia'    => $request->materia,
             ]);
 
             return redirect()->route($this->indexRoute)
@@ -101,6 +109,13 @@ class GestionBibliotecaController extends Controller
     {
         try {
             $documento = Biblioteca::findOrFail($id);
+
+            // Borramos el archivo físico también
+            $ruta = public_path('documentos/' . $documento->ruta_archivo);
+            if (file_exists($ruta)) {
+                unlink($ruta);
+            }
+
             $documento->delete();
 
             return redirect()->route($this->indexRoute)

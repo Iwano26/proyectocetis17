@@ -18,7 +18,7 @@ class Biblioteca extends Model
         'nombre_doc',
         'materia',
         'ruta_archivo',
-        'autor'
+        // quita 'autor'
     ];
 
     // Si tu tabla tiene created_at y updated_at, déjalo en true

@@ -52,15 +52,21 @@
                             </div>
                             
                             {{-- SELECCIÓN DE MATERIA DINÁMICA DE CURSOS --}}
+                            {{-- Select de CURSO --}}
                             <div class="mb-3">
-                                <label for="materia" class="form-label">Materia Relacionada</label>
-                                <select name="materia" id="materia" class="form-select" required>
-                                    <option value="" disabled selected>-- Selecciona una materia --</option>
-                                    @foreach($materiasDisponibles as $mat)
-                                        <option value="{{ $mat }}" {{ old('materia') == $mat ? 'selected' : '' }}>{{ $mat }}</option>
+                                <label for="id_curso" class="form-label">Curso Relacionado</label>
+                                <select name="id_curso" id="id_curso" class="form-select" required>
+                                    <option value="" disabled selected>-- Selecciona un curso --</option>
+                                    @foreach($cursosDisponibles as $curso)
+                                        <option value="{{ $curso->id_curso }}" data-materia="{{ $curso->materia }}">
+                                            {{ $curso->nombre_curso }} — {{ $curso->materia }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
+
+                            {{-- Materia se llena automático --}}
+                            <input type="hidden" name="materia" id="materia_hidden">
 
                             <div class="mb-3">
                                 <label id="archivoInputLabel" for="ruta_archivo" class="form-label">Adjuntar Archivo Digital</label>
@@ -126,7 +132,7 @@
                                                 @endif
                                             </div>
 
-                                            <a href="{{ asset('storage/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-link p-0 mt-2 fw-bold text-decoration-none" style="font-size:0.95rem; color:#004A77;">
+                                            <a href="{{ asset('documentos/' . $archivo->ruta_archivo) }}" target="_blank" class="btn btn-link p-0 mt-2 fw-bold text-decoration-none" style="font-size:0.95rem; color:#004A77;">
                                                 <i class="bi bi-cloud-arrow-down-fill me-1"></i>Descargar / Visualizar Recurso
                                             </a>
                                         </td>
@@ -166,6 +172,8 @@
         </div>
     </div>
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     const defaultAction = "{{ route('gestionbiblioteca.store') }}"; 
@@ -241,6 +249,15 @@
                 document.body.appendChild(form);
                 form.submit();
             }
+        });
+    }
+
+    // Llenar materia automático al elegir curso
+    const selectCursoAdmin = document.getElementById('id_curso');
+    if (selectCursoAdmin) {
+        selectCursoAdmin.addEventListener('change', function() {
+            document.getElementById('materia_hidden').value = 
+                this.options[this.selectedIndex].dataset.materia;
         });
     }
 </script>

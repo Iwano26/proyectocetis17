@@ -13,35 +13,28 @@ class BibliotecaController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Cargamos el query con la relación de usuario para el Nombre Completo + Apellidos
         $query = Biblioteca::with('usuario');
         $user = Auth::user();
 
-        // 2. FILTRO: "Mis Archivos" (Muestra solo los subidos por el usuario actual)
         if ($request->input('mis_archivos') == 1 && $user) {
             $query->where('correo_usuario', $user->correo);
         }
 
-        // 3. BUSCADOR: Buscar por nombre de documento
         if ($request->filled('buscar')) {
             $term = $request->input('buscar');
             $query->where('nombre_doc', 'LIKE', "%{$term}%");
         }
 
-        // 4. FILTRO: Filtrar por Materia seleccionada (Usando el campo 'materia' de tu tabla biblioteca)
         if ($request->filled('materia')) {
             $query->where('materia', $request->input('materia'));
         }
 
-        // 5. ORDEN: Más reciente o Más antiguo
-        $direccionOrden = 'desc'; // Por defecto el más reciente
+        $direccionOrden = 'desc';
         if ($request->input('orden') === 'antiguo') {
             $direccionOrden = 'asc';
         }
         $archivos = $query->orderBy('created_at', $direccionOrden)->get();
 
-        // 6. TRUCO DE ORO: Traemos las materias ÚNICAS y limpias de la tabla 'curso'
-        // Esto junta los duplicados y quita espacios basura para que NO salgan 7 "Programación" XD
         $materiasDisponibles = DB::connection('mysql')
             ->table('curso')
             ->whereNotNull('materia')
@@ -50,31 +43,28 @@ class BibliotecaController extends Controller
             ->orderBy('materia', 'asc')
             ->pluck('materia');
 
-        // Retornamos la vista inyectando los archivos filtrados y la lista limpia de materias
         return view('biblioteca', compact('archivos', 'materiasDisponibles'));
     }
-    
+
     public function create()
     {
-        // Traemos las materias ÚNICAS y limpias para el formulario de subida
-        $materias = DB::connection('mysql')
-            ->table('curso')
-            ->whereNotNull('materia')
-            ->where('materia', '!=', '')
-            ->select(DB::raw('DISTINCT TRIM(materia) as materia'))
-            ->orderBy('materia', 'asc')
-            ->pluck('materia'); // Nos da una lista limpia de textos
+        $user = Auth::user();
 
-        return view('BibliotecaViews.SubirArchivo', compact('materias'));
+        // Solo los cursos donde el usuario es Asesor
+        $cursos = DB::connection('mysql')
+            ->table('curso')
+            ->where('correo_persona', $user->correo)
+            ->orderBy('nombre_curso', 'asc')
+            ->get(['id_curso', 'nombre_curso', 'materia']);
+
+        return view('BibliotecaViews.SubirArchivo', compact('cursos'));
     }
 
-    /**
-     * NUEVO: Procesa y guarda un nuevo documento real en la base de datos
-     */
     public function store(Request $request)
     {
         $request->validate([
             'nombre_doc'  => 'required|string|max:255',
+            'id_curso'    => 'required|integer|exists:curso,id_curso',
             'materia'     => 'required|string|max:100',
             'archivo_pdf' => 'required|file|mimes:pdf|max:10240',
         ]);
@@ -83,7 +73,6 @@ class BibliotecaController extends Controller
             $user = Auth::user();
             $path = null;
 
-            // Procesamos y subimos el archivo a la carpeta publica documentos/
             if ($request->hasFile('archivo_pdf')) {
                 $file = $request->file('archivo_pdf');
                 $nombreArchivo = time() . '_' . $file->getClientOriginalName();
@@ -92,12 +81,11 @@ class BibliotecaController extends Controller
             }
 
             Biblioteca::create([
-                'id_curso'       => null, // Nulo para desligarlo de duplicados y usar texto limpio
+                'id_curso'       => $request->id_curso,
                 'correo_usuario' => $user ? $user->correo : 'anonimo@cetis17.edu.mx',
                 'nombre_doc'     => $request->nombre_doc,
-                'materia'        => $request->materia, // Guardamos la materia directa
+                'materia'        => $request->materia,
                 'ruta_archivo'   => $path,
-                'autor'          => $user ? ($user->nombre . ' ' . $user->apellido) : 'Invitado'
             ]);
 
             return redirect()->route('biblioteca.index')
@@ -115,21 +103,18 @@ class BibliotecaController extends Controller
         $archivo = Biblioteca::where('id_biblioteca', $id)->firstOrFail();
         $user = Auth::user();
 
-        // BLINDAJE: Si no es Admin Y tampoco es el Asesor dueño del archivo, lo sacamos patitas pa' la calle
         if ($user->rol !== 'Administrador' && $archivo->correo_usuario !== $user->correo) {
             abort(403, 'No tienes permisos para editar este archivo.');
         }
 
-        // ACTUALIZADO: Traemos las materias de forma única también para editar sin ver duplicados
-        $materias = DB::connection('mysql')
+        // Cursos del asesor para el select de edición
+        $cursos = DB::connection('mysql')
             ->table('curso')
-            ->whereNotNull('materia')
-            ->where('materia', '!=', '')
-            ->select(DB::raw('DISTINCT TRIM(materia) as materia'))
-            ->orderBy('materia', 'asc')
-            ->pluck('materia');
+            ->where('correo_persona', $user->correo)
+            ->orderBy('nombre_curso', 'asc')
+            ->get(['id_curso', 'nombre_curso', 'materia']);
 
-        return view('BibliotecaViews.EditarArchivo', compact('archivo', 'materias'));
+        return view('BibliotecaViews.EditarArchivo', compact('archivo', 'cursos'));
     }
 
     public function update(Request $request, $id)
@@ -137,16 +122,20 @@ class BibliotecaController extends Controller
         $archivo = Biblioteca::where('id_biblioteca', $id)->firstOrFail();
         $user = Auth::user();
 
-        // BLINDAJE: Seguridad en el procesamiento del formulario
         if ($user->rol !== 'Administrador' && $archivo->correo_usuario !== $user->correo) {
             abort(403, 'No tienes permisos para actualizar este archivo.');
         }
 
-        // ACTUALIZADO: Actualizamos directamente la materia con el string limpio del select
+        // Obtenemos la materia del curso seleccionado
+        $curso = DB::connection('mysql')
+            ->table('curso')
+            ->where('id_curso', $request->id_curso)
+            ->first();
+
         $archivo->update([
             'nombre_doc' => $request->nombre_doc,
-            'id_curso'   => null, // Lo desligamos de IDs individuales 
-            'materia'    => $request->materia 
+            'id_curso'   => $request->id_curso,
+            'materia'    => $curso ? $curso->materia : $archivo->materia,
         ]);
 
         return redirect()->route('biblioteca.index')->with('success', 'Información actualizada correctamente.');
@@ -157,13 +146,12 @@ class BibliotecaController extends Controller
         $archivo = Biblioteca::where('id_biblioteca', $id)->firstOrFail();
         $user = Auth::user();
 
-        // BLINDAJE: Seguridad al borrar
         if ($user->rol !== 'Administrador' && $archivo->correo_usuario !== $user->correo) {
             abort(403, 'No tienes permisos para eliminar este archivo.');
         }
 
         $ruta = public_path('documentos/' . $archivo->ruta_archivo);
-        
+
         if (File::exists($ruta)) {
             File::delete($ruta);
         }
